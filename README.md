@@ -18,12 +18,14 @@
  * 每邀请多一个用户购买一个ticket，即可获得一个ticket赠送（相同号码）
 ## 接口设计
  * buyTicket (uint16[] numbers) payable public
+ * buyRandom () payable public
  * award() ownable public
 
 
 ## TODO
- * 购买和摇奖
+ * 购买和摇奖 done
  * ERC 721
  * 历史购买者分成10%
  * 开发者分成1%
+ * 分段发送奖金，因为gaslimit限制
 
