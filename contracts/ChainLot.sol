@@ -43,6 +43,8 @@ contract ChainLot is owned{
 	awardRule[] public awardRules;
 
 	ticket[] private allTickets;
+  awardData[] private toBeAward;
+  uint256 private awardIndex;
 
 	struct awardRule{
 		uint256 whiteNumberCount;
@@ -71,6 +73,8 @@ contract ChainLot is owned{
 	event Award(uint8[] jackpotNumbers, uint256 lastestAwardNumber, uint256 lastAwardedNumber, uint256 lastAwardedTicketIndex, uint256 allTicketsCount);
 	event ToBeAward(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, address user, uint256 blockNumber, uint256 awardValue);
 	event MatchRule(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, address user, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
+  event Transfer(address winner, uint256 value);
+  event CalculateAwards(uint256 ruleId, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
 	
   	function ChainLot(uint8 _maxWhiteNumber, 
   						uint8 _maxYellowNumber, 
@@ -157,15 +161,9 @@ contract ChainLot is owned{
   		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTickets.length);
 
   		//calculate winners and send out award
-      //XXX: fixed 128 array
-  		ticket[128][] memory winnersTickets = new ticket[128][](awardRules.length);
-      uint256[] memory indices= new uint256[](awardRules.length);
-      for(uint256 i=0; i<indices.length; i++) {
-        indices[i] = 0;
-      }
-
+      
   		//statistic winners
-  		for(i = lastAwardedTicketIndex; i < allTickets.length; i ++) {
+  		for(uint i = lastAwardedTicketIndex; i < allTickets.length; i ++) {
   			//only award blockNumber <= lastestAwardNumber
   			if(allTickets[i].blockNumber > lastestAwardNumber) break;
 
@@ -186,9 +184,8 @@ contract ChainLot is owned{
   			
   			if(ruleId >= 0 && ruleId < awardRules.length) {
           //match one rule!
-          winnersTickets[ruleId][indices[ruleId]] = allTickets[i];
-          indices[ruleId]++;
-  				MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, awardRules[ruleId].awardEther);
+          winnerTickets[ruleId].tickets.push(allTickets[i]);
+          MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, awardRules[ruleId].awardEther);
   			}
   			else {
   				//MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, 0);
@@ -198,43 +195,55 @@ contract ChainLot is owned{
   			lastAwardedNumber = allTickets[i].blockNumber;	
   		}
 
-  		//calculate winners award, from top to bottom, top winners takes all
-  		/*uint256 totalBalance = this.balance;
-  		awardData[] memory toBeAward;
-  		for(i=0; i<awardRules.length; i++){
-  			if(winnersTickets[i].length > 0) {
-  				uint256 totalWinnersAward = 0;
-  				uint256 totalTicketCount = 0;
-  				for(j=0;j<winnersTickets[i].length; j++) {
-  					totalWinnersAward += winnersTickets[i][j].count * awardRules[i].awardEther;
-  					totalTicketCount += winnersTickets[i][j].count;
-  				}
-
-  				if(totalBalance >= totalWinnersAward) {
-	  				totalBalance -= totalWinnersAward;
-	  			}
-	  			else {
-	  				totalBalance = 0;
-	  				totalWinnersAward = totalBalance;
-	  			}
-
-	  			for(j=0;j<winnersTickets[i].length; j++) {
-	  				uint256 awardValue = winnersTickets[i][j].count * totalWinnersAward / totalTicketCount;
-	  				toBeAward[toBeAward.length]=awardData(winnersTickets[i][j].user, awardValue);
-	  				ToBeAward(jackpotNumbers, winnersTickets[i][j].numbers, winnersTickets[i][j].count, winnersTickets[i][j].user, winnersTickets[i][j].blockNumber, awardValue);
-  				}
-
-	  			if(totalBalance == 0) break;
-	  		}
-
-  		}
+      calculateAwards(jackpotNumbers);
 
   		//send awards
-  		for(i=0; i<toBeAward.length; i++) {
+  		for(i=awardIndex; i<toBeAward.length; i++) {
   			//TODO: 10% history user share
   			toBeAward[i].user.transfer(toBeAward[i].value);
-  		}*/
+        Transfer(toBeAward[i].user, toBeAward[i].value);
+  		}
+      awardIndex = toBeAward.length;
   	}
+
+    function calculateAwards(uint8[] jackpotNumbers) internal {
+
+      //calculate winners award, from top to bottom, top winners takes all
+      uint256 totalBalance = this.balance;
+      for(uint i=0; i<awardRules.length; i++){
+        if(winnerTickets[i].tickets.length > winnerTickets[i].processedIndex && totalBalance > 0) {
+          uint256 totalWinnersAward = 0;
+          uint256 totalTicketCount = 0;
+          for(uint j=winnerTickets[i].processedIndex;j<winnerTickets[i].tickets.length; j++) {
+            ticket t = winnerTickets[i].tickets[j];
+            totalWinnersAward += t.count * awardRules[i].awardEther;
+            totalTicketCount += t.count;
+          }
+
+          CalculateAwards(i, awardRules[i].awardEther, totalBalance, totalWinnersAward, totalTicketCount);
+
+          if(totalBalance >= totalWinnersAward) {
+            totalBalance -= totalWinnersAward;
+          }
+          else {
+            totalWinnersAward = totalBalance;
+            totalBalance = 0;
+          }
+
+
+          for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].tickets.length; j++){
+            t = winnerTickets[i].tickets[j];
+            uint256 awardValue = t.count * totalWinnersAward / totalTicketCount;
+            toBeAward.push(awardData(t.user, awardValue));
+            ToBeAward(jackpotNumbers, t.numbers, t.count, t.user, t.blockNumber, awardValue);
+          }
+        }
+        
+        //move pointer
+        winnerTickets[i].processedIndex = winnerTickets[i].tickets.length;
+
+      }
+    }
 
   	function genRandomNumbers(uint256 blockNumber, uint256 shift) internal view returns(uint8[] _numbers){
   		require(blockNumber < block.number);

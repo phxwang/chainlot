@@ -14,7 +14,10 @@ contract("ChainLot", function(accounts){
 
 				chainlot.award({gas:5000000}).then(function(r){
 					console.log("award");
-					console.log(JSON.stringify(r));
+					for(log in r.logs) {
+						console.log(JSON.stringify(r.logs[log]));	
+					}
+					
 				});
 			});
 		});
