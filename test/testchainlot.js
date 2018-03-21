@@ -8,7 +8,7 @@ contract("ChainLot", function(accounts){
 			console.log("buy random tickets");
 			console.log(JSON.stringify(r));
 
-			chainlot.buyTicket([1,2], {from:web3.eth.accounts[2], value:2e10}).then(function(r){
+			chainlot.buyTicket([1,1,2], {from:web3.eth.accounts[2], value:2e10}).then(function(r){
 				console.log("buy some tickets");
 				console.log(JSON.stringify(r));
 
