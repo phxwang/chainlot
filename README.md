@@ -20,7 +20,7 @@
 ## Interface
  * buyTicket (uint16[] numbers) payable public
  * buyRandom () payable public
- * award() ownable public
+ * award() onlyOwner public
 ## 费用分析
  ### buyTicket
  1 tickets, 160,000gas, 3gwei, 0.0005ETH, $0.3

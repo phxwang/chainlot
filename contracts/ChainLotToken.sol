@@ -168,7 +168,8 @@ contract ChainLotToken is ERC721, owned {
     return _mint(_owner, _numbers, _count);
   }
 
-  function getToken(uint256 _tokenId) external view returns (address mintedBy, uint64 mintedAt, uint256 numbers, uint256 count, uint256 blockNumber) {
+  function getToken(uint256 _tokenId) external view 
+    returns (address mintedBy, uint64 mintedAt, uint256 numbers, uint256 count, uint256 blockNumber) {
     Token memory token = tokens[_tokenId];
 
     mintedBy = token.mintedBy;

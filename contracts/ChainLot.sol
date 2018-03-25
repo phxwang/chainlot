@@ -262,7 +262,7 @@ contract ChainLot is owned{
 
   }
 
-  function numbersToUint256(uint8[] numbers) internal constant returns(uint256 numbersUint256){
+  function numbersToUint256(uint8[] numbers) internal pure returns(uint256 numbersUint256){
     numbersUint256 = 0;
     for(uint256 i=0;i<numbers.length; i++) {
       numbersUint256 *= 256;
@@ -270,7 +270,7 @@ contract ChainLot is owned{
     }
   }
 
-  function uint256ToNumbers(uint256 numbersUint256) internal constant returns(uint8[] numbers){
+  function uint256ToNumbers(uint256 numbersUint256) internal view returns(uint8[] numbers){
     numbers = new uint8[](maxWhiteNumberCount+maxYellowNumberCount);
     for(uint256 i=0; i<numbers.length; i++) {
       numbers[numbers.length - 1 - i] = uint8(numbersUint256 % 256);
