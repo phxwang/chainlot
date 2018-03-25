@@ -1,25 +1,35 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
+var ChainLotToken = artifacts.require("./ChainLotToken.sol");
 
 
 contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
-		console.log(chainlot.address);
-		chainlot.buyRandom({from:web3.eth.accounts[2], value:1e11, gas:5000000}).then(function(r){
-			console.log("buy random tickets");
-			console.log(JSON.stringify(r));
+		ChainLotToken.deployed().then(function(chainlottoken) {
+			chainlot.setChainLotTokenAddress(chainlottoken.address).then(function(r) {
+				chainlottoken.transferOwnership(chainlot.address).then(function(r){
+					console.log("buy random tickets");
+					chainlot.buyRandom({from:web3.eth.accounts[2], value:1e11, gas:5000000}).then(function(r){
+						for(log in r.logs) {
+									console.log(JSON.stringify(r.logs[log]));	
+						}
 
-			chainlot.buyTicket([1,1,2], {from:web3.eth.accounts[2], value:2e10}).then(function(r){
-				console.log("buy some tickets");
-				console.log(JSON.stringify(r));
+						console.log("buy some tickets");
+						chainlot.buyTicket([1,1,2], {from:web3.eth.accounts[2], value:2e10}).then(function(r){
+							for(log in r.logs) {
+									console.log(JSON.stringify(r.logs[log]));	
+							}
 
-				chainlot.award({gas:5000000}).then(function(r){
-					console.log("award");
-					for(log in r.logs) {
-						console.log(JSON.stringify(r.logs[log]));	
-					}
-					
+							console.log("award");
+							chainlot.award({gas:5000000}).then(function(r){
+								for(log in r.logs) {
+									console.log(JSON.stringify(r.logs[log]));	
+								}
+								
+							});
+						});
+					});
 				});
-			});
+			});			
 		});
 		
 	})

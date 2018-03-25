@@ -1,11 +1,11 @@
-var ChainLot = artifacts.require("./ChainLot.sol");
+/*var ChainLot = artifacts.require("./ChainLot.sol");
 
 
 contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
-		//buyRandom(chainlot, 0, afterBuyRandom)(null);
-		chianlot.buyRandom({value:1e11, gas:500000}).
-	})
+		buyRandom(chainlot, 0, afterBuyRandom)(null);
+		//chianlot.buyRandom({value:1e11, gas:500000});
+	});
 })
 
 var buyRandom=function(chainlot, index, thenFunc) {
@@ -32,4 +32,4 @@ var afterBuyRandom=function(chainlot) {
 			
 		});
 	});
-}
+}*/
