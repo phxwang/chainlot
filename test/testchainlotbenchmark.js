@@ -1,10 +1,16 @@
-/*var ChainLot = artifacts.require("./ChainLot.sol");
-
+var ChainLot = artifacts.require("./ChainLot.sol");
+var ChainLotToken = artifacts.require("./ChainLotToken.sol");
 
 contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
-		buyRandom(chainlot, 0, afterBuyRandom)(null);
-		//chianlot.buyRandom({value:1e11, gas:500000});
+		ChainLotToken.deployed().then(function(chainlottoken) {
+			chainlot.setChainLotTokenAddress(chainlottoken.address).then(function(r) {
+				chainlottoken.transferOwnership(chainlot.address).then(function(r){
+					buyRandom(chainlot, 0, afterBuyRandom)(null);
+					//chianlot.buyRandom({value:1e11, gas:500000});
+				});
+			});
+		});		
 	});
 })
 
@@ -32,4 +38,4 @@ var afterBuyRandom=function(chainlot) {
 			
 		});
 	});
-}*/
+}

@@ -20,14 +20,14 @@ contract ChainLot is owned{
 	uint256 public awardIntervalNumber; //50000
 	uint256 public lastAwardedNumber;
 	uint256 public lastAwardedTicketIndex;
+  uint256 public allTokensCount;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	mapping(uint => uint) public awardRulesIndex;
   mapping(uint => winnerTicketQueue) public winnerTickets;
 	awardRule[] public awardRules;
   ChainLotToken public chainLotToken;
-
-	ticket[] private allTickets;
+  
   awardData[] private toBeAward;
   uint256 private awardIndex;
 
@@ -37,25 +37,18 @@ contract ChainLot is owned{
 		uint256 awardEther;
 	}
 
-	struct ticket {
-		uint8[] numbers;
-		uint256 count;
-    uint256 tokenId;
-		uint256 blockNumber;
-	}
-
 	struct awardData {
 		address user;
 		uint256 value;
 	}
 
   struct winnerTicketQueue {
-    ticket[] tickets;
+    uint256[] tokenIds;
     uint256 processedIndex;
   }
 
-	event BuyTicket(uint8[] numbers, uint256 ticketCount, uint256 tokenId, address user, uint256 blockNumber, uint256 allTicketsCount);
-	event Award(uint8[] jackpotNumbers, uint256 lastestAwardNumber, uint256 lastAwardedNumber, uint256 lastAwardedTicketIndex, uint256 allTicketsCount);
+	event BuyTicket(uint8[] numbers, uint256 ticketCount, uint256 tokenId, address user, uint256 blockNumber, uint256 allTokensCount);
+	event Award(uint8[] jackpotNumbers, uint256 lastestAwardNumber, uint256 lastAwardedNumber, uint256 lastAwardedTicketIndex, uint256 allTokensCount);
 	event ToBeAward(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 tokenId, address user, uint256 blockNumber, uint256 awardValue);
 	event MatchRule(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 tokenId, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
   event Transfer(address winner, uint256 value);
@@ -131,10 +124,9 @@ contract ChainLot is owned{
     }
     
     require(ticketCount > 0);
-    uint256 tokenId = chainLotToken.mint(msg.sender);
-    ticket memory t = ticket(numbers, ticketCount, tokenId, block.number);
-    allTickets.push(t);
-    BuyTicket(t.numbers, t.count, t.tokenId, msg.sender, t.blockNumber, allTickets.length);
+    uint256 tokenId = chainLotToken.mint(msg.sender, numbersToUint256(numbers), ticketCount);
+    allTokensCount = tokenId + 1;
+    BuyTicket(numbers, ticketCount, tokenId, msg.sender, block.number, allTokensCount);
   }
 
 	event LOG(uint256 msg);
@@ -144,24 +136,27 @@ contract ChainLot is owned{
 		//get last awardIntervalNumber
 		uint256 lastestAwardNumber = block.number - 1 - (block.number - 1)%awardIntervalNumber;
 		uint8[] memory jackpotNumbers = genRandomNumbers(lastestAwardNumber, 7);
-		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTickets.length);
+		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTokensCount);
 
 		//calculate winners and send out award
     
 		//statistic winners
-		for(uint i = lastAwardedTicketIndex; i < allTickets.length; i ++) {
+		for(uint i = lastAwardedTicketIndex; i < allTokensCount; i ++) {
 			//only award blockNumber <= lastestAwardNumber
-			if(allTickets[i].blockNumber > lastestAwardNumber) break;
+      address mb; uint256 ma; uint256 numbersUint256; uint256 count; uint256 blockNumber;
+      (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(i);
+      uint8[] memory numbers = uint256ToNumbers(numbersUint256);
+			if(blockNumber > lastestAwardNumber) break;
 
 			uint256 matchedWhiteCount = 0;
 			uint256 matchedYellowCount = 0;
 			for(uint256 j = 0; j < maxWhiteNumberCount; j++) {
-				if(allTickets[i].numbers[j] == jackpotNumbers[j]) {
+				if(numbers[j] == jackpotNumbers[j]) {
 					matchedWhiteCount ++;
 				}
 			}
 			for(j = maxWhiteNumberCount; j < jackpotNumbers.length; j++) {
-				if(allTickets[i].numbers[j] == jackpotNumbers[j]) {
+				if(numbers[j] == jackpotNumbers[j]) {
 					matchedYellowCount ++;
 				}
 			}
@@ -170,15 +165,15 @@ contract ChainLot is owned{
 			
 			if(ruleId >= 0 && ruleId < awardRules.length) {
         //match one rule!
-        winnerTickets[ruleId].tickets.push(allTickets[i]);
-        MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].tokenId, allTickets[i].blockNumber, ruleId, awardRules[ruleId].awardEther);
+        winnerTickets[ruleId].tokenIds.push(i);
+        MatchRule(jackpotNumbers, numbers, count, i, blockNumber, ruleId, awardRules[ruleId].awardEther);
 			}
 			else {
 				//MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, 0);
 			}
 			
 			lastAwardedTicketIndex = i+1;
-			lastAwardedNumber = allTickets[i].blockNumber;	
+			lastAwardedNumber = blockNumber;	
 		}
 
     calculateAwards(jackpotNumbers);
@@ -198,16 +193,19 @@ contract ChainLot is owned{
     //calculate winners award, from top to bottom, top winners takes all
     uint256 totalBalance = this.balance;
     for(uint i=0; i<awardRules.length; i++){
-      if(winnerTickets[i].tickets.length > winnerTickets[i].processedIndex && totalBalance > 0) {
+      if(winnerTickets[i].tokenIds.length > winnerTickets[i].processedIndex && totalBalance > 0) {
         uint256 totalWinnersAward = 0;
         uint256 totalTicketCount = 0;
-        for(uint j=winnerTickets[i].processedIndex;j<winnerTickets[i].tickets.length; j++) {
-          ticket t = winnerTickets[i].tickets[j];
-          totalWinnersAward += t.count * awardRules[i].awardEther;
-          totalTicketCount += t.count;
+        for(uint j=winnerTickets[i].processedIndex;j<winnerTickets[i].tokenIds.length; j++) {
+          uint256 tokenId = winnerTickets[i].tokenIds[j];
+          address mb; uint256 ma; uint256 numbersUint256; uint256 count; uint256 blockNumber;
+          (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(tokenId);
+          uint8[] memory numbers = uint256ToNumbers(numbersUint256);
+          totalWinnersAward += count * awardRules[i].awardEther;
+          totalTicketCount += count;
         }
 
-        CalculateAwards(i, awardRules[i].awardEther, totalBalance, totalWinnersAward, totalTicketCount);
+        CalculateAwards(i, awardRules[i].awardEther, this.balance, totalWinnersAward, totalTicketCount);
 
         if(totalBalance >= totalWinnersAward) {
           totalBalance -= totalWinnersAward;
@@ -218,17 +216,19 @@ contract ChainLot is owned{
         }
 
 
-        for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].tickets.length; j++){
-          t = winnerTickets[i].tickets[j];
-          uint256 awardValue = t.count * totalWinnersAward / totalTicketCount;
-          awardData memory ad = awardData(chainLotToken.ownerOf(t.tokenId), awardValue);
+        for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].tokenIds.length; j++){
+          tokenId = winnerTickets[i].tokenIds[j];
+          (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(i);
+          numbers = uint256ToNumbers(numbersUint256);
+          uint256 awardValue = count * totalWinnersAward / totalTicketCount;
+          awardData memory ad = awardData(chainLotToken.ownerOf(tokenId), awardValue);
           toBeAward.push(ad);
-          ToBeAward(jackpotNumbers, t.numbers, t.count, t.tokenId, ad.user, t.blockNumber, awardValue);
+          ToBeAward(jackpotNumbers, numbers, count, tokenId, ad.user, blockNumber, awardValue);
         }
       }
       
       //move pointer
-      winnerTickets[i].processedIndex = winnerTickets[i].tickets.length;
+      winnerTickets[i].processedIndex = winnerTickets[i].tokenIds.length;
 
     }
   }
@@ -258,7 +258,23 @@ contract ChainLot is owned{
   }
 
   //TODO: list tickets of msg.sender
-  function listUserTickets(){
+  function listUserTickets() public {
 
+  }
+
+  function numbersToUint256(uint8[] numbers) internal constant returns(uint256 numbersUint256){
+    numbersUint256 = 0;
+    for(uint256 i=0;i<numbers.length; i++) {
+      numbersUint256 *= 256;
+      numbersUint256 += numbers[i];
+    }
+  }
+
+  function uint256ToNumbers(uint256 numbersUint256) internal constant returns(uint8[] numbers){
+    numbers = new uint8[](maxWhiteNumberCount+maxYellowNumberCount);
+    for(uint256 i=0; i<numbers.length; i++) {
+      numbers[numbers.length - 1 - i] = uint8(numbersUint256 % 256);
+      numbersUint256 /= 256;
+    }
   }
 }

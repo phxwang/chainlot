@@ -29,6 +29,9 @@ contract ChainLotToken is ERC721, owned {
   struct Token {
     address mintedBy;
     uint64 mintedAt;
+    uint256 numbers;
+    uint256 count;
+    uint256 blockNumber;
   }
 
 
@@ -74,10 +77,13 @@ contract ChainLotToken is ERC721, owned {
     Transfer(_from, _to, _tokenId);
   }
 
-  function _mint(address _owner) internal returns (uint256 tokenId) {
+  function _mint(address _owner,uint256 _numbers,uint256 _count) internal returns (uint256 tokenId) {
     Token memory token = Token({
       mintedBy: _owner,
-      mintedAt: uint64(now)
+      mintedAt: uint64(now),
+      numbers: _numbers,
+      count: _count,
+      blockNumber: block.number
     });
     tokenId = tokens.push(token) - 1;
 
@@ -155,14 +161,20 @@ contract ChainLotToken is ERC721, owned {
 
   /*** OTHER EXTERNAL FUNCTIONS ***/
 
-  function mint(address _owner) external onlyOwner returns (uint256) {
-    return _mint(_owner);
+  function mint(address _owner, 
+    uint256 _numbers,
+    uint256 _count) 
+    external onlyOwner returns (uint256) {
+    return _mint(_owner, _numbers, _count);
   }
 
-  function getToken(uint256 _tokenId) external view returns (address mintedBy, uint64 mintedAt) {
+  function getToken(uint256 _tokenId) external view returns (address mintedBy, uint64 mintedAt, uint256 numbers, uint256 count, uint256 blockNumber) {
     Token memory token = tokens[_tokenId];
 
     mintedBy = token.mintedBy;
     mintedAt = token.mintedAt;
+    numbers = token.numbers;
+    count = token.count;
+    blockNumber = token.blockNumber;
   }
 }

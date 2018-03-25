@@ -23,19 +23,21 @@
  * award() ownable public
 ## 费用分析
  ### buyTicket
- 1 tickets, 300,000gas, 3gwei, 0.001ETH, $0.6
+ 1 tickets, 160,000gas, 3gwei, 0.0005ETH, $0.3
  ### buyRandom
- 10 tickets, 3,000,000gas, 3gwei, 0.01ETH, $6
+ 10 tickets, 1,500,000gas, 3gwei, 0.005ETH, $3
  ### award
- 10 tickets, 1,000,000gas 3gwei, 0.003ETH, $2
- 50 tickets, 2,600,000gas 3gwei, 0.008ETH, $5
+ 10 tickets, 620,000gas 3gwei, 0.0018ETH, $1
+ 50 tickets, 1,870,000gas 3gwei, 0.006ETH, $4
+ 100 tickets, 3,520,000gas 3gwei, 0.012ETH, $7
 
 
 
 ## TODO
  * 购买和摇奖 done
- * ERC 721
+ * ERC 721 done
  * 历史购买者分成10%
  * 开发者分成5%
+ * 邀请朋友得ticket
  * 分段计算中奖和发送奖金，因为gaslimit限制
 

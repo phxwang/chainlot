@@ -1,4 +1,4 @@
-var ChainLot = artifacts.require("./ChainLot.sol");
+/*var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotToken = artifacts.require("./ChainLotToken.sol");
 
 
@@ -33,4 +33,4 @@ contract("ChainLot", function(accounts){
 		});
 		
 	})
-})
+})*/
