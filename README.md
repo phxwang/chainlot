@@ -23,13 +23,13 @@
  * award() onlyOwner public
 ## 费用分析
  ### buyTicket
- 1 tickets, 160,000gas, 3gwei, 0.0005ETH, $0.3
+ * 1 tickets, 160,000gas, 3gwei, 0.0005ETH, $0.3
  ### buyRandom
- 10 tickets, 1,500,000gas, 3gwei, 0.005ETH, $3
+ * 10 tickets, 1,500,000gas, 3gwei, 0.005ETH, $3
  ### award
- 10 tickets, 620,000gas 3gwei, 0.0018ETH, $1
- 50 tickets, 1,870,000gas 3gwei, 0.006ETH, $4
- 100 tickets, 3,520,000gas 3gwei, 0.012ETH, $7
+ * 10 tickets, 620,000gas 3gwei, 0.0018ETH, $1
+ * 50 tickets, 1,870,000gas 3gwei, 0.006ETH, $4
+ * 100 tickets, 3,520,000gas 3gwei, 0.012ETH, $7
 
 
 
