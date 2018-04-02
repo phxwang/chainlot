@@ -1,8 +1,8 @@
-/*var ChainLot = artifacts.require("./ChainLot.sol");
-var ChainLotToken = artifacts.require("./ChainLotToken.sol");
+var ChainLot = artifacts.require("./ChainLot.sol");
+var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 
 
-contract("ChainLot", function(accounts){
+/*contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
 		ChainLotToken.deployed().then(function(chainlottoken) {
 			chainlot.setChainLotTokenAddress(chainlottoken.address).then(function(r) {

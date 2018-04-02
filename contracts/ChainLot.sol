@@ -1,5 +1,6 @@
 pragma solidity ^0.4.4;
-import "./ChainLotToken.sol";
+import "./ChainLotTicket.sol";
+import "./CLToken.sol";
 
 /*
 award rules:
@@ -20,16 +21,17 @@ contract ChainLot is owned{
 	uint256 public awardIntervalNumber; //50000
 	uint256 public lastAwardedNumber;
 	uint256 public lastAwardedTicketIndex;
-  uint256 public allTokensCount;
+  	uint256 public allTicketsCount;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	mapping(uint => uint) public awardRulesIndex;
-  mapping(uint => winnerTicketQueue) public winnerTickets;
+  	mapping(uint => winnerTicketQueue) public winnerTickets;
 	awardRule[] public awardRules;
-  ChainLotToken public chainLotToken;
+  	ChainLotTicket public chainLotTicket;
+  	CLToken public clToken;
   
-  awardData[] private toBeAward;
-  uint256 private awardIndex;
+  	awardData[] private toBeAward;
+  	uint256 private awardIndex;
 
 	struct awardRule{
 		uint256 whiteNumberCount;
@@ -42,17 +44,17 @@ contract ChainLot is owned{
 		uint256 value;
 	}
 
-  struct winnerTicketQueue {
-    uint256[] tokenIds;
-    uint256 processedIndex;
-  }
+  	struct winnerTicketQueue {
+    	uint256[] ticketIds;
+    	uint256 processedIndex;
+  	}
 
-	event BuyTicket(uint8[] numbers, uint256 ticketCount, uint256 tokenId, address user, uint256 blockNumber, uint256 allTokensCount);
-	event Award(uint8[] jackpotNumbers, uint256 lastestAwardNumber, uint256 lastAwardedNumber, uint256 lastAwardedTicketIndex, uint256 allTokensCount);
-	event ToBeAward(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 tokenId, address user, uint256 blockNumber, uint256 awardValue);
-	event MatchRule(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 tokenId, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
-  event Transfer(address winner, uint256 value);
-  event CalculateAwards(uint256 ruleId, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
+	event BuyTicket(uint8[] numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 allTicketsCount, uint256 value);
+	event Award(uint8[] jackpotNumbers, uint256 lastestAwardNumber, uint256 lastAwardedNumber, uint256 lastAwardedTicketIndex, uint256 allTicketsCount);
+	event ToBeAward(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 awardValue);
+	event MatchRule(uint8[] jackpotNumbers, uint8[] ticketNumber, uint256 ticketCount, uint256 ticketId, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
+  	event Transfer(address winner, uint256 value);
+  	event CalculateAwards(uint256 ruleId, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
 	
 	function ChainLot(uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
@@ -100,34 +102,35 @@ contract ChainLot is owned{
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
 	function buyTicket(uint8[] numbers) payable public {
-    uint256 ticketCount = msg.value/etherPerTicket;
-    _buyTicket(numbers, ticketCount);
+	    uint256 ticketCount = msg.value/etherPerTicket;
+	    _buyTicket(numbers, ticketCount);
 	}
 
 	//random numbers
 	//random seed: number-1 block hash x user address
 	function buyRandom() payable public{
-    uint256 ticketCount = msg.value/etherPerTicket;
-    for(uint256 i=0; i<ticketCount; i++) {
-      uint8[] memory numbers = genRandomNumbers(block.number - 1, i+1);
-      _buyTicket(numbers, 1);  
-    }
+	    uint256 ticketCount = msg.value/etherPerTicket;
+	    //for(uint256 i=0; i<ticketCount; i++) {
+	    uint8[] memory numbers = genRandomNumbers(block.number - 1, 0);
+	    _buyTicket(numbers, ticketCount);  
+	    //}
 	}
 
-  function _buyTicket(uint8[] numbers, uint256 ticketCount) internal {
-    require(numbers.length == maxWhiteNumberCount+maxYellowNumberCount);
-    for(uint8 i=0; i<maxWhiteNumberCount; i++) {
-      require(numbers[i]>=1 && numbers[i]<=maxWhiteNumber); 
-    }     
-    for(i=maxWhiteNumberCount; i<numbers.length; i++){
-      require(numbers[i]>=1&&numbers[i]<=maxYellowNumber);
-    }
-    
-    require(ticketCount > 0);
-    uint256 tokenId = chainLotToken.mint(msg.sender, numbersToUint256(numbers), ticketCount);
-    allTokensCount = tokenId + 1;
-    BuyTicket(numbers, ticketCount, tokenId, msg.sender, block.number, allTokensCount);
-  }
+  	function _buyTicket(uint8[] numbers, uint256 ticketCount) internal {
+	    require(numbers.length == maxWhiteNumberCount+maxYellowNumberCount);
+	    for(uint8 i=0; i<maxWhiteNumberCount; i++) {
+	      require(numbers[i]>=1 && numbers[i]<=maxWhiteNumber); 
+	    }     
+	    for(i=maxWhiteNumberCount; i<numbers.length; i++){
+	      require(numbers[i]>=1&&numbers[i]<=maxYellowNumber);
+	    }
+	    
+	    require(ticketCount > 0);
+	    uint256 ticketId = chainLotTicket.mint(msg.sender, numbersToUint256(numbers), ticketCount);
+	    allTicketsCount = ticketId + 1;
+	    clToken.buy.value(msg.value)();
+	    BuyTicket(numbers, ticketCount, ticketId, msg.sender, block.number, allTicketsCount, msg.value);
+	}
 
 	event LOG(uint256 msg);
 
@@ -136,15 +139,15 @@ contract ChainLot is owned{
 		//get last awardIntervalNumber
 		uint256 lastestAwardNumber = block.number - 1 - (block.number - 1)%awardIntervalNumber;
 		uint8[] memory jackpotNumbers = genRandomNumbers(lastestAwardNumber, 7);
-		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTokensCount);
+		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTicketsCount);
 
 		//calculate winners and send out award
     
 		//statistic winners
-		for(uint i = lastAwardedTicketIndex; i < allTokensCount; i ++) {
+		for(uint i = lastAwardedTicketIndex; i < allTicketsCount; i ++) {
 			//only award blockNumber <= lastestAwardNumber
       address mb; uint256 ma; uint256 numbersUint256; uint256 count; uint256 blockNumber;
-      (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(i);
+      (mb, ma, numbersUint256, count, blockNumber) = chainLotTicket.getTicket(i);
       uint8[] memory numbers = uint256ToNumbers(numbersUint256);
 			if(blockNumber > lastestAwardNumber) break;
 
@@ -164,9 +167,9 @@ contract ChainLot is owned{
 			uint256 ruleId = awardRulesIndex[getRuleKey(matchedWhiteCount, matchedYellowCount)] - 1;
 			
 			if(ruleId >= 0 && ruleId < awardRules.length) {
-        //match one rule!
-        winnerTickets[ruleId].tokenIds.push(i);
-        MatchRule(jackpotNumbers, numbers, count, i, blockNumber, ruleId, awardRules[ruleId].awardEther);
+		        //match one rule!
+		        winnerTickets[ruleId].ticketIds.push(i);
+		        MatchRule(jackpotNumbers, numbers, count, i, blockNumber, ruleId, awardRules[ruleId].awardEther);
 			}
 			else {
 				//MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, 0);
@@ -182,8 +185,9 @@ contract ChainLot is owned{
     //send awards
 		for(i=awardIndex; i<toBeAward.length; i++) {
 			//TODO: 10% history user share
-			toBeAward[i].user.transfer(toBeAward[i].value);
-      Transfer(toBeAward[i].user, toBeAward[i].value);
+			//toBeAward[i].user.transfer(toBeAward[i].value);
+			clToken.transfer(toBeAward[i].user, toBeAward[i].value);
+      		Transfer(toBeAward[i].user, toBeAward[i].value);
 		}
     awardIndex = toBeAward.length;
 	}
@@ -193,13 +197,13 @@ contract ChainLot is owned{
     //calculate winners award, from top to bottom, top winners takes all
     uint256 totalBalance = this.balance;
     for(uint i=0; i<awardRules.length; i++){
-      if(winnerTickets[i].tokenIds.length > winnerTickets[i].processedIndex && totalBalance > 0) {
+      if(winnerTickets[i].ticketIds.length > winnerTickets[i].processedIndex && totalBalance > 0) {
         uint256 totalWinnersAward = 0;
         uint256 totalTicketCount = 0;
-        for(uint j=winnerTickets[i].processedIndex;j<winnerTickets[i].tokenIds.length; j++) {
-          uint256 tokenId = winnerTickets[i].tokenIds[j];
+        for(uint j=winnerTickets[i].processedIndex;j<winnerTickets[i].ticketIds.length; j++) {
+          uint256 ticketId = winnerTickets[i].ticketIds[j];
           address mb; uint256 ma; uint256 numbersUint256; uint256 count; uint256 blockNumber;
-          (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(tokenId);
+          (mb, ma, numbersUint256, count, blockNumber) = chainLotTicket.getTicket(ticketId);
           uint8[] memory numbers = uint256ToNumbers(numbersUint256);
           totalWinnersAward += count * awardRules[i].awardEther;
           totalTicketCount += count;
@@ -216,19 +220,19 @@ contract ChainLot is owned{
         }
 
 
-        for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].tokenIds.length; j++){
-          tokenId = winnerTickets[i].tokenIds[j];
-          (mb, ma, numbersUint256, count, blockNumber) = chainLotToken.getToken(i);
+        for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].ticketIds.length; j++){
+          ticketId = winnerTickets[i].ticketIds[j];
+          (mb, ma, numbersUint256, count, blockNumber) = chainLotTicket.getTicket(ticketId);
           numbers = uint256ToNumbers(numbersUint256);
           uint256 awardValue = count * totalWinnersAward / totalTicketCount;
-          awardData memory ad = awardData(chainLotToken.ownerOf(tokenId), awardValue);
+          awardData memory ad = awardData(chainLotTicket.ownerOf(ticketId), awardValue);
           toBeAward.push(ad);
-          ToBeAward(jackpotNumbers, numbers, count, tokenId, ad.user, blockNumber, awardValue);
+          ToBeAward(jackpotNumbers, numbers, count, ticketId, ad.user, blockNumber, awardValue);
         }
       }
       
       //move pointer
-      winnerTickets[i].processedIndex = winnerTickets[i].tokenIds.length;
+      winnerTickets[i].processedIndex = winnerTickets[i].ticketIds.length;
 
     }
   }
@@ -238,7 +242,7 @@ contract ChainLot is owned{
 		uint256 hash = uint256(block.blockhash(blockNumber));
 		uint256 addressInt = uint256(msg.sender);
 		uint256 random = hash * addressInt;
-    random = random >> shift;
+    	random = random >> shift;
 		uint8[] memory numbers = new uint8[](maxWhiteNumberCount+maxYellowNumberCount);
 		for(uint8 i=0;i<maxWhiteNumberCount;i++) {
 			numbers[i] = uint8(random%maxWhiteNumber + 1);
@@ -253,13 +257,12 @@ contract ChainLot is owned{
 		return numbers;
 	}
 
-  function setChainLotTokenAddress(address tokenAddress) onlyOwner external {
-    chainLotToken = ChainLotToken(tokenAddress);
+  function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
+    chainLotTicket = ChainLotTicket(ticketAddress);
   }
 
-  //TODO: list tickets of msg.sender
-  function listUserTickets() public {
-
+  function setCLTokenAddress(address tokenAddress) onlyOwner external {
+    clToken = CLToken(tokenAddress);
   }
 
   function numbersToUint256(uint8[] numbers) internal pure returns(uint256 numbersUint256){
