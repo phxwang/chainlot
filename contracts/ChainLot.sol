@@ -24,6 +24,7 @@ contract ChainLot is owned{
   	uint256 public allTicketsCount;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
+	uint8 public totalNumberCount;
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
 	awardRule[] public awardRules;
@@ -69,6 +70,7 @@ contract ChainLot is owned{
 		maxYellowNumberCount = _yellowNumberCount;
 		etherPerTicket = _etherPerTicket;
 		awardIntervalNumber = _awardIntervalNumber;
+		totalNumberCount = maxWhiteNumberCount + maxYellowNumberCount;
 
 		for(uint i=0; i<awardRulesArray.length; i+=3) {
 			require(i+3 <= awardRulesArray.length);
@@ -103,7 +105,8 @@ contract ChainLot is owned{
 	//			6: <=maxYellowNumber
 	function buyTicket(uint8[] numbers) payable public {
 	    uint256 ticketCount = msg.value/etherPerTicket;
-	    _buyTicket(numbers, ticketCount);
+	    clToken.buy.value(msg.value)();
+	    _buyTicket(msg.sender, numbers, ticketCount, msg.value);
 	}
 
 	//random numbers
@@ -112,11 +115,32 @@ contract ChainLot is owned{
 	    uint256 ticketCount = msg.value/etherPerTicket;
 	    //for(uint256 i=0; i<ticketCount; i++) {
 	    uint8[] memory numbers = genRandomNumbers(block.number - 1, 0);
-	    _buyTicket(numbers, ticketCount);  
+	    clToken.buy.value(msg.value)();
+	    _buyTicket(msg.sender, numbers, ticketCount, msg.value);  
 	    //}
 	}
 
-  	function _buyTicket(uint8[] numbers, uint256 ticketCount) internal {
+	function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+		require(_token == address(clToken));
+		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
+
+		uint256 ticketCount = _value/etherPerTicket;
+		uint8[] memory numbers;
+		if(_extraData.length == 0) {
+			numbers = genRandomNumbers(block.number - 1, 0);
+		}
+		else {
+			numbers = new uint8[](totalNumberCount);
+			for(uint i=0; i < totalNumberCount; i ++) {
+				numbers[i] = uint8(_extraData[i]);
+			}	
+		}	
+
+		if(clToken.transferFrom(_from, this, _value))
+			_buyTicket(_from, numbers, ticketCount, _value);
+	}
+
+  	function _buyTicket(address _from, uint8[] numbers, uint256 ticketCount, uint256 _value) internal {
 	    require(numbers.length == maxWhiteNumberCount+maxYellowNumberCount);
 	    for(uint8 i=0; i<maxWhiteNumberCount; i++) {
 	      require(numbers[i]>=1 && numbers[i]<=maxWhiteNumber); 
@@ -126,13 +150,12 @@ contract ChainLot is owned{
 	    }
 	    
 	    require(ticketCount > 0);
-	    uint256 ticketId = chainLotTicket.mint(msg.sender, numbersToUint256(numbers), ticketCount);
+	    uint256 ticketId = chainLotTicket.mint(_from, numbersToUint256(numbers), ticketCount);
 	    allTicketsCount = ticketId + 1;
-	    clToken.buy.value(msg.value)();
-	    BuyTicket(numbers, ticketCount, ticketId, msg.sender, block.number, allTicketsCount, msg.value);
+	    BuyTicket(numbers, ticketCount, ticketId, _from, block.number, allTicketsCount, _value);
 	}
 
-	event LOG(uint256 msg);
+	event LOG(uint msg);
 
 	//calculate jackpot and other winners and send awards
 	function award() onlyOwner public {

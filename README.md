@@ -40,7 +40,8 @@
 ## TODO
  * 购买和摇奖 done
  * ERC 721 done
- * 积分机制（ERC 20）
+ * 积分机制（ERC 20） done
+ * 使用积分购买ticket
  * 历史购买者分成10%
  * 开发者分成5%
  * 邀请朋友得ticket
