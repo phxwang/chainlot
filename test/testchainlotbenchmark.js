@@ -50,16 +50,26 @@ var afterBuyRandom=function(chainlot) {
 		console.log("buy some tickets");
 		console.log(JSON.stringify(r));
 
-		chainlot.award({gas:5000000}).then(function(r){
-			console.log("award");
-			for(log in r.logs) {
-				console.log(JSON.stringify(r.logs[log]));	
-			}
-			console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
-			cltoken.balanceOf(cltoken.address).then(function(r) {
-				console.log("cltoken balance of cltoken: " + JSON.stringify(r));
-			})
-			//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
+		chainlot.matchAwards({gas:5000000}).then(function(r){
+			console.log("match awards");
+			console.log(JSON.stringify(r.logs));
+
+			chainlot.calculateAwards({gas:5000000}).then(function(r){
+				console.log("calculate awards");
+				console.log(JSON.stringify(r.logs));
+				chainlot.sendAwards({gas:5000000}).then(function(r){
+					console.log("send awards");
+					console.log(JSON.stringify(r.logs));
+
+					console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
+					cltoken.balanceOf(cltoken.address).then(function(r) {
+					console.log("cltoken balance of cltoken: " + JSON.stringify(r));
+					})
+					//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
+
+				});
+
+			});
 		});
 	});
 }

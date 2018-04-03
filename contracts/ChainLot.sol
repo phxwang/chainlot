@@ -21,6 +21,7 @@ contract ChainLot is owned{
 	uint256 public awardIntervalNumber; //50000
 	uint256 public lastAwardedNumber;
 	uint256 public lastAwardedTicketIndex;
+	bytes public latestJackpotNumber;
   	uint256 public allTicketsCount;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
@@ -155,10 +156,11 @@ contract ChainLot is owned{
 	event LOG(uint msg);
 
 	//calculate jackpot and other winners and send awards
-	function award() onlyOwner public {
+	function matchAwards() onlyOwner public {
 		//get last awardIntervalNumber
 		uint256 lastestAwardNumber = block.number - 1 - (block.number - 1)%awardIntervalNumber;
 		bytes memory jackpotNumbers = genRandomNumbers(lastestAwardNumber, 7);
+		latestJackpotNumber = jackpotNumbers;
 		Award(jackpotNumbers, lastestAwardNumber, lastAwardedTicketIndex, lastAwardedNumber, allTicketsCount);
 
 		//calculate winners and send out award
@@ -196,22 +198,11 @@ contract ChainLot is owned{
 			
 			lastAwardedTicketIndex = i+1;
 			lastAwardedNumber = blockNumber;	
-		}
-
-    calculateAwards(jackpotNumbers);
-
-		
-    //send awards
-		for(i=awardIndex; i<toBeAward.length; i++) {
-			//TODO: 10% history user share
-			//toBeAward[i].user.transfer(toBeAward[i].value);
-			clToken.transfer(toBeAward[i].user, toBeAward[i].value);
-      		TransferAward(toBeAward[i].user, toBeAward[i].value);
-		}
-    	awardIndex = toBeAward.length;
+		}	
 	}
 
-  function calculateAwards(bytes jackpotNumbers) internal {
+  function calculateAwards() onlyOwner public {
+  	bytes memory jackpotNumbers = latestJackpotNumber;
 
     //calculate winners award, from top to bottom, top winners takes all
     uint256 totalBalance = clToken.balanceOf(this);
@@ -252,6 +243,16 @@ contract ChainLot is owned{
       winnerTickets[i].processedIndex = winnerTickets[i].ticketIds.length;
 
     }
+  }
+
+  function sendAwards() onlyOwner public {
+  	for(uint i=awardIndex; i<toBeAward.length; i++) {
+			//TODO: 10% history user share
+			//toBeAward[i].user.transfer(toBeAward[i].value);
+			clToken.transfer(toBeAward[i].user, toBeAward[i].value);
+      		TransferAward(toBeAward[i].user, toBeAward[i].value);
+	}
+    awardIndex = toBeAward.length;
   }
 
 	function genRandomNumbers(uint256 blockNumber, uint256 shift) internal view returns(bytes _numbers){

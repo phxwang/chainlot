@@ -31,9 +31,9 @@
  ### buyRandom
  * 1 tickets, 160,000gas x 3gwei, 0.0005ETH, $0.3
  ### award
- * 10 tickets, 620,000gas x 3gwei, 0.0018ETH, $1
- * 50 tickets, 1,870,000gas x 3gwei, 0.006ETH, $4
- * 100 tickets, 3,520,000gas x 3gwei, 0.012ETH, $7
+ * match: 10 tickets, 350,000gas x 3gwei, 0.001ETH, $0.6
+ * calculate: 10 tickets, 200,000gas x 3gwei, 0.0006ETH, $0.36
+ * send: 10 tickets, 120,000gas x 3gwei, 0.0004ETH, $0.24
 
 
 
@@ -41,9 +41,9 @@
  * 购买和摇奖 done
  * ERC 721 done
  * 积分机制（ERC 20） done
- * 使用积分购买ticket
+ * 使用积分购买ticket done
+ * 分段计算中奖和发送奖金，因为gaslimit限制
  * 历史购买者分成10%
  * 开发者分成5%
  * 邀请朋友得ticket
- * 分段计算中奖和发送奖金，因为gaslimit限制
 
