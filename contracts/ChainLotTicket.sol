@@ -29,7 +29,7 @@ contract ChainLotTicket is ERC721, owned {
   struct Ticket {
     address mintedBy;
     uint64 mintedAt;
-    uint256 numbers;
+    bytes numbers;
     uint256 count;
     uint256 blockNumber;
   }
@@ -77,7 +77,7 @@ contract ChainLotTicket is ERC721, owned {
     Transfer(_from, _to, _ticketId);
   }
 
-  function _mint(address _owner,uint256 _numbers,uint256 _count) internal returns (uint256 ticketId) {
+  function _mint(address _owner,bytes _numbers,uint256 _count) internal returns (uint256 ticketId) {
     Ticket memory ticket = Ticket({
       mintedBy: _owner,
       mintedAt: uint64(now),
@@ -162,19 +162,25 @@ contract ChainLotTicket is ERC721, owned {
   /*** OTHER EXTERNAL FUNCTIONS ***/
 
   function mint(address _owner, 
-    uint256 _numbers,
+    bytes _numbers,
     uint256 _count) 
     external onlyOwner returns (uint256) {
     return _mint(_owner, _numbers, _count);
   }
 
   function getTicket(uint256 _ticketId) external view 
-    returns (address mintedBy, uint64 mintedAt, uint256 numbers, uint256 count, uint256 blockNumber) {
+    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber) {
     Ticket memory ticket = tickets[_ticketId];
+
+    uint bytesLength = 32;
+    if(bytesLength > ticket.numbers.length) bytesLength = ticket.numbers.length;
+    for(uint i=0; i<bytesLength; i++) {
+      numbers |= bytes32(ticket.numbers[i]&0xFF)>>(i*8);
+    }
 
     mintedBy = ticket.mintedBy;
     mintedAt = ticket.mintedAt;
-    numbers = ticket.numbers;
+    //numbers = ticket.numbers;
     count = ticket.count;
     blockNumber = ticket.blockNumber;
   }

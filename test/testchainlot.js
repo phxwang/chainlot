@@ -3,7 +3,7 @@ var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
 
 
-contract("ChainLot", function(accounts){
+/*contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
 		ChainLotTicket.deployed().then(function(chainlotticket) {
 			CLToken.deployed().then(function(cltoken) {
@@ -32,18 +32,18 @@ contract("ChainLot", function(accounts){
 											});
 										})
 									})
-									/*cltoken.approve(chainlot.address, 1e11).then(function(r) {
+									cltoken.approve(chainlot.address, 1e11).then(function(r) {
 										chainlot.receiveApproval(web3.eth.accounts[4], 1e11, cltoken.address, "0x020101", {from:web3.eth.accounts[4]}).then(function(r) {
 											console.log(JSON.stringify(r));
 											chainlotticket.ticketsOfOwner(web3.eth.accounts[4]).then((r)=>{
 												console.log(JSON.stringify(r));
 											})
 										});										
-									});*/
+									});
 								});
 
-								/*console.log("buy some tickets");
-								chainlot.buyTicket([1,1,2], {from:web3.eth.accounts[2], value:2e10}).then(function(r){
+								console.log("buy some tickets");
+								chainlot.buyTicket("0x020201", {from:web3.eth.accounts[2], value:2e10}).then(function(r){
 									for(log in r.logs) {
 											console.log(JSON.stringify(r.logs[log]));	
 									}
@@ -55,7 +55,7 @@ contract("ChainLot", function(accounts){
 										}
 										
 									});
-								});*/
+								});
 							});
 						});
 					});
@@ -64,4 +64,4 @@ contract("ChainLot", function(accounts){
 		});
 		
 	})
-})
+})*/

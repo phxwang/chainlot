@@ -3,7 +3,7 @@ var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
 
 var cltoken;
-/*contract("ChainLot", function(accounts){
+contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
 		ChainLotTicket.deployed().then(function(chainlotticket) {
 			CLToken.deployed().then(function(_cltoken) {
@@ -11,25 +11,25 @@ var cltoken;
 				chainlot.setChainLotTicketAddress(chainlotticket.address).then(function(r) {
 					chainlot.setCLTokenAddress(cltoken.address).then(function(r) {
 						chainlotticket.transferOwnership(chainlot.address).then(function(r){
-							cltoken.sendTransaction({from:web3.eth.accounts[0], value:1e11, gas:5000000}).then(function(r) {
+							/*cltoken.sendTransaction({from:web3.eth.accounts[0], value:1e11, gas:5000000}).then(function(r) {
 								cltoken.balanceOf(web3.eth.accounts[0]).then(function(r) {
 									console.log(JSON.stringify(r));
 								})
-							})
-							//buyRandom(chainlot, 0, afterBuyRandom)(null);
-							chainlot.buyRandom({value:1e11, gas:500000}).then(function(r) {
+							})*/
+							buyRandom(chainlot, 0, afterBuyRandom)(null);
+							/*chainlot.buyRandom({value:1e11, gas:500000}).then(function(r) {
 								console.log(JSON.stringify(r));
 								cltoken.balanceOf(chainlot.address).then(function(r) {
 									console.log(JSON.stringify(r));
 								})
-							});
+							});*/
 						});
 					});
 				});
 			});			
 		});		
 	});
-})*/
+})
 
 var buyRandom=function(chainlot, index, thenFunc) {
 	return function(r) {
@@ -46,7 +46,7 @@ var buyRandom=function(chainlot, index, thenFunc) {
 }
 
 var afterBuyRandom=function(chainlot) {
-	chainlot.buyTicket([1,1,2], {from:web3.eth.accounts[Math.floor(Math.random()*10)], value:2e11}).then(function(r){
+	chainlot.buyTicket("0x010202", {from:web3.eth.accounts[Math.floor(Math.random()*10)], value:2e11}).then(function(r){
 		console.log("buy some tickets");
 		console.log(JSON.stringify(r));
 
