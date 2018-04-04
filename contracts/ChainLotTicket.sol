@@ -2,6 +2,7 @@ pragma solidity ^0.4.18;
 
 import "./ERC721.sol";
 import "./owned.sol";
+import "./CLToken.sol";
 
 contract ChainLotTicket is ERC721, owned {
   /*** CONSTANTS ***/
@@ -38,11 +39,18 @@ contract ChainLotTicket is ERC721, owned {
   /*** STORAGE ***/
 
   Ticket[] tickets;
+  mapping (address => bool) minters;
 
   mapping (uint256 => address) public ticketIndexToOwner;
-  mapping (address => uint256) ownershipTicketCount;
+  mapping (address => uint256) public ownershipTicketCount;
   mapping (uint256 => address) public ticketIndexToApproved;
 
+  uint public totalTicketCountSum;
+  uint public totalWithdrawedToken;
+  mapping (address => uint256) public withdrawedToken;
+  mapping (address => uint256) public ownershipTicketCountSum;
+  CLToken clToken;
+  
 
   /*** EVENTS ***/
 
@@ -90,6 +98,8 @@ contract ChainLotTicket is ERC721, owned {
     Mint(_owner, ticketId);
 
     _transfer(0, _owner, ticketId);
+    totalTicketCountSum += _count;
+    ownershipTicketCountSum[_owner] += _count;
   }
 
 
@@ -161,10 +171,19 @@ contract ChainLotTicket is ERC721, owned {
 
   /*** OTHER EXTERNAL FUNCTIONS ***/
 
+  function setMinter(address _minter, bool _enable) external onlyOwner {
+    minters[_minter] = _enable;
+  }
+
+  modifier onlyMinter {
+        require(minters[msg.sender]);
+        _;
+  }
+
   function mint(address _owner, 
     bytes _numbers,
     uint256 _count) 
-    external onlyOwner returns (uint256) {
+    external onlyMinter returns (uint256) {
     return _mint(_owner, _numbers, _count);
   }
 
@@ -183,5 +202,21 @@ contract ChainLotTicket is ERC721, owned {
     //numbers = ticket.numbers;
     count = ticket.count;
     blockNumber = ticket.blockNumber;
+  }
+
+  //withdraw token from history cut pool
+  //everyone can only withdraw no more than his/her share cut
+  //share cut = (totalToken + withdrawedToken) * ticketCountSum / totalTicketCountSum
+  function withdrawToken(uint256 value) external {
+    uint totalToken = clToken.balanceOf(this);
+    uint tokenLeft = (totalToken+totalWithdrawedToken)*ownershipTicketCountSum[msg.sender]/totalTicketCountSum - withdrawedToken[msg.sender];
+    require(tokenLeft >= value);
+    withdrawedToken[msg.sender] += value;
+    totalWithdrawedToken += value;
+    clToken.transfer(msg.sender, value);
+  }
+
+  function setCLTokenAddress(address tokenAddress) onlyOwner external {
+    clToken = CLToken(tokenAddress);
   }
 }
