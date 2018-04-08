@@ -32,6 +32,7 @@ contract ChainLot is owned{
 	
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
+  	mapping(uint => winnerTicketQueue) public distributeTickets;
 	awardRule[] public awardRules;
   	ChainLotTicket public chainLotTicket;
   	CLToken public clToken;
@@ -53,6 +54,7 @@ contract ChainLot is owned{
   	struct winnerTicketQueue {
     	uint256[] ticketIds;
     	uint256 processedIndex;
+    	uint256 distributedIndex;
   	}
 
 	event BuyTicket(bytes numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 allTicketsCount, uint256 value);
@@ -90,6 +92,7 @@ contract ChainLot is owned{
 
     for(i=0; i<awardRules.length; i++) {
       winnerTickets[i].processedIndex = 0;
+      winnerTickets[i].distributedIndex = 0;
     }
 		/*
 		awardRules.push(awardRule(5,1,-1));
@@ -259,17 +262,23 @@ contract ChainLot is owned{
     }
   }
 
-  //TODO: segment distribute
+  //segment distribute
   function distributeAwards() onlyOwner external {
   	bytes memory jackpotNumbers = latestJackpotNumber;
-  	/*for(j=winnerTickets[i].processedIndex;j<winnerTickets[i].ticketIds.length; j++){
-          ticketId = winnerTickets[i].ticketIds[j];
-          (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
-          uint256 awardValue = count * totalWinnersAward / totalTicketCount;
-          awardData memory ad = awardData(chainLotTicket.ownerOf(ticketId), awardValue);
-          toBeAward.push(ad);
-          ToBeAward(jackpotNumbers, numbers, count, ticketId, ad.user, blockNumber, awardValue);
-    }*/
+  	for(uint i=0; i<awardRules.length; i++){
+  		if(awardResults[i].totalTicketCount > 0) {
+  			for(uint j=winnerTickets[i].distributedIndex;j<winnerTickets[i].ticketIds.length; j++){
+	          uint ticketId = winnerTickets[i].ticketIds[j];
+	          address mb; uint256 ma; bytes32 numbers; uint256 count; uint256 blockNumber;
+	          (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+	          uint256 awardValue = count * awardResults[i].totalWinnersAward / awardResults[i].totalTicketCount;
+	          awardData memory ad = awardData(chainLotTicket.ownerOf(ticketId), awardValue);
+	          toBeAward.push(ad);
+	          ToBeAward(jackpotNumbers, numbers, count, ticketId, ad.user, blockNumber, awardValue);
+	    	}
+  		}
+	  	winnerTickets[i].distributedIndex = winnerTickets[i].ticketIds.length;
+	}
   }
 
   //TODO: segment send

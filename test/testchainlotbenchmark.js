@@ -37,7 +37,7 @@ var buyRandom=function(chainlot, index, thenFunc) {
 			console.log("buy random, progress: " + index*10);
 			console.log(JSON.stringify(r.logs));
 		}
-		if(index < 100) {
+		if(index < 10) {
 			id = Math.floor(Math.random()*10);
 			console.log("from account: " + id);
 			chainlot.buyRandom(web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:1e11, gas:5000000}).then(buyRandom(chainlot, index+1, thenFunc));
@@ -53,7 +53,7 @@ var matchAwards=function(chainlot, index, thenFunc) {
 			console.log("match awards, progress: " + index*10);
 			console.log(JSON.stringify(r.logs));
 		}	
-		if(index < 3) {
+		if(index < 2) {
 			chainlot.matchAwards(100, {gas:5000000}).then(matchAwards(chainlot, index+1, thenFunc));
 		}
 		else {
@@ -80,15 +80,19 @@ var afterMatchAwards=function(chainlot) {
 	chainlot.calculateAwards({gas:5000000}).then(function(r){
 		console.log("calculate awards");
 		console.log(JSON.stringify(r.logs));
-		chainlot.sendAwards({gas:5000000}).then(function(r){
-			console.log("send awards");
+		chainlot.distributeAwards({gas:5000000}).then(function(r){
+			console.log("distribute awards");
 			console.log(JSON.stringify(r.logs));
+			chainlot.sendAwards({gas:5000000}).then(function(r){
+				console.log("send awards");
+				console.log(JSON.stringify(r.logs));
 
-			console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
-			cltoken.balanceOf(cltoken.address).then(function(r) {
-				console.log("cltoken balance of cltoken: " + JSON.stringify(r));
-			})
-			//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
+				console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
+				cltoken.balanceOf(cltoken.address).then(function(r) {
+					console.log("cltoken balance of cltoken: " + JSON.stringify(r));
+				})
+				//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
+			});
 		});
 	});
 }
