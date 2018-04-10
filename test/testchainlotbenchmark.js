@@ -16,13 +16,15 @@ contract("ChainLot", function(accounts){
 									console.log(JSON.stringify(r));
 								})
 							})*/
-							buyRandom(chainlot, 0, afterBuyRandom)(null);
-							/*chainlot.buyRandom({value:1e11, gas:500000}).then(function(r) {
-								console.log(JSON.stringify(r));
-								cltoken.balanceOf(chainlot.address).then(function(r) {
-									console.log(JSON.stringify(r));
-								})
-							});*/
+							//console.log(JSON.stringify(r.logs));	
+							chainlot.newPool({gas:5000000}).then((r)=>{
+								console.log(JSON.stringify(r.logs));	
+								buyRandom(chainlot, 0, afterBuyRandom)(null);
+								/*chainlot.buyRandom(web3.eth.accounts[2],{from:web3.eth.accounts[1],value:1e11, gas:5000000}).then(function(r) {
+									console.log(JSON.stringify(r.logs));
+								});*/
+							})
+							
 						});
 					});
 				});
@@ -62,17 +64,40 @@ var matchAwards=function(chainlot, index, thenFunc) {
 	}
 }
 
+var addBlockNumber =function(chainlot, index, thenFunc) {
+	return function(r) {
+		if(index > 0) {
+			console.log("add block number, progress: " + index);
+		}	
+
+		if(index < 50) {
+			web3.eth.sendTransaction({from:web3.eth.accounts[0], 
+				to:web3.eth.accounts[1], value:1e2}, addBlockNumber(chainlot, index+1, thenFunc));
+		}
+		else {
+			thenFunc(chainlot);
+		}
+	}
+}
+
+var afterAddBlockNumber=function(chainlot) {
+	chainlot.prepareAwards({gas:5000000}).then(function(r){
+			console.log("prepare awards");
+			console.log(JSON.stringify(r.logs));
+			matchAwards(chainlot, 0, afterMatchAwards)(null);
+			
+	});
+}
+
 var afterBuyRandom=function(chainlot) {
 	chainlot.buyTicket("0x010202", web3.eth.accounts[0], {from:web3.eth.accounts[Math.floor(Math.random()*10)], value:2e11}).then(function(r){
 		console.log("buy some tickets");
 		console.log(JSON.stringify(r.logs));
 
-		chainlot.prepareAwards({gas:5000000}).then(function(r){
-			console.log("prepare awards");
-			console.log(JSON.stringify(r.logs));
-			matchAwards(chainlot, 0, afterMatchAwards)(null);
-			
-		});
+		chainlot.listAllPool().then(function(r){
+			console.log(JSON.stringify(r));
+		})
+		addBlockNumber(chainlot, 0, afterAddBlockNumber)(null);
 	});
 }
 
