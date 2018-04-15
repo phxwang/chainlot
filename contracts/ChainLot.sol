@@ -1,7 +1,21 @@
 pragma solidity ^0.4.4;
-import "./ChainLotTicket.sol";
-import "./CLToken.sol";
 import "./ChainLotPool.sol";
+import "./owned.sol";
+
+interface CLTokenInterface {
+	function transfer(address _to, uint256 _value) external;
+	function buy() payable external;
+	function balanceOf(address user) external view returns(uint value);
+}
+
+interface ChainLotTicketInterface {
+	function mint(address _owner, 
+    	bytes _numbers,
+    	uint256 _count) external returns (uint256);
+	function getTicket(uint256 _ticketId) external view 
+    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber);
+    function ownerOf(uint256 _ticketId) external view returns (address owner);
+}
 
 /*
 award rules:
@@ -33,33 +47,9 @@ contract ChainLot is owned{
 	bytes public latestJackpotNumber;
 	uint256 public lastestAwardNumber;
 	
-	mapping(uint => uint) public awardRulesIndex;
-  	mapping(uint => winnerTicketQueue) public winnerTickets;
-  	mapping(uint => winnerTicketQueue) public distributeTickets;
-	awardRule[] public awardRules;
-  	ChainLotTicket public chainLotTicket;
-  	CLToken public clToken;
+  	ChainLotTicketInterface public chainLotTicket;
+  	CLTokenInterface public clToken;
   
-  	awardData[] private toBeAward;
-  	uint256 private awardIndex;
-
-	struct awardRule{
-		uint256 whiteNumberCount;
-		uint256 yellowNumberCount;
-		uint256 awardEther;
-	}
-
-	struct awardData {
-		address user;
-		uint256 value;
-	}
-
-  	struct winnerTicketQueue {
-    	uint256[] ticketIds;
-    	uint256 processedIndex;
-    	uint256 distributedIndex;
-  	}
-
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 allTicketsCount, uint256 value);
 	event PrepareAward(bytes jackpotNumbers, uint256 poolBlockNumber, uint256 allTicketsCount);
 	//event PrepareAward(bytes32 jackpotNumbers, uint poolBlockNumber);
@@ -67,9 +57,11 @@ contract ChainLot is owned{
 	event MatchAwards(bytes jackpotNumbers, uint lastMatchedTicketIndex, uint endIndex, uint allTicketsCount);
 	event TransferAward(address winner, uint256 value);
   	event TransferDevCut(address dev, uint256 value);
-  	event TransferHistoryCut(address ticket, uint256 value);
+  	event TransferHistoryCut(address user, uint256 value);
+  	event AddHistoryCut(uint added, uint256 total);
   	event CalculateAwards(uint256 ruleId, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
+  	event TransferUnawarded(address to, uint value);
 
 	function ChainLot(uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
@@ -182,11 +174,11 @@ contract ChainLot is owned{
   }
 
   function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
-    chainLotTicket = ChainLotTicket(ticketAddress);
+    chainLotTicket = ChainLotTicketInterface(ticketAddress);
   }
 
   function setCLTokenAddress(address tokenAddress) onlyOwner external {
-    clToken = CLToken(tokenAddress);
+    clToken = CLTokenInterface(tokenAddress);
   }
 
   function listAllPool() external view returns (address[] _poolAddresses, uint[] _poolTokens, uint[] _poolTickets) {
@@ -199,5 +191,26 @@ contract ChainLot is owned{
   		poolTickets[i] = chainlotPools[i].allTicketsCount();
   	}
   	return (poolAddresses, poolTokens, poolTickets);
+  }
+
+  function withDrawDevCut(uint value) onlyOwner external {
+  	clToken.transfer(owner, value);
+  }
+
+  //withdraw history cut from pools
+  function withDrawHistoryCut(uint start, uint end, uint[] ticketIds) external {
+  	require(start >=0);
+  	require(end <= chainlotPools.length);
+  	for(uint i = start; i < end; i++) {
+  		chainlotPools[i].withdrawHistoryCut(msg.sender, ticketIds);
+  	}
+  }
+
+  function transferUnawarded(uint start, uint end) onlyOwner external {
+  	require(start >=0);
+  	require(end <= chainlotPools.length-1);
+  	for(uint i = start; i < end; i++) {
+  		chainlotPools[i].transferUnawarded(address(chainlotPools[chainlotPools.length-1]));
+  	}
   }
 }

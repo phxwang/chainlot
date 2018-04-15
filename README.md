@@ -21,6 +21,13 @@
  	* 主合约将用户支付的以太坊兑换成积分
  	* 奖金作为积分返还
  	* 积分可以再次购买ticket
+ * ERC721 token
+ 	* 实际的ticket物品token
+ 	* 作为历史提成分红的凭证
+ * 奖池（参考DAO）
+ 	* 每轮抽奖设置一个奖池
+ 	* 奖池的2%作为开发者费用，10%作为历史购买者分红，其他用于奖券分红
+ 	* 分红后剩余的积分转移到下一个奖池。
 ## Interface
  * buyTicket (uint16[] numbers) payable public
  * buyRandom () payable public
@@ -43,12 +50,14 @@
  * 积分机制（ERC 20） done
  * 使用积分购买ticket done
  * 分开计算中奖和发送奖金 done
- * 每次抽奖生成一个单独的合约
+ * 每次抽奖生成一个单独的合约 done
  * 计算中奖和发送奖金分段，以便扩展
  	* 分段计算 
  	* 容错机制
  * 历史购买者分成10% done
- * 开发者分成5% done
+ 	* 支持每个奖池分成给奖池生成之前的所有历史ticket
+ * 每次开奖后剩余积分转移到下个奖池 done
+ * 开发者分成2% done
  * 邀请朋友得ticket done
  * 支持逻辑升级
 
