@@ -46,11 +46,6 @@ interface ChainLotPoolFactoryInterface {
 						CLTokenInterface _clToken,
 						address _chainLot)  external returns (ChainLotPoolInterface pool);
 
-  	function latestPool() view external returns(ChainLotPoolInterface pool);
-
-  	function validatePool(address pool) view external returns(bool);
-
-  	function poolAt(uint i) view external returns(ChainLotPoolInterface pool);
 }
 
 

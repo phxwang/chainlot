@@ -28,10 +28,13 @@
  	* 每轮抽奖设置一个奖池
  	* 奖池的2%作为开发者费用，10%作为历史购买者分红，其他用于奖券分红
  	* 分红后剩余的积分转移到下一个奖池。
-## Interface
- * buyTicket (uint16[] numbers) payable public
- * buyRandom () payable public
- * award() onlyOwner public
+## 运营流程
+	* 开新奖池，开奖blocknumber是N
+	* 等待用户购买
+	* blocknumber到达N
+	* 开新奖池，开奖blocknumber是N+m
+	* 上一个奖池计算中奖和奖金
+
 ## 费用分析
  ### buyTicket
  * 1 tickets, 160,000gas x 3gwei, 0.0005ETH, $0.3
@@ -52,9 +55,10 @@
  * 分开计算中奖和发送奖金 done
  * 每次抽奖生成一个单独的合约 done
  * 合约逻辑拆分（单个合约太大创建不了了）done
- * 计算中奖和发送奖金分段，以便扩展
+ * 计算中奖和发送奖金优化
  	* 分段计算 
  	* 容错机制
+ 	* 创建奖金池和抽奖同时进行
  * 历史购买者分成10% done
  	* 支持每个奖池分成给奖池生成之前的所有历史ticket
  * 每次开奖后剩余积分转移到下个奖池 done

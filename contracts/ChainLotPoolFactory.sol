@@ -5,11 +5,7 @@ import "./ChainLotPool.sol";
 
 contract ChainLotPoolFactory is owned {
   	uint currentPoolBlockNumber;
-	ChainLotPool[] public chainlotPools;
-	mapping(address=>bool) public chainlotPoolsMap;
-
-	ChainLotTicketInterface public chainLotTicket;
-  	CLTokenInterface public clToken;
+  	uint poolCount;
 
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
 	
@@ -32,39 +28,10 @@ contract ChainLotPoolFactory is owned {
 		clp = new ChainLotPool(nextPoolBlockNumber, 
 			maxWhiteNumber, maxYellowNumber, whiteNumberCount, yellowNumberCount, 
 			etherPerTicket, awardRulesArray, _chainLotTicket, _clToken, chainLot);
-		chainlotPools.push(clp);
-		chainlotPoolsMap[address(clp)] = true;
-		GenerateNewPool(currentPoolBlockNumber, nextPoolBlockNumber, chainlotPools.length);
+		poolCount ++;
+		GenerateNewPool(currentPoolBlockNumber, nextPoolBlockNumber, poolCount);
 		currentPoolBlockNumber = nextPoolBlockNumber;
-
-		clToken = _clToken;
-		chainLotTicket = _chainLotTicket;
 	}
   	return ChainLotPoolInterface(clp);
-  }
-
-  function latestPool() view external returns(ChainLotPoolInterface pool) {
-  	return ChainLotPoolInterface(chainlotPools[chainlotPools.length-1]);
-  }
-
-  function validatePool(address pool) view external returns(bool) {
-  	return chainlotPoolsMap[pool];
-  }
-
-  function poolAt(uint i) view external returns(ChainLotPoolInterface pool) {
-  	require(i < chainlotPools.length);
-  	return ChainLotPoolInterface(chainlotPools[i]);
-  }
-
-  function listAllPool() external view returns (address[] _poolAddresses, uint[] _poolTokens, uint[] _poolTickets) {
-  	address[] memory poolAddresses = new address[](chainlotPools.length);
-  	uint[] memory poolTokens = new uint[](chainlotPools.length);
-  	uint[] memory poolTickets = new uint[](chainlotPools.length);
-  	for(uint i=0; i<chainlotPools.length; i++) {
-  		poolAddresses[i] = address(chainlotPools[i]);
-  		poolTokens[i] = clToken.balanceOf(address(chainlotPools[i]));
-  		poolTickets[i] = chainlotPools[i].allTicketsCount();
-  	}
-  	return (poolAddresses, poolTokens, poolTickets);
   }
 }

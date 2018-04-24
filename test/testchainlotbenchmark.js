@@ -70,7 +70,7 @@ var matchAwards=function(chainlot, index, thenFunc) {
 			console.log(JSON.stringify(r.logs));
 		}	
 		if(index < 2) {
-			chainlot.matchAwards(100, {gas:5000000}).then(matchAwards(chainlot, index+1, thenFunc));
+			chainlot.matchAwards(0, 100, {gas:5000000}).then(matchAwards(chainlot, index+1, thenFunc));
 		}
 		else {
 			thenFunc(chainlot);
@@ -95,7 +95,7 @@ var addBlockNumber =function(chainlot, index, thenFunc) {
 }
 
 var afterAddBlockNumber=function(chainlot) {
-	chainlot.prepareAwards({gas:5000000}).then(function(r){
+	chainlot.prepareAwards(0, {gas:5000000}).then(function(r){
 			console.log("prepare awards");
 			console.log(JSON.stringify(r.logs));
 			matchAwards(chainlot, 0, afterMatchAwards)(null);
@@ -116,13 +116,13 @@ var afterBuyRandom=function(chainlot) {
 }
 
 var afterMatchAwards=function(chainlot) {
-	chainlot.calculateAwards({gas:5000000}).then(function(r){
+	chainlot.calculateAwards(0, {gas:5000000}).then(function(r){
 		console.log("calculate awards");
 		console.log(JSON.stringify(r.logs));
-		chainlot.distributeAwards({gas:5000000}).then(function(r){
+		chainlot.distributeAwards(0, {gas:5000000}).then(function(r){
 			console.log("distribute awards");
 			console.log(JSON.stringify(r.logs));
-			chainlot.sendAwards({gas:5000000}).then(function(r){
+			chainlot.sendAwards(0, {gas:5000000}).then(function(r){
 				console.log("send awards");
 				console.log(JSON.stringify(r.logs));
 

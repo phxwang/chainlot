@@ -31,6 +31,9 @@ contract ChainLot is owned{
 	uint256 public lastAwardedTicketIndex;
 	bytes public latestJackpotNumber;
 	uint256 public lastestAwardNumber;
+
+	ChainLotPoolInterface[] public chainlotPools;
+	mapping(address=>bool) public chainlotPoolsMap;
 	
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
@@ -72,7 +75,11 @@ contract ChainLot is owned{
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray, chainLotTicket, clToken, this);
-		if(address(newed) != 0) currentPool = newed;
+		if(address(newed) != 0) {
+			currentPool = newed;
+			chainlotPools.push(currentPool);
+			chainlotPoolsMap[address(currentPool)] = true;
+		}
 	}
 
 	//numbers: uint8[6] 
@@ -91,7 +98,7 @@ contract ChainLot is owned{
 	}
 
 	modifier onlyPool {
-        require(clpFactory.validatePool(msg.sender));
+        require(chainlotPoolsMap[msg.sender]);
         _;
   	}
 
@@ -121,31 +128,36 @@ contract ChainLot is owned{
 
 	//XXX: need to init award process after new pool;
 	//calculate jackpot 
-	function prepareAwards() onlyOwner external {
-		require(address(currentPool) != 0);
-		currentPool.prepareAwards();
+	function prepareAwards(uint poolIndex) onlyOwner external {
+		ChainLotPoolInterface pool = chainlotPools[poolIndex];
+		require(address(pool) != 0);
+		pool.prepareAwards();
 	}
 	//match winners
-	function matchAwards(uint8 toMatchCount) onlyOwner external {
-		require(address(currentPool) != 0);
-		currentPool.matchAwards(toMatchCount);
+	function matchAwards(uint poolIndex, uint8 toMatchCount) onlyOwner external {
+		ChainLotPoolInterface pool = chainlotPools[poolIndex];
+		require(address(pool) != 0);
+		pool.matchAwards(toMatchCount);
 	}
 
-  	function calculateAwards() onlyOwner external {
-  		require(address(currentPool) != 0);
-  		currentPool.calculateAwards();
+  	function calculateAwards(uint poolIndex) onlyOwner external {
+  		ChainLotPoolInterface pool = chainlotPools[poolIndex];
+		require(address(pool) != 0);
+  		pool.calculateAwards();
   	}
 
 	//segment distribute
-	function distributeAwards() onlyOwner external {
-		require(address(currentPool) != 0);
-		currentPool.distributeAwards();
+	function distributeAwards(uint poolIndex) onlyOwner external {
+		ChainLotPoolInterface pool = chainlotPools[poolIndex];
+		require(address(pool) != 0);
+		pool.distributeAwards();
   	}
 
   //TODO: segment send
-  function sendAwards() onlyOwner external {
-  	require(address(currentPool) != 0);
-  	currentPool.sendAwards();
+  function sendAwards(uint poolIndex) onlyOwner external {
+  	ChainLotPoolInterface pool = chainlotPools[poolIndex];
+	require(address(pool) != 0);
+  	pool.sendAwards();
   }
 
   function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
@@ -168,14 +180,14 @@ contract ChainLot is owned{
   function withDrawHistoryCut(uint start, uint end, uint[] ticketIds) external {
   	require(start >=0);
   	for(uint i = start; i < end; i++) {
-  		clpFactory.poolAt(i).withdrawHistoryCut(msg.sender, ticketIds);
+  		chainlotPools[i].withdrawHistoryCut(msg.sender, ticketIds);
   	}
   }
 
   function transferUnawarded(uint start, uint end) onlyOwner external {
   	require(start >=0);
   	for(uint i = start; i < end; i++) {
-  		clpFactory.poolAt(i).transferUnawarded(currentPool);
+  		chainlotPools[i].transferUnawarded(currentPool);
   	}
   }
 }
