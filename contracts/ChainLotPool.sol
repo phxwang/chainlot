@@ -1,6 +1,6 @@
 pragma solidity ^0.4.4;
-import "./ChainLot.sol";
 import "./owned.sol";
+import "./Interface.sol";
 
 contract ChainLotPool is owned{
 	uint public poolBlockNumber;
@@ -25,7 +25,7 @@ contract ChainLotPool is owned{
 	awardRule[] public awardRules;
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
-  	ChainLot public  chainLot;
+  	ChainLotInterface public  chainLot;
   
   	awardData[] private toBeAward;
   	uint256 private awardIndex;
@@ -70,7 +70,7 @@ contract ChainLotPool is owned{
 						uint256[] awardRulesArray,
 						ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLot _chainLot) public {
+						address _chainLot) public {
   		poolBlockNumber = _poolBlockNumber;
   		maxWhiteNumber = _maxWhiteNumber;
 		maxYellowNumber = _maxYellowNumber;
@@ -80,7 +80,7 @@ contract ChainLotPool is owned{
 		totalNumberCount = maxWhiteNumberCount + maxYellowNumberCount;
 		chainLotTicket = _chainLotTicket;
 		clToken = _clToken;
-		chainLot = _chainLot;
+		chainLot = ChainLotInterface(_chainLot);
 
 		for(uint i=0; i<awardRulesArray.length; i+=3) {
 			require(i+3 <= awardRulesArray.length);
@@ -94,6 +94,7 @@ contract ChainLotPool is owned{
       		winnerTickets[i].processedIndex = 0;
       		winnerTickets[i].distributedIndex = 0;
     	}
+    	owner = _chainLot;
   	}
 
   	function getRuleKey(uint256 _whiteNumberCount, uint256 _yellowNumberCount) internal view returns(uint256 index){
@@ -113,12 +114,18 @@ contract ChainLotPool is owned{
 	    }
 	}
 
+	event LOG(uint msg);
+
 	//random numbers
 	//random seed: number-1 block hash x user address
 	function buyRandom(address buyer, address referer) payable public{
 		require(block.number < poolBlockNumber);
+		require(address(clToken) != 0);
 	    uint256 ticketCount = msg.value/etherPerTicket;
 	    bytes memory numbers = genRandomNumbers(block.number - 1, 0);
+
+	    LOG(msg.value);
+
 	    clToken.buy.value(msg.value)();
 	    _buyTicket(buyer, numbers, ticketCount, msg.value);  
 	    if(referer != 0 && buyer != referer) {
@@ -164,11 +171,11 @@ contract ChainLotPool is owned{
 	function prepareAwards() onlyOwner external returns(bytes32 numbers){
 		jackpotNumbers = genRandomNumbers(poolBlockNumber, 7);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsCount);
-		uint bytesLength = 32;
+		/*uint bytesLength = 32;
     	if(bytesLength > jackpotNumbers.length) bytesLength = jackpotNumbers.length;
     	for(uint i=0; i<bytesLength; i++) {
       		numbers |= bytes32(jackpotNumbers[i]&0xFF)>>(i*8);
-    	}
+    	}*/
 	}
 
 	//match winners

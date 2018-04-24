@@ -2,6 +2,7 @@ var Migrations = artifacts.require("./Migrations.sol");
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 
 
 module.exports = function(deployer) {
@@ -11,5 +12,6 @@ module.exports = function(deployer) {
   deployer.deploy(ChainLot, 2, 2, 2, 1, 1e10, 50, [2,1,2e16,0,1,1e10]);
   deployer.deploy(ChainLotTicket);
   deployer.deploy(CLToken, 100000000000);
+  deployer.deploy(ChainLotPoolFactory);
   //2, 2, 2, 1, 10000000000, 2, [2,1,2000000000000000,0,1,10000000000]
 };

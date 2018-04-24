@@ -1,29 +1,43 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 
 var cltoken;
 contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
 		ChainLotTicket.deployed().then(function(chainlotticket) {
-			CLToken.deployed().then(function(_cltoken) {
-				cltoken = _cltoken;
-				chainlot.setChainLotTicketAddress(chainlotticket.address).then(function(r) {
-					chainlot.setCLTokenAddress(cltoken.address).then(function(r) {
-						chainlotticket.setMinter(chainlot.address, true).then(function(r){
-							/*cltoken.sendTransaction({from:web3.eth.accounts[0], value:1e11, gas:5000000}).then(function(r) {
-								cltoken.balanceOf(web3.eth.accounts[0]).then(function(r) {
-									console.log(JSON.stringify(r));
-								})
-							})*/
-							//console.log(JSON.stringify(r.logs));	
-							chainlot.newPool({gas:5000000}).then((r)=>{
-								console.log(JSON.stringify(r.logs));	
-								buyRandom(chainlot, 0, afterBuyRandom)(null);
-								/*chainlot.buyRandom(web3.eth.accounts[2],{from:web3.eth.accounts[1],value:1e11, gas:5000000}).then(function(r) {
-									console.log(JSON.stringify(r.logs));
-								});*/
-							})
+			ChainLotPoolFactory.deployed().then(function(factory) {
+				CLToken.deployed().then(function(_cltoken) {
+					cltoken = _cltoken;
+					chainlot.setChainLotTicketAddress(chainlotticket.address).then(function(r) {
+						//console.log("set ticket " + JSON.stringify(r));	
+						chainlot.setCLTokenAddress(cltoken.address).then(function(r) {
+							//console.log("set cltoken " + JSON.stringify(r));	
+							chainlot.setChainLotPoolFactoryAddress(factory.address).then(function(r) {
+								//console.log("set factory " + JSON.stringify(r));		
+								chainlotticket.setMinter(chainlot.address, true).then(function(r){
+									factory.transferOwnership(chainlot.address).then(function(r) {
+										//console.log("set minter " + JSON.stringify(r));	
+										/*cltoken.sendTransaction({from:web3.eth.accounts[0], value:1e11, gas:5000000}).then(function(r) {
+											cltoken.balanceOf(web3.eth.accounts[0]).then(function(r) {
+												console.log(JSON.stringify(r));
+											})
+										})*/
+										//console.log(JSON.stringify(r.logs));	
+										chainlot.newPool({gas:5000000}).then((r)=>{
+											console.log(JSON.stringify(r.logs));	
+											buyRandom(chainlot, 0, afterBuyRandom)(null);
+											/*chainlot.buyRandom(web3.eth.accounts[2],{from:web3.eth.accounts[1],value:1e11, gas:5000000}).then(function(r) {
+												console.log(JSON.stringify(r.logs));
+											});*/
+										});
+
+									});
+									
+								});
+
+							});
 							
 						});
 					});
@@ -94,9 +108,9 @@ var afterBuyRandom=function(chainlot) {
 		console.log("buy some tickets");
 		console.log(JSON.stringify(r.logs));
 
-		chainlot.listAllPool().then(function(r){
+		/*chainlot.listAllPool().then(function(r){
 			console.log(JSON.stringify(r));
-		})
+		})*/
 		addBlockNumber(chainlot, 0, afterAddBlockNumber)(null);
 	});
 }
