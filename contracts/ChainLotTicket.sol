@@ -44,6 +44,8 @@ contract ChainLotTicket is ERC721, owned {
   mapping (uint256 => address) public ticketIndexToOwner;
   mapping (address => uint256) public ownershipTicketCount;
   mapping (uint256 => address) public ticketIndexToApproved;
+
+  uint public totalTicketCountSum;
   
 
   /*** EVENTS ***/
@@ -88,6 +90,7 @@ contract ChainLotTicket is ERC721, owned {
       blockNumber: block.number
     });
     ticketId = tickets.push(ticket) - 1;
+    totalTicketCountSum += _count;
 
     Mint(_owner, ticketId);
 
@@ -180,6 +183,7 @@ contract ChainLotTicket is ERC721, owned {
 
   function getTicket(uint256 _ticketId) external view 
     returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber) {
+    require(_ticketId < tickets.length);
     Ticket memory ticket = tickets[_ticketId];
 
     uint bytesLength = 32;

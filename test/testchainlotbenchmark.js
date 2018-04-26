@@ -25,13 +25,15 @@ contract("ChainLot", function(accounts){
 											})
 										})*/
 										//console.log(JSON.stringify(r.logs));	
-										chainlot.newPool({gas:5000000}).then((r)=>{
+
+										newPool(chainlot, 0, afterNewPool)(null);
+										/*chainlot.newPool({gas:5000000}).then((r)=>{
 											console.log(JSON.stringify(r.logs));	
 											buyRandom(chainlot, 0, afterBuyRandom)(null);
-											/*chainlot.buyRandom(web3.eth.accounts[2],{from:web3.eth.accounts[1],value:1e11, gas:5000000}).then(function(r) {
+											chainlot.buyRandom(web3.eth.accounts[2],{from:web3.eth.accounts[1],value:1e11, gas:5000000}).then(function(r) {
 												console.log(JSON.stringify(r.logs));
-											});*/
-										});
+											});
+										});*/
 
 									});
 									
@@ -46,6 +48,23 @@ contract("ChainLot", function(accounts){
 		});		
 	});
 })
+var newPool=function(chainlot, index, thenFunc) {
+	return function(r) {
+		if(index > 0) {
+			console.log("new pool progress: " + index);
+			console.log(JSON.stringify(r.logs));
+		}
+		if(index < 5) {
+			chainlot.newPool({gas:5000000}).then(newPool(chainlot, index+1, thenFunc));
+		}
+		else
+			thenFunc(chainlot);
+	}
+}
+
+var afterNewPool=function(chainlot) {
+	buyRandom(chainlot, 0, afterBuyRandom)(null);
+}
 
 var buyRandom=function(chainlot, index, thenFunc) {
 	return function(r) {
@@ -53,7 +72,7 @@ var buyRandom=function(chainlot, index, thenFunc) {
 			console.log("buy random, progress: " + index*10);
 			console.log(JSON.stringify(r.logs));
 		}
-		if(index < 10) {
+		if(index < 20) {
 			id = Math.floor(Math.random()*10);
 			console.log("from account: " + id);
 			chainlot.buyRandom(web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:1e11, gas:5000000}).then(buyRandom(chainlot, index+1, thenFunc));
@@ -61,46 +80,6 @@ var buyRandom=function(chainlot, index, thenFunc) {
 		else
 			thenFunc(chainlot);
 	}
-}
-
-var matchAwards=function(chainlot, index, thenFunc) {
-	return function(r) {
-		if(index > 0) {
-			console.log("match awards, progress: " + index*10);
-			console.log(JSON.stringify(r.logs));
-		}	
-		if(index < 2) {
-			chainlot.matchAwards(0, 100, {gas:5000000}).then(matchAwards(chainlot, index+1, thenFunc));
-		}
-		else {
-			thenFunc(chainlot);
-		}
-	}
-}
-
-var addBlockNumber =function(chainlot, index, thenFunc) {
-	return function(r) {
-		if(index > 0) {
-			console.log("add block number, progress: " + index);
-		}	
-
-		if(index < 50) {
-			web3.eth.sendTransaction({from:web3.eth.accounts[0], 
-				to:web3.eth.accounts[1], value:1e2}, addBlockNumber(chainlot, index+1, thenFunc));
-		}
-		else {
-			thenFunc(chainlot);
-		}
-	}
-}
-
-var afterAddBlockNumber=function(chainlot) {
-	chainlot.prepareAwards(0, {gas:5000000}).then(function(r){
-			console.log("prepare awards");
-			console.log(JSON.stringify(r.logs));
-			matchAwards(chainlot, 0, afterMatchAwards)(null);
-			
-	});
 }
 
 var afterBuyRandom=function(chainlot) {
@@ -115,14 +94,56 @@ var afterBuyRandom=function(chainlot) {
 	});
 }
 
+var addBlockNumber =function(chainlot, index, thenFunc) {
+	return function(r) {
+		if(index > 0) {
+			console.log("add block number, progress: " + index);
+		}	
+
+		if(index < 0) {
+			web3.eth.sendTransaction({from:web3.eth.accounts[0], 
+				to:web3.eth.accounts[1], value:1e2}, addBlockNumber(chainlot, index+1, thenFunc));
+		}
+		else {
+			thenFunc(chainlot);
+		}
+	}
+}
+
+var afterAddBlockNumber=function(chainlot) {
+	chainlot.prepareAwards(1, {gas:5000000}).then(function(r){
+			console.log("prepare awards");
+			console.log(JSON.stringify(r.logs));
+			matchAwards(chainlot, 0, afterMatchAwards)(null);
+			
+	});
+}
+
+
+
+var matchAwards=function(chainlot, index, thenFunc) {
+	return function(r) {
+		if(index > 0) {
+			console.log("match awards, progress: " + index*10);
+			console.log(JSON.stringify(r.logs));
+		}	
+		if(index < 2) {
+			chainlot.matchAwards(1, 100, {gas:5000000}).then(matchAwards(chainlot, index+1, thenFunc));
+		}
+		else {
+			thenFunc(chainlot);
+		}
+	}
+}
+
 var afterMatchAwards=function(chainlot) {
-	chainlot.calculateAwards(0, {gas:5000000}).then(function(r){
+	chainlot.calculateAwards(1, {gas:5000000}).then(function(r){
 		console.log("calculate awards");
 		console.log(JSON.stringify(r.logs));
-		chainlot.distributeAwards(0, {gas:5000000}).then(function(r){
+		chainlot.distributeAwards(1, {gas:5000000}).then(function(r){
 			console.log("distribute awards");
 			console.log(JSON.stringify(r.logs));
-			chainlot.sendAwards(0, {gas:5000000}).then(function(r){
+			chainlot.sendAwards(1, {gas:5000000}).then(function(r){
 				console.log("send awards");
 				console.log(JSON.stringify(r.logs));
 
@@ -135,3 +156,6 @@ var afterMatchAwards=function(chainlot) {
 		});
 	});
 }
+
+
+

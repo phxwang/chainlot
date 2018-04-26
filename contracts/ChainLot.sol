@@ -34,23 +34,25 @@ contract ChainLot is owned{
 
 	ChainLotPoolInterface[] public chainlotPools;
 	mapping(address=>bool) public chainlotPoolsMap;
+	uint currentPoolIndex = 0;
 	
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
   	ChainLotPoolFactoryInterface public clpFactory;
   
-	event BuyTicket(uint poolBlockNumber, bytes numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 allTicketsCount, uint256 value);
+	event BuyTicket(uint poolBlockNumber, bytes numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint totalTicketCountSum, uint256 value);
 	event PrepareAward(bytes jackpotNumbers, uint256 poolBlockNumber, uint256 allTicketsCount);
-	//event PrepareAward(bytes32 jackpotNumbers, uint poolBlockNumber);
 	event ToBeAward(bytes jackpotNumbers, bytes32 ticketNumber, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 awardValue);
 	event MatchAwards(bytes jackpotNumbers, uint lastMatchedTicketIndex, uint endIndex, uint allTicketsCount);
-	event TransferAward(address winner, uint256 value);
+	event MatchRule(bytes jackpotNumbers, bytes32 ticketNumber, uint256 ticketCount, uint256 ticketId, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
+  	event TransferAward(address winner, uint256 value);
   	event TransferDevCut(address dev, uint256 value);
   	event TransferHistoryCut(address user, uint256 value);
   	event AddHistoryCut(uint added, uint256 total);
-  	event CalculateAwards(uint256 ruleId, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
+  	event CalculateAwards(uint256 ruleId, uint winnersTicketCount, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
   	event TransferUnawarded(address to, uint value);
+  	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
   	event LOG(uint msg);
 
 	function ChainLot(uint8 _maxWhiteNumber, 
@@ -76,9 +78,27 @@ contract ChainLot is owned{
 		ChainLotPoolInterface newed = clpFactory.newPool(maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray, chainLotTicket, clToken, this);
 		if(address(newed) != 0) {
-			currentPool = newed;
-			chainlotPools.push(currentPool);
-			chainlotPoolsMap[address(currentPool)] = true;
+			chainlotPools.push(newed);
+			chainlotPoolsMap[address(newed)] = true;
+
+			if(address(currentPool)==0) {
+				currentPool = newed;
+				currentPoolIndex = chainlotPools.length - 1;
+				SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
+			}
+
+		}
+	}
+
+	function checkAndSwitchPool() internal {
+		require(address(currentPool) != 0);
+
+		//find the right pool
+		while(currentPool.poolBlockNumber() <= block.number) {
+			require(currentPoolIndex + 1 < chainlotPools.length); // need more pool
+			currentPoolIndex ++;
+			currentPool = chainlotPools[currentPoolIndex];
+			SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
 		}
 	}
 
@@ -86,14 +106,14 @@ contract ChainLot is owned{
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public {
-		require(address(currentPool) != 0);
+		checkAndSwitchPool();
 		currentPool.buyTicket.value(msg.value)(msg.sender, numbers, referer);
 	}
 
 	//random numbers
 	//random seed: number-1 block hash x user address
 	function buyRandom(address referer) payable public{
-		require(address(currentPool) != 0);
+		checkAndSwitchPool();
 	    currentPool.buyRandom.value(msg.value)(msg.sender, referer);
 	}
 
@@ -126,7 +146,7 @@ contract ChainLot is owned{
 			_buyTicket(_from, numbers, ticketCount, _value);*/
 	}
 
-	//XXX: need to init award process after new pool;
+	//need to init award process after new pool;
 	//calculate jackpot 
 	function prepareAwards(uint poolIndex) onlyOwner external {
 		ChainLotPoolInterface pool = chainlotPools[poolIndex];
@@ -185,6 +205,7 @@ contract ChainLot is owned{
   }
 
   function transferUnawarded(uint start, uint end) onlyOwner external {
+  	checkAndSwitchPool();
   	require(start >=0);
   	for(uint i = start; i < end; i++) {
   		chainlotPools[i].transferUnawarded(currentPool);

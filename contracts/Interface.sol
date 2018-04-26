@@ -19,9 +19,11 @@ interface ChainLotTicketInterface {
 	function getTicket(uint256 _ticketId) external view 
     returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber);
     function ownerOf(uint256 _ticketId) external view returns (address owner);
+    function totalTicketCountSum() external view returns (uint totalTicketCountSum);
 }
 
 interface ChainLotPoolInterface {
+	function poolBlockNumber() external view returns(uint blockNumber);
 	function buyTicket(address buyer, bytes numbers, address referer) payable public;
 	function buyRandom(address buyer, address referer) payable public;
 	//calculate jackpot 

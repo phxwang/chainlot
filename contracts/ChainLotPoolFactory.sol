@@ -4,10 +4,10 @@ import "./ChainLotPool.sol";
 
 
 contract ChainLotPoolFactory is owned {
-  	uint currentPoolBlockNumber;
+  	uint latestPoolBlockNumber;
   	uint poolCount;
 
-  	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
+  	event GenerateNewPool(uint latestPoolBlockNumber, uint nextPoolBlockNumber, uint length);
 	
 	//pool range: n*awardIntervalNumber ~ (n+1)awardIntervalNumber-1
   	function newPool(uint8 maxWhiteNumber, 
@@ -20,18 +20,19 @@ contract ChainLotPoolFactory is owned {
 						ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
 						address chainLot) onlyOwner  external returns (ChainLotPoolInterface poolAddress){
-  	uint nextPoolBlockNumber = block.number - block.number%awardIntervalNumber + awardIntervalNumber;
+  	uint startPoolBlockNumber = block.number;
+  	if(startPoolBlockNumber < latestPoolBlockNumber) startPoolBlockNumber = latestPoolBlockNumber;
+  	uint nextPoolBlockNumber = startPoolBlockNumber - startPoolBlockNumber%awardIntervalNumber + awardIntervalNumber;
 	ChainLotPool clp;
 	//GenerateNewPool(currentPoolBlockNumber, nextPoolBlockNumber, chainlotPools.length);
-	if(nextPoolBlockNumber > currentPoolBlockNumber) {
 		//generate new pool
-		clp = new ChainLotPool(nextPoolBlockNumber, 
-			maxWhiteNumber, maxYellowNumber, whiteNumberCount, yellowNumberCount, 
-			etherPerTicket, awardRulesArray, _chainLotTicket, _clToken, chainLot);
-		poolCount ++;
-		GenerateNewPool(currentPoolBlockNumber, nextPoolBlockNumber, poolCount);
-		currentPoolBlockNumber = nextPoolBlockNumber;
-	}
+	clp = new ChainLotPool(nextPoolBlockNumber, 
+		maxWhiteNumber, maxYellowNumber, whiteNumberCount, yellowNumberCount, 
+		etherPerTicket, awardRulesArray, _chainLotTicket, _clToken, chainLot);
+	poolCount ++;
+	GenerateNewPool(latestPoolBlockNumber, nextPoolBlockNumber, poolCount);
+	latestPoolBlockNumber = nextPoolBlockNumber;
+	
   	return ChainLotPoolInterface(clp);
   }
 }
