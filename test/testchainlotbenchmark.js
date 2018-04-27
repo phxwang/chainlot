@@ -184,7 +184,7 @@ var afterMatchAwards=function(chainlot) {
 					
 				})
 				//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
-				/*for(i=0; i<web3.eth.accounts.length; i++) {
+				for(i=0; i<web3.eth.accounts.length; i++) {
 					cltoken.balanceOf(web3.eth.accounts[i]).then(function(account) {
 						return function(r) {
 							console.log("cltoken balance of account " + account + ":  " + JSON.stringify(r));
@@ -205,7 +205,7 @@ var afterMatchAwards=function(chainlot) {
 							
 						}
 					}(web3.eth.accounts[i]));
-				}*/
+				}
 
 			});
 		});

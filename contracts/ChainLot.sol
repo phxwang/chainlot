@@ -206,6 +206,7 @@ contract ChainLot is owned{
   	}
   }
 
+  //transfer unawarded tokens of awarded pool to newest one
   function transferUnawarded(uint poolStart, uint poolEnd) onlyOwner external {
   	checkAndSwitchPool();
   	require(poolEnd > poolStart);
