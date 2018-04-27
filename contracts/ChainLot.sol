@@ -34,7 +34,7 @@ contract ChainLot is owned{
 
 	ChainLotPoolInterface[] public chainlotPools;
 	mapping(address=>bool) public chainlotPoolsMap;
-	uint currentPoolIndex = 0;
+	uint public currentPoolIndex = 0;
 	
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
@@ -51,7 +51,7 @@ contract ChainLot is owned{
   	event AddHistoryCut(uint added, uint256 total);
   	event CalculateAwards(uint256 ruleId, uint winnersTicketCount, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
-  	event TransferUnawarded(address to, uint value);
+  	event TransferUnawarded(address from, address to, uint value);
   	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
   	event LOG(uint msg);
 
@@ -209,7 +209,7 @@ contract ChainLot is owned{
   function transferUnawarded(uint poolStart, uint poolEnd) onlyOwner external {
   	checkAndSwitchPool();
   	require(poolEnd > poolStart);
-  	require(poolEnd <= chainlotPools.length);
+  	require(poolEnd <= currentPoolIndex);
   	for(uint i = poolStart; i < poolEnd; i++) {
   		chainlotPools[i].transferUnawarded(currentPool);
   	}
@@ -225,4 +225,5 @@ contract ChainLot is owned{
   	}
   	return poolCuts;
   }
+
 }

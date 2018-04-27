@@ -62,7 +62,7 @@ contract ChainLotPool is owned{
   	event TransferHistoryCut(address user, uint256 value);
   	event AddHistoryCut(uint added, uint256 total);
   	event CalculateAwards(uint256 ruleId, uint winnersTicketCount, uint256 awardEther, uint256 totalBalance, uint256 totalWinnersAward, uint256 totalTicketCount);
-  	event TransferUnawarded(address to, uint value);
+  	event TransferUnawarded(address from, address to, uint value);
 
   	function ChainLotPool(uint _poolBlockNumber,
   						uint8 _maxWhiteNumber, 
@@ -237,6 +237,7 @@ contract ChainLotPool is owned{
   	//TODO: segment calculate
   	function calculateAwards() onlyOwner external {
 	  	require(lastMatchedTicketIndex == allTicketsId.length);
+	  	require(block.number >= poolBlockNumber);
 	  	//calculate winners award, from top to bottom, top winners takes all
 	    uint256 totalBalance = clToken.balanceOf(this);
 	    for(uint i=0; i<awardRules.length; i++){
@@ -272,6 +273,7 @@ contract ChainLotPool is owned{
 
   	//TODO: segment distribute
   	function distributeAwards() onlyOwner external {
+  		//TODO: validate last step
 	  	//bytes memory jackpotNumbers = jackpotNumbers;
 	  	for(uint i=0; i<awardRules.length; i++){
 	  		if(awardResults[i].totalTicketCount > 0) {
@@ -291,6 +293,7 @@ contract ChainLotPool is owned{
 
   	//TODO: segment send
 	function sendAwards() onlyOwner external {
+		//TODO: validate last step
 	  	uint devCut = 0;
 	  	uint _historyCut = 0;
 	  	uint hCut = 0;
@@ -345,7 +348,10 @@ contract ChainLotPool is owned{
 	}
 
 	function transferUnawarded(address to) onlyOwner external {
-      	require(lastMatchedTicketIndex == allTicketsCount);
+		require(preparedAwards);
+      	require(awardIndex == toBeAward.length);
+      	require(lastMatchedTicketIndex == allTicketsId.length);
+
       	for(uint i=0; i<awardRules.length; i++){
           	require(winnerTickets[i].distributedIndex == winnerTickets[i].ticketIds.length);
       	}
@@ -353,7 +359,7 @@ contract ChainLotPool is owned{
       	uint toBeTransfer = clToken.balanceOf(this) - historyCut;
       	require(toBeTransfer > 0);
       	clToken.transfer(to, toBeTransfer);
-      	TransferUnawarded(to, toBeTransfer);
+      	TransferUnawarded(address(this), to, toBeTransfer);
 	}
 
 	function genRandomNumbers(uint256 blockNumber, uint256 shift) internal view returns(bytes _numbers){

@@ -93,6 +93,7 @@ var afterBuyRandom=function(chainlot) {
 			console.log(JSON.stringify(r));
 		})*/
 		addBlockNumber(chainlot, 0, afterAddBlockNumber)(null);
+		listPool(chainlot);
 	});
 }
 
@@ -138,6 +139,25 @@ var matchAwards=function(chainlot, index, thenFunc) {
 	}
 }
 
+var listPool=function(chainlot) {
+	chainlot.currentPoolIndex().then(function(r) {
+		for(i=0; i<=r; i++) {
+			chainlot.chainlotPools(i).then(function(index) {
+				return function(r) {
+					//console.log("pool: " + r);
+					cltoken.balanceOf(r).then(function(account, index1) {
+						return function(r) {
+							console.log("pool balance of " + account + "[" + index1 + "]:  " + JSON.stringify(r));
+						}
+					}(r, index));
+
+				}
+			}(i));
+			
+		}
+	});
+}
+
 var afterMatchAwards=function(chainlot) {
 	chainlot.calculateAwards(1, {gas:5000000}).then(function(r){
 		console.log("calculate awards");
@@ -149,12 +169,22 @@ var afterMatchAwards=function(chainlot) {
 				console.log("send awards");
 				console.log(JSON.stringify(r.logs));
 
+
 				console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
 				cltoken.balanceOf(cltoken.address).then(function(r) {
 					console.log("cltoken balance of cltoken: " + JSON.stringify(r));
+
+					//listPool(chainlot);
+
+					chainlot.transferUnawarded(1, 2, {gas:5000000}).then(function(r){
+						console.log("transfer unawarded");
+						console.log(JSON.stringify(r.logs));
+						listPool(chainlot);
+					});
+					
 				})
 				//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
-				for(i=0; i<web3.eth.accounts.length; i++) {
+				/*for(i=0; i<web3.eth.accounts.length; i++) {
 					cltoken.balanceOf(web3.eth.accounts[i]).then(function(account) {
 						return function(r) {
 							console.log("cltoken balance of account " + account + ":  " + JSON.stringify(r));
@@ -175,7 +205,7 @@ var afterMatchAwards=function(chainlot) {
 							
 						}
 					}(web3.eth.accounts[i]));
-				}
+				}*/
 
 			});
 		});
