@@ -4,9 +4,11 @@ var CLToken = artifacts.require("./CLToken.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 
 var cltoken;
+var chainlotticket;
 contract("ChainLot", function(accounts){
 	ChainLot.deployed().then(function(chainlot) {
-		ChainLotTicket.deployed().then(function(chainlotticket) {
+		ChainLotTicket.deployed().then(function(_chainlotticket) {
+			chainlotticket = _chainlotticket;
 			ChainLotPoolFactory.deployed().then(function(factory) {
 				CLToken.deployed().then(function(_cltoken) {
 					cltoken = _cltoken;
@@ -152,6 +154,29 @@ var afterMatchAwards=function(chainlot) {
 					console.log("cltoken balance of cltoken: " + JSON.stringify(r));
 				})
 				//console.log(JSON.stringify(web3.eth.getBalance(chainlot.address)));
+				for(i=0; i<web3.eth.accounts.length; i++) {
+					cltoken.balanceOf(web3.eth.accounts[i]).then(function(account) {
+						return function(r) {
+							console.log("cltoken balance of account " + account + ":  " + JSON.stringify(r));
+						}
+					}(web3.eth.accounts[i]));
+
+					chainlotticket.ticketsOfOwner(web3.eth.accounts[i]).then(function(account){
+						return function(r) {
+							if(r.length > 0) {
+								console.log("tickets of account " + account + ":  " + JSON.stringify(r));
+								//console.log(r);
+								chainlot.listUserHistoryCut(account, 0, 3, r).then(function(account1) {
+									return function(r) {
+										console.log("history cut of account " + account1 + ":  " + JSON.stringify(r));
+									}
+								}(account));
+							}
+							
+						}
+					}(web3.eth.accounts[i]));
+				}
+
 			});
 		});
 	});

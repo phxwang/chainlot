@@ -34,6 +34,7 @@ interface ChainLotPoolInterface {
 	function sendAwards() external;
 	function withdrawHistoryCut(address user, uint[] ticketIds) external;
 	function transferUnawarded(address to) external;
+	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 }
 
 interface ChainLotPoolFactoryInterface {

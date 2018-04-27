@@ -197,18 +197,32 @@ contract ChainLot is owned{
   }
 
   //withdraw history cut from pools
-  function withDrawHistoryCut(uint start, uint end, uint[] ticketIds) external {
-  	require(start >=0);
-  	for(uint i = start; i < end; i++) {
+  function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external {
+  	require(poolEnd > poolStart);
+  	require(poolEnd <= chainlotPools.length);
+
+  	for(uint i = poolStart; i < poolEnd; i++) {
   		chainlotPools[i].withdrawHistoryCut(msg.sender, ticketIds);
   	}
   }
 
-  function transferUnawarded(uint start, uint end) onlyOwner external {
+  function transferUnawarded(uint poolStart, uint poolEnd) onlyOwner external {
   	checkAndSwitchPool();
-  	require(start >=0);
-  	for(uint i = start; i < end; i++) {
+  	require(poolEnd > poolStart);
+  	require(poolEnd <= chainlotPools.length);
+  	for(uint i = poolStart; i < poolEnd; i++) {
   		chainlotPools[i].transferUnawarded(currentPool);
   	}
+  }
+
+  function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[] _poolCuts) {
+  	require(poolEnd > poolStart);
+  	require(poolEnd <= chainlotPools.length);
+
+  	uint[] memory poolCuts = new uint[](poolEnd - poolStart);
+	for(uint i = poolStart; i < poolEnd; i++) {
+  		poolCuts[i-poolStart] = chainlotPools[i].listUserHistoryCut(user, ticketIds);
+  	}
+  	return poolCuts;
   }
 }
