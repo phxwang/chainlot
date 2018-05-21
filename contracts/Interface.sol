@@ -3,11 +3,11 @@ pragma solidity ^0.4.4;
 interface ChainLotInterface {
 	function mint(address _owner, 
 	    bytes _numbers,
-	    uint256 _count) external returns (uint256);
+	    uint _count) external returns (uint);
 }
 
 interface CLTokenInterface {
-	function transfer(address _to, uint256 _value) external;
+	function transfer(address _to, uint _value) external;
 	function buy() payable external;
 	function balanceOf(address user) external view returns(uint value);
 }
@@ -15,10 +15,10 @@ interface CLTokenInterface {
 interface ChainLotTicketInterface {
 	function mint(address _owner, 
     	bytes _numbers,
-    	uint256 _count) external returns (uint256);
-	function getTicket(uint256 _ticketId) external view 
-    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber);
-    function ownerOf(uint256 _ticketId) external view returns (address owner);
+    	uint _count) external returns (uint);
+	function getTicket(uint _ticketId) external view 
+    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint count, uint blockNumber);
+    function ownerOf(uint _ticketId) external view returns (address owner);
     function totalTicketCountSum() external view returns (uint totalTicketCountSum);
 }
 
@@ -44,8 +44,8 @@ interface ChainLotPoolFactoryInterface {
 						uint8 _whiteNumberCount, 
 						uint8 _yellowNumberCount, 
 						uint _awardIntervalNumber,
-						uint256 _etherPerTicket, 
-						uint256[] awardRulesArray)  external returns (ChainLotPoolInterface pool);
+						uint _etherPerTicket, 
+						uint[] awardRulesArray)  external returns (ChainLotPoolInterface pool);
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
