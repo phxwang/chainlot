@@ -171,7 +171,7 @@ contract ChainLotPool is owned{
 	    require(ticketCount > 0);
 	    uint ticketId = chainLot.mint(_from, numbers, ticketCount);
 	    allTicketsId.push(ticketId);
-	    totalTicketCountSum += chainLotTicket.totalTicketCountSum();
+	    totalTicketCountSum = chainLotTicket.totalTicketCountSum();
 	    BuyTicket(poolBlockNumber, numbers, ticketCount, ticketId, _from, block.number, totalTicketCountSum, _value);
 	    return ticketId;
 	}
@@ -339,16 +339,18 @@ contract ChainLotPool is owned{
 	}
 
 	function withdrawHistoryCut(address user, uint[] ticketIds) external {
-		uint userCut = calculateUserHistoryCut(ticketIds, user);
+		uint userCut = calculateUserHistoryCut(ticketIds, user, false);
 	  	clToken.transfer(user, userCut);
 		TransferHistoryCut(user, userCut);
 	}
 
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut) {
-		return calculateUserHistoryCut(ticketIds, user);
+		return calculateUserHistoryCut(ticketIds, user, true);
 	}
 
-	function calculateUserHistoryCut(uint[] ticketIds, address user) internal view returns(uint _cut) {
+	function calculateUserHistoryCut(uint[] ticketIds, address user, bool onlyList) internal view returns(uint _cut) {
+		if(totalTicketCountSum == 0)
+			return 0;
 		uint historyTicketCountSum = 0;
 	  	address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
 	  	for(uint i=0; i<ticketIds.length; i++) {
@@ -357,8 +359,9 @@ contract ChainLotPool is owned{
 	  			&& blockNumber < poolBlockNumber 
 	  			&& chainLotTicket.ownerOf(ticketIds[i]) == user) {
 	  			historyTicketCountSum += count;	
-	  			//XXX
-	  			//withdrawed[ticketIds[i]] = true;
+	  			if(!onlyList) {
+	  				withdrawed[ticketIds[i]] = true;
+	  			}
 	  		}		
 	  	}
 	  	

@@ -85,6 +85,7 @@ contract("ChainLot", async (accounts) => {
 			console.log("pool balance of " + address + "[" + i + "]:  " + JSON.stringify(balance));
 		};
 
+		let historyCutSum = 0;
 		for(i=0; i<web3.eth.accounts.length; i++) {
 			account = web3.eth.accounts[i];
 			let abalance = await cltoken.balanceOf(account);
@@ -94,7 +95,9 @@ contract("ChainLot", async (accounts) => {
 			console.log("tickets of account " + account + "("+i+"):  " + JSON.stringify(tickets));
 			let cut = await chainlot.listUserHistoryCut(account, 0, 3, tickets);
 			console.log("history cut of account " + account + "("+i+"):  " + JSON.stringify(cut));
+			historyCutSum += Number(cut[pi]);
 		}
+		console.log(historyCutSum);
 	}	
 
 })
