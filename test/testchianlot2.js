@@ -17,6 +17,7 @@ contract("ChainLot", async (accounts) => {
 	let cltoken = await CLToken.deployed();
 	let chainlotpublic = await ChainLotPublic.deployed();
 	await chainlotpublic.setChainLotAddress(chainlot.address);
+	await chainlotpublic.setCLTokenAddress(cltoken.address);
 	await chainlot.setChainLotTicketAddress(chainlotticket.address);
 	await chainlot.setCLTokenAddress(cltoken.address);
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
@@ -28,6 +29,18 @@ contract("ChainLot", async (accounts) => {
 		let r = await chainlot.newPool();
 		console.log(JSON.stringify(r.logs))
 	}
+
+	r = await cltoken.sendTransaction({from:web3.eth.accounts[5], value:5e11});
+	console.log(JSON.stringify(r.logs));
+
+	r = await cltoken.approveAndCall(chainlotpublic.address, 1e11, "0x020101", {from:web3.eth.accounts[5]});
+	console.log(JSON.stringify(r.logs));
+
+	r = await chainlotpublic.sendTransaction({from:web3.eth.accounts[5], value:2e11});
+	console.log(JSON.stringify(r.logs));
+
+	r = await chainlotticket.ticketsOfOwner(web3.eth.accounts[5]);
+	console.log("tickets: " + r);
 
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
@@ -72,13 +85,13 @@ contract("ChainLot", async (accounts) => {
 
 		console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
 		let clbalance = await cltoken.balanceOf(cltoken.address);
-		console.log("cltoken balance of cltoken: " + JSON.stringify(clbalance));
+		console.log("cltoken balance of cltoken: " + web3.fromWei(clbalance, 'ether'));
 
 		let poolSize = await chainlot.currentPoolIndex();
 		for(i=0; i<=poolSize; i++) {
 			let address = await chainlot.chainlotPools(i);
 			let balance = await cltoken.balanceOf(address);
-			console.log("pool balance of " + address + "[" + i + "]:  " + JSON.stringify(balance));
+			console.log("pool balance of " + address + "[" + i + "]:  " + web3.fromWei(balance, 'ether'));
 		};
 
 		console.log("transfer unawarded");
@@ -89,14 +102,14 @@ contract("ChainLot", async (accounts) => {
 		for(i=0; i<=poolSize; i++) {
 			let address = await chainlot.chainlotPools(i);
 			let balance = await cltoken.balanceOf(address);
-			console.log("pool balance of " + address + "[" + i + "]:  " + JSON.stringify(balance));
+			console.log("pool balance of " + address + "[" + i + "]:  " + web3.fromWei(balance, 'ether'));
 		};
 
 		let historyCutSum = 0;
 		for(i=0; i<web3.eth.accounts.length; i++) {
 			account = web3.eth.accounts[i];
 			let abalance = await cltoken.balanceOf(account);
-			console.log("cltoken balance of account " + account + "("+i+"):  " + JSON.stringify(abalance));
+			console.log("cltoken balance of account " + account + "("+i+"):  " + web3.fromWei(abalance, 'ether'));
 
 			let tickets = await chainlotticket.ticketsOfOwner(account);
 			console.log("tickets of account " + account + "("+i+"):  " + JSON.stringify(tickets));
@@ -104,8 +117,11 @@ contract("ChainLot", async (accounts) => {
 			console.log("history cut of account " + account + "("+i+"):  " + JSON.stringify(cut));
 			historyCutSum += Number(cut[pi]);
 		}
-		console.log(historyCutSum);
+		console.log(web3.fromWei(historyCutSum, 'ether'));
 	}	
+
+	let totalTokenSum = await chainlot.tokenSum();
+	console.log("total token sum: " + web3.fromWei(totalTokenSum, 'ether'));
 
 })
 

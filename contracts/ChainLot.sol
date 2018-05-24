@@ -20,17 +20,13 @@ contract ChainLot is owned{
 	uint public etherPerTicket; //10**18/100;
 	uint public awardIntervalNumber; //50000
 
-	uint public allTicketsCount;
+	uint public tokenSum;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	uint8 public totalNumberCount;
 
 	uint[] awardRulesArray;
 	
-	uint public lastAwardedNumber;
-	uint public lastAwardedTicketIndex;
-	bytes public latestJackpotNumber;
-	uint public lastestAwardNumber;
 
 	ChainLotPoolInterface[] public chainlotPools;
 	mapping(address=>bool) public chainlotPoolsMap;
@@ -110,6 +106,7 @@ contract ChainLot is owned{
 	function buyTicket(bytes numbers, address referer) payable public {
 		checkAndSwitchPool();
 		currentPool.buyTicket.value(msg.value)(numbers, referer);
+		tokenSum += msg.value;
 	}
 
 	//random numbers
@@ -117,6 +114,7 @@ contract ChainLot is owned{
 	function buyRandom(address referer) payable public{
 		checkAndSwitchPool();
 	    currentPool.buyRandom.value(msg.value)(referer);
+	    tokenSum += msg.value;
 	}
 
 	modifier onlyPool {
@@ -132,20 +130,10 @@ contract ChainLot is owned{
   	}
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
-		/*require(_token == address(clToken));
-		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
-
-		uint ticketCount = _value/etherPerTicket;
-		bytes memory numbers;
-		if(_extraData.length == 0) {
-			numbers = genRandomNumbers(block.number - 1, 0);
-		}
-		else {
-			numbers = _extraData;
-		}	
-
-		if(clToken.transferFrom(_from, this, _value))
-			_buyTicket(_from, numbers, ticketCount, _value);*/
+		checkAndSwitchPool();
+		clToken.transfer(currentPool, _value);
+	    currentPool.receiveApproval(_from, _value, _token, _extraData);
+	    tokenSum += _value;
 	}
 
 	/*//need to init award process after new pool;

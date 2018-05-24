@@ -7,12 +7,14 @@ interface ChainLotInterface {
 
 	function buyTicket(bytes numbers, address referer) payable public;
 	function buyRandom(address referer) payable public;
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
 }
 
 interface CLTokenInterface {
 	function transfer(address _to, uint _value) external;
 	function buy() payable external;
 	function balanceOf(address user) external view returns(uint value);
+	function transferFrom(address _from, address _to, uint _value) public returns (bool success);
 }
 
 interface ChainLotTicketInterface {
@@ -39,6 +41,7 @@ interface ChainLotPoolInterface {
 	function withdrawHistoryCut(uint[] ticketIds) external;
 	//function transferUnawarded(address to) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
 }
 
 interface ChainLotPoolFactoryInterface {

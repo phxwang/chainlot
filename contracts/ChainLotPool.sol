@@ -117,6 +117,7 @@ contract ChainLotPool is owned{
 		require(block.number < poolBlockNumber);
 		require(address(clToken) != 0);
 	    uint ticketCount = msg.value/etherPerTicket;
+	    require(ticketCount > 0);
 	    clToken.buy.value(msg.value)();
 	    tokenSum += msg.value;
 	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
@@ -134,11 +135,12 @@ contract ChainLotPool is owned{
 		buyTicket(numbers, referer);
 	}
 
-	/*function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
 		require(_token == address(clToken));
 		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
 
 		uint ticketCount = _value/etherPerTicket;
+		require(ticketCount > 0);
 		bytes memory numbers;
 		if(_extraData.length == 0) {
 			numbers = genRandomNumbers(block.number - 1, 0);
@@ -147,9 +149,9 @@ contract ChainLotPool is owned{
 			numbers = _extraData;
 		}	
 
-		if(clToken.transferFrom(_from, this, _value))
-			_buyTicket(_from, numbers, ticketCount, _value);
-	}*/
+		
+		_buyTicket(_from, numbers, ticketCount, _value);
+	}
 
   	function _buyTicket(address _from, bytes numbers, uint ticketCount, uint _value) internal returns(uint _ticketId){
 	    require(numbers.length == maxWhiteNumberCount+maxYellowNumberCount);
