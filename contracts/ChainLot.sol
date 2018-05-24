@@ -17,20 +17,20 @@ award rules:
 contract ChainLot is owned{
 	uint8 public maxWhiteNumber; //70;
 	uint8 public maxYellowNumber; //25;
-	uint256 public etherPerTicket; //10**18/100;
-	uint256 public awardIntervalNumber; //50000
+	uint public etherPerTicket; //10**18/100;
+	uint public awardIntervalNumber; //50000
 
-	uint256 public allTicketsCount;
+	uint public allTicketsCount;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	uint8 public totalNumberCount;
 
-	uint256[] awardRulesArray;
+	uint[] awardRulesArray;
 	
-	uint256 public lastAwardedNumber;
-	uint256 public lastAwardedTicketIndex;
+	uint public lastAwardedNumber;
+	uint public lastAwardedTicketIndex;
 	bytes public latestJackpotNumber;
-	uint256 public lastestAwardNumber;
+	uint public lastestAwardNumber;
 
 	ChainLotPoolInterface[] public chainlotPools;
 	mapping(address=>bool) public chainlotPoolsMap;
@@ -40,16 +40,16 @@ contract ChainLot is owned{
   	CLTokenInterface public clToken;
   	ChainLotPoolFactoryInterface public clpFactory;
   
-	event BuyTicket(uint poolBlockNumber, bytes numbers, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint totalTicketCountSum, uint256 value);
-	event PrepareAward(bytes jackpotNumbers, uint256 poolBlockNumber, uint256 allTicketsCount);
-	event ToBeAward(bytes jackpotNumbers, bytes32 ticketNumber, uint256 ticketCount, uint256 ticketId, address user, uint256 blockNumber, uint256 awardValue);
+	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
+	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
+	event ToBeAward(bytes jackpotNumbers, bytes32 ticketNumber, uint ticketCount, uint ticketId, address user, uint blockNumber, uint awardValue);
 	event MatchAwards(bytes jackpotNumbers, uint lastMatchedTicketIndex, uint endIndex, uint allTicketsCount);
-	event MatchRule(bytes jackpotNumbers, bytes32 ticketNumber, uint256 ticketCount, uint256 ticketId, uint256 blockNumber, uint256 ruleId, uint256 ruleEther);
-  	event TransferAward(address winner, uint256 value);
-  	event TransferDevCut(address dev, uint256 value);
-  	event TransferHistoryCut(address user, uint256 value);
-  	event AddHistoryCut(uint added, uint256 total);
-  	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint256 awardEther, uint256 totalWinnersAward, uint256 totalTicketCount);
+	event MatchRule(bytes jackpotNumbers, bytes32 ticketNumber, uint ticketCount, uint ticketId, uint blockNumber, uint ruleId, uint ruleEther);
+  	event TransferAward(address winner, uint value);
+  	event TransferDevCut(address dev, uint value);
+  	event TransferHistoryCut(address user, uint value);
+  	event AddHistoryCut(uint added, uint total);
+  	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
   	event TransferUnawarded(address from, address to, uint value);
@@ -60,9 +60,9 @@ contract ChainLot is owned{
 						uint8 _maxYellowNumber, 
 						uint8 _whiteNumberCount, 
 						uint8 _yellowNumberCount, 
-						uint256 _etherPerTicket, 
-						uint256 _awardIntervalNumber,
-						uint256[] _awardRulesArray) public {
+						uint _etherPerTicket, 
+						uint _awardIntervalNumber,
+						uint[] _awardRulesArray) public {
 		maxWhiteNumber = _maxWhiteNumber;
 		maxYellowNumber = _maxYellowNumber;
 		maxWhiteNumberCount = _whiteNumberCount;
@@ -78,7 +78,7 @@ contract ChainLot is owned{
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray);
-		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this), msg.sender);
+		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this));
 		if(address(newed) != 0) {
 			chainlotPools.push(newed);
 			chainlotPoolsMap[address(newed)] = true;
@@ -109,14 +109,14 @@ contract ChainLot is owned{
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public {
 		checkAndSwitchPool();
-		currentPool.buyTicket.value(msg.value)(msg.sender, numbers, referer);
+		currentPool.buyTicket.value(msg.value)(numbers, referer);
 	}
 
 	//random numbers
 	//random seed: number-1 block hash x user address
 	function buyRandom(address referer) payable public{
 		checkAndSwitchPool();
-	    currentPool.buyRandom.value(msg.value)(msg.sender, referer);
+	    currentPool.buyRandom.value(msg.value)(referer);
 	}
 
 	modifier onlyPool {
@@ -126,16 +126,16 @@ contract ChainLot is owned{
 
 	function mint(address _owner, 
 	    bytes _numbers,
-	    uint256 _count) 
-	    external onlyPool returns (uint256) {
+	    uint _count) 
+	    external onlyPool returns (uint) {
 	    return chainLotTicket.mint(_owner, _numbers, _count);
   	}
 
-	function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
 		/*require(_token == address(clToken));
 		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
 
-		uint256 ticketCount = _value/etherPerTicket;
+		uint ticketCount = _value/etherPerTicket;
 		bytes memory numbers;
 		if(_extraData.length == 0) {
 			numbers = genRandomNumbers(block.number - 1, 0);
@@ -210,7 +210,7 @@ contract ChainLot is owned{
   	require(poolEnd <= chainlotPools.length);
 
   	for(uint i = poolStart; i < poolEnd; i++) {
-  		chainlotPools[i].withdrawHistoryCut(msg.sender, ticketIds);
+  		chainlotPools[i].withdrawHistoryCut(ticketIds);
   	}
   }
 

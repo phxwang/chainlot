@@ -15,8 +15,8 @@ contract ChainLotPoolFactory is owned {
 						uint8 whiteNumberCount, 
 						uint8 yellowNumberCount, 
 						uint awardIntervalNumber,
-						uint256 etherPerTicket, 
-						uint256[] awardRulesArray) onlyOwner  external returns (ChainLotPoolInterface poolAddress){
+						uint etherPerTicket, 
+						uint[] awardRulesArray) onlyOwner  external returns (ChainLotPoolInterface poolAddress){
   	uint startPoolBlockNumber = block.number;
   	if(startPoolBlockNumber < latestPoolBlockNumber) startPoolBlockNumber = latestPoolBlockNumber;
   	uint nextPoolBlockNumber = startPoolBlockNumber - startPoolBlockNumber%awardIntervalNumber + awardIntervalNumber;
@@ -35,9 +35,8 @@ contract ChainLotPoolFactory is owned {
 
   function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot,
-						address _owner) onlyOwner external {
-  	ChainLotPool(pool).setPool(_chainLotTicket, _clToken, _chainLot, _owner);
+						ChainLotInterface _chainLot) onlyOwner external {
+  	ChainLotPool(pool).setPool(_chainLotTicket, _clToken, _chainLot);
 
   }
 }

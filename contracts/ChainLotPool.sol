@@ -98,12 +98,11 @@ contract ChainLotPool is owned{
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot,
-						address _owner) {
+						ChainLotInterface _chainLot) {
   		chainLotTicket = _chainLotTicket;
 		clToken = _clToken;
 		chainLot = _chainLot;
-		owner = _owner;
+		owner = tx.origin;
   	}
 
   	function getRuleKey(uint _whiteNumberCount, uint _yellowNumberCount) internal view returns(uint index){
@@ -113,12 +112,12 @@ contract ChainLotPool is owned{
 	//numbers: uint8[6] 
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
-	function buyTicket(address buyer, bytes numbers, address referer) payable public{
+	function buyTicket(bytes numbers, address referer) payable public{
 		require(block.number < poolBlockNumber);
 	    uint ticketCount = msg.value/etherPerTicket;
 	    clToken.buy.value(msg.value)();
-	    _buyTicket(buyer, numbers, ticketCount, msg.value);
-	    if(referer != 0 && buyer != referer) {
+	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
+	    if(referer != 0 && tx.origin != referer) {
 	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
 	    }
 	}
@@ -127,7 +126,7 @@ contract ChainLotPool is owned{
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(address buyer, address referer) payable public{
+	function buyRandom(address referer) payable public{
 		require(block.number < poolBlockNumber);
 		require(address(clToken) != 0);
 	    uint ticketCount = msg.value/etherPerTicket;
@@ -136,8 +135,8 @@ contract ChainLotPool is owned{
 	    LOG(msg.value);
 
 	    clToken.buy.value(msg.value)();
-	    _buyTicket(buyer, numbers, ticketCount, msg.value);  
-	    if(referer != 0 && buyer != referer) {
+	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);  
+	    if(referer != 0 && tx.origin != referer) {
 	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
 	    }
 	}
@@ -338,10 +337,10 @@ contract ChainLotPool is owned{
 	    awardIndex = endIndex;
 	}
 
-	function withdrawHistoryCut(address user, uint[] ticketIds) external {
-		uint userCut = calculateUserHistoryCut(ticketIds, user, false);
-	  	clToken.transfer(user, userCut);
-		TransferHistoryCut(user, userCut);
+	function withdrawHistoryCut(uint[] ticketIds) external {
+		uint userCut = calculateUserHistoryCut(ticketIds, tx.origin, false);
+	  	clToken.transfer(tx.origin, userCut);
+		TransferHistoryCut(tx.origin, userCut);
 	}
 
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut) {

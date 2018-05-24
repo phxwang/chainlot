@@ -3,6 +3,7 @@ var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
+var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 
 contract("ChainLot", async (accounts) => {
 
@@ -10,6 +11,8 @@ contract("ChainLot", async (accounts) => {
 	let chainlotticket = await ChainLotTicket.deployed();
 	let factory = await ChainLotPoolFactory.deployed();
 	let cltoken = await CLToken.deployed();
+	let chainlotpublic = await ChainLotPublic.deployed();
+	await chainlotpublic.setChainLotAddress(chainlot.address);
 	await chainlot.setChainLotTicketAddress(chainlotticket.address);
 	await chainlot.setCLTokenAddress(cltoken.address);
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
@@ -25,7 +28,7 @@ contract("ChainLot", async (accounts) => {
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
 		console.log("from account: " + id);
-		r = await chainlot.buyRandom(web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:1e11});
+		r = await chainlotpublic.buyRandom(web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:1e11});
 		//console.log(JSON.stringify(r.logs));	
 	}
 

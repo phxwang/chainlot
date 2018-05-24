@@ -4,6 +4,9 @@ interface ChainLotInterface {
 	function mint(address _owner, 
 	    bytes _numbers,
 	    uint _count) external returns (uint);
+
+	function buyTicket(bytes numbers, address referer) payable public;
+	function buyRandom(address referer) payable public;
 }
 
 interface CLTokenInterface {
@@ -24,8 +27,8 @@ interface ChainLotTicketInterface {
 
 interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
-	function buyTicket(address buyer, bytes numbers, address referer) payable public;
-	function buyRandom(address buyer, address referer) payable public;
+	function buyTicket(bytes numbers, address referer) payable public;
+	function buyRandom(address referer) payable public;
 	//calculate jackpot 
 	/*function prepareAwards() external returns(bytes32 numbers);
 	function matchAwards(uint8 toMatchCount) external;
@@ -33,7 +36,7 @@ interface ChainLotPoolInterface {
 	function splitAward() external;
 	function distributeAwards() external;
 	function sendAwards() external;*/
-	function withdrawHistoryCut(address user, uint[] ticketIds) external;
+	function withdrawHistoryCut(uint[] ticketIds) external;
 	//function transferUnawarded(address to) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 }
@@ -49,8 +52,7 @@ interface ChainLotPoolFactoryInterface {
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot,
-						address _owner)  external; 
+						ChainLotInterface _chainLot)  external; 
 
 }
 
