@@ -18,4 +18,8 @@ contract ChainLotPublic is owned {
 		chainlot = ChainLotInterface(chainlotAddress);
 	}
 
+	function () payable public {
+		buyRandom(0);
+	}
+
 }

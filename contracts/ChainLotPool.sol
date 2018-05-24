@@ -21,6 +21,7 @@ contract ChainLotPool is owned{
 	bytes public jackpotNumbers;
 	bool public preparedAwards;
 	uint public historyCut;
+	uint public tokenSum;
 	
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
@@ -114,8 +115,10 @@ contract ChainLotPool is owned{
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public{
 		require(block.number < poolBlockNumber);
+		require(address(clToken) != 0);
 	    uint ticketCount = msg.value/etherPerTicket;
 	    clToken.buy.value(msg.value)();
+	    tokenSum += msg.value;
 	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
 	    if(referer != 0 && tx.origin != referer) {
 	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
@@ -127,18 +130,8 @@ contract ChainLotPool is owned{
 	//random numbers
 	//random seed: number-1 block hash x user address
 	function buyRandom(address referer) payable public{
-		require(block.number < poolBlockNumber);
-		require(address(clToken) != 0);
-	    uint ticketCount = msg.value/etherPerTicket;
-	    bytes memory numbers = genRandomNumbers(block.number - 1, 0);
-
-	    LOG(msg.value);
-
-	    clToken.buy.value(msg.value)();
-	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);  
-	    if(referer != 0 && tx.origin != referer) {
-	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
-	    }
+		bytes memory numbers = genRandomNumbers(block.number - 1, 0);
+		buyTicket(numbers, referer);
 	}
 
 	/*function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
@@ -177,7 +170,8 @@ contract ChainLotPool is owned{
 
 	//calculate jackpot 
 	function prepareAwards() onlyOwner external {
-		require(preparedAwards != true);
+		require(!preparedAwards);
+		require(block.number > poolBlockNumber);
 		jackpotNumbers = genRandomNumbers(poolBlockNumber, 7);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
 		preparedAwards = true;

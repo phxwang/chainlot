@@ -8,7 +8,7 @@ contract ChainLotTicket is ERC721, owned {
   /*** CONSTANTS ***/
 
   string public constant name = "ChainLotTicket";
-  string public constant symbol = "CLT";
+  string public constant symbol = "CLTK";
 
   bytes4 constant InterfaceID_ERC165 =
     bytes4(keccak256('supportsInterface(bytes4)'));
@@ -18,10 +18,10 @@ contract ChainLotTicket is ERC721, owned {
     bytes4(keccak256('symbol()')) ^
     bytes4(keccak256('totalSupply()')) ^
     bytes4(keccak256('balanceOf(address)')) ^
-    bytes4(keccak256('ownerOf(uint256)')) ^
-    bytes4(keccak256('approve(address,uint256)')) ^
-    bytes4(keccak256('transfer(address,uint256)')) ^
-    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('ownerOf(uint)')) ^
+    bytes4(keccak256('approve(address,uint)')) ^
+    bytes4(keccak256('transfer(address,uint)')) ^
+    bytes4(keccak256('transferFrom(address,address,uint)')) ^
     bytes4(keccak256('ticketsOfOwner(address)'));
 
 
@@ -31,45 +31,45 @@ contract ChainLotTicket is ERC721, owned {
     address mintedBy;
     uint64 mintedAt;
     bytes numbers;
-    uint256 count;
-    uint256 blockNumber;
+    uint count;
+    uint blockNumber;
   }
 
 
   /*** STORAGE ***/
 
   Ticket[] tickets;
-  mapping (address => bool) minters;
+  mapping (address => bool) public minters;
 
-  mapping (uint256 => address) public ticketIndexToOwner;
-  mapping (address => uint256) public ownershipTicketCount;
-  mapping (uint256 => address) public ticketIndexToApproved;
+  mapping (uint => address) public ticketIndexToOwner;
+  mapping (address => uint) public ownershipTicketCount;
+  mapping (uint => address) public ticketIndexToApproved;
 
   uint public totalTicketCountSum;
   
 
   /*** EVENTS ***/
 
-  event Mint(address owner, uint256 ticketId);
+  event Mint(address owner, uint ticketId);
 
 
   /*** INTERNAL FUNCTIONS ***/
 
-  function _owns(address _claimant, uint256 _ticketId) internal view returns (bool) {
+  function _owns(address _claimant, uint _ticketId) internal view returns (bool) {
     return ticketIndexToOwner[_ticketId] == _claimant;
   }
 
-  function _approvedFor(address _claimant, uint256 _ticketId) internal view returns (bool) {
+  function _approvedFor(address _claimant, uint _ticketId) internal view returns (bool) {
     return ticketIndexToApproved[_ticketId] == _claimant;
   }
 
-  function _approve(address _to, uint256 _ticketId) internal {
+  function _approve(address _to, uint _ticketId) internal {
     ticketIndexToApproved[_ticketId] = _to;
 
     Approval(ticketIndexToOwner[_ticketId], ticketIndexToApproved[_ticketId], _ticketId);
   }
 
-  function _transfer(address _from, address _to, uint256 _ticketId) internal {
+  function _transfer(address _from, address _to, uint _ticketId) internal {
     ownershipTicketCount[_to]++;
     ticketIndexToOwner[_ticketId] = _to;
 
@@ -81,7 +81,7 @@ contract ChainLotTicket is ERC721, owned {
     Transfer(_from, _to, _ticketId);
   }
 
-  function _mint(address _owner,bytes _numbers,uint256 _count) internal returns (uint256 ticketId) {
+  function _mint(address _owner,bytes _numbers,uint _count) internal returns (uint ticketId) {
     Ticket memory ticket = Ticket({
       mintedBy: _owner,
       mintedAt: uint64(now),
@@ -104,27 +104,27 @@ contract ChainLotTicket is ERC721, owned {
     return ((_interfaceID == InterfaceID_ERC165) || (_interfaceID == InterfaceID_ERC721));
   }
 
-  function totalSupply() public view returns (uint256) {
+  function totalSupply() public view returns (uint) {
     return tickets.length;
   }
 
-  function balanceOf(address _owner) public view returns (uint256) {
+  function balanceOf(address _owner) public view returns (uint) {
     return ownershipTicketCount[_owner];
   }
 
-  function ownerOf(uint256 _ticketId) external view returns (address owner) {
+  function ownerOf(uint _ticketId) external view returns (address owner) {
     owner = ticketIndexToOwner[_ticketId];
 
     require(owner != address(0));
   }
 
-  function approve(address _to, uint256 _ticketId) external {
+  function approve(address _to, uint _ticketId) external {
     require(_owns(msg.sender, _ticketId));
 
     _approve(_to, _ticketId);
   }
 
-  function transfer(address _to, uint256 _ticketId) external {
+  function transfer(address _to, uint _ticketId) external {
     require(_to != address(0));
     require(_to != address(this));
     require(_owns(msg.sender, _ticketId));
@@ -132,7 +132,7 @@ contract ChainLotTicket is ERC721, owned {
     _transfer(msg.sender, _to, _ticketId);
   }
 
-  function transferFrom(address _from, address _to, uint256 _ticketId) external {
+  function transferFrom(address _from, address _to, uint _ticketId) external {
     require(_to != address(0));
     require(_to != address(this));
     require(_approvedFor(msg.sender, _ticketId));
@@ -141,17 +141,17 @@ contract ChainLotTicket is ERC721, owned {
     _transfer(_from, _to, _ticketId);
   }
 
-  function ticketsOfOwner(address _owner) public view returns (uint256[]) {
-    uint256 balance = balanceOf(_owner);
+  function ticketsOfOwner(address _owner) public view returns (uint[]) {
+    uint balance = balanceOf(_owner);
 
     if (balance == 0) {
-      return new uint256[](0);
+      return new uint[](0);
     } else {
-      uint256[] memory result = new uint256[](balance);
-      uint256 maxTicketId = totalSupply();
-      uint256 idx = 0;
+      uint[] memory result = new uint[](balance);
+      uint maxTicketId = totalSupply();
+      uint idx = 0;
 
-      uint256 ticketId;
+      uint ticketId;
       for (ticketId = 1; ticketId <= maxTicketId; ticketId++) {
         if (ticketIndexToOwner[ticketId] == _owner) {
           result[idx] = ticketId;
@@ -176,13 +176,13 @@ contract ChainLotTicket is ERC721, owned {
 
   function mint(address _owner, 
     bytes _numbers,
-    uint256 _count) 
-    external onlyMinter returns (uint256) {
+    uint _count) 
+    external onlyMinter returns (uint) {
     return _mint(_owner, _numbers, _count);
   }
 
-  function getTicket(uint256 _ticketId) external view 
-    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint256 count, uint256 blockNumber) {
+  function getTicket(uint _ticketId) external view 
+    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint count, uint blockNumber) {
     require(_ticketId < tickets.length);
     Ticket memory ticket = tickets[_ticketId];
 

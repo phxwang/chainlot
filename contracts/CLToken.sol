@@ -2,7 +2,7 @@ pragma solidity ^0.4.16;
 
 import "./owned.sol";
 
-interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
+interface tokenRecipient { function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public; }
 
 contract TokenERC20 {
     // Public variables of the token
@@ -10,17 +10,17 @@ contract TokenERC20 {
     string public symbol;
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
-    uint256 public totalSupply;
+    uint public totalSupply;
 
     // This creates an array with all balances
-    mapping (address => uint256) public balanceOf;
-    mapping (address => mapping (address => uint256)) public allowance;
+    mapping (address => uint) public balanceOf;
+    mapping (address => mapping (address => uint)) public allowance;
 
     // This generates a public event on the blockchain that will notify clients
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint value);
 
     // This notifies clients about the amount burnt
-    event Burn(address indexed from, uint256 value);
+    event Burn(address indexed from, uint value);
 
     /**
      * Constrctor function
@@ -28,11 +28,11 @@ contract TokenERC20 {
      * Initializes contract with initial supply tokens to the creator of the contract
      */
     function TokenERC20(
-        uint256 initialSupply,
+        uint initialSupply,
         string tokenName,
         string tokenSymbol
     ) public {
-        totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
+        totalSupply = initialSupply * 10 ** uint(decimals);  // Update total supply with the decimal amount
         balanceOf[this] = totalSupply;               // Give the creator all initial tokens
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;                               // Set the symbol for display purposes
@@ -67,7 +67,7 @@ contract TokenERC20 {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transfer(address _to, uint256 _value) public {
+    function transfer(address _to, uint _value) public {
         _transfer(msg.sender, _to, _value);
     }
 
@@ -80,7 +80,7 @@ contract TokenERC20 {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         require(_value <= allowance[_from][msg.sender]);     // Check allowance
         allowance[_from][msg.sender] -= _value;
         _transfer(_from, _to, _value);
@@ -95,7 +95,7 @@ contract TokenERC20 {
      * @param _spender The address authorized to spend
      * @param _value the max amount they can spend
      */
-    function approve(address _spender, uint256 _value) public
+    function approve(address _spender, uint _value) public
         returns (bool success) {
         allowance[msg.sender][_spender] = _value;
         return true;
@@ -110,7 +110,7 @@ contract TokenERC20 {
      * @param _value the max amount they can spend
      * @param _extraData some extra information to send to the approved contract
      */
-    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    function approveAndCall(address _spender, uint _value, bytes _extraData)
         public
         returns (bool success) {
         tokenRecipient spender = tokenRecipient(_spender);
@@ -127,7 +127,7 @@ contract TokenERC20 {
      *
      * @param _value the amount of money to burn
      */
-    function burn(uint256 _value) public returns (bool success) {
+    function burn(uint _value) public returns (bool success) {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
@@ -143,7 +143,7 @@ contract TokenERC20 {
      * @param _from the address of the sender
      * @param _value the amount of money to burn
      */
-    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+    function burnFrom(address _from, uint _value) public returns (bool success) {
         require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
         balanceOf[_from] -= _value;                         // Subtract from the targeted balance
@@ -160,7 +160,7 @@ contract TokenERC20 {
 
 contract CLToken is owned, TokenERC20 {
 
-    string public constant name = "ChainLotTicket";
+    string public constant name = "ChainLotToken";
     string public constant symbol = "CLT";
 
     mapping (address => bool) public frozenAccount;
@@ -170,7 +170,7 @@ contract CLToken is owned, TokenERC20 {
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
     function CLToken(
-        uint256 initialSupply
+        uint initialSupply
     ) TokenERC20(initialSupply, name, symbol) public {}
 
     /* Internal transfer, only can be called by this contract */
@@ -183,7 +183,7 @@ contract CLToken is owned, TokenERC20 {
     /*/// @notice Create `mintedAmount` tokens and send it to `target`
     /// @param target Address to receive the tokens
     /// @param mintedAmount the amount of tokens it will receive
-    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+    function mintToken(address target, uint mintedAmount) onlyOwner public {
         balanceOf[target] += mintedAmount;
         totalSupply += mintedAmount;
         Transfer(0, this, mintedAmount);
@@ -201,7 +201,7 @@ contract CLToken is owned, TokenERC20 {
     /*/// @notice Allow users to buy tokens for `newBuyPrice` eth and sell tokens for `newSellPrice` eth
     /// @param newSellPrice Price the users can sell to the contract
     /// @param newBuyPrice Price users can buy from the contract
-    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+    function setPrices(uint newSellPrice, uint newBuyPrice) onlyOwner public {
         sellPrice = newSellPrice;
         buyPrice = newBuyPrice;
     }*/
@@ -217,7 +217,7 @@ contract CLToken is owned, TokenERC20 {
 
     /// @notice Sell `amount` tokens to contract
     /// @param amount amount of tokens to be sold
-    function sell(uint256 amount) public {
+    function sell(uint amount) public {
         require(this.balance >= amount);      // checks if the contract has enough ether to buy
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(amount);          // sends ether to the seller. It's important to do this last to avoid recursion attacks

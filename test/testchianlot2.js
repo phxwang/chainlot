@@ -5,6 +5,10 @@ var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 
+//a = [70, 25, 5, 1, 1e16, 10000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]];
+//console.log(a);
+//return;
+
 contract("ChainLot", async (accounts) => {
 
 	let chainlot = await ChainLot.deployed();

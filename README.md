@@ -1,6 +1,13 @@
 # chainlot
 
 
+## DEMO
+ * ChainLotPublic:0x5FB992C93329B49Deb29a6030c51357bb0A4dD16
+ * ChainLotTicket:0x794c7790B72e348C84339c64620cd2B4d39Ea58f
+ * ChainLotToken:0x8565A2FF40700FBE787B7F9afd97DEE3ffa51263
+ * ChainLotFactory:0xF858F5287d534a515232847FDCB350506280216B
+ * ChainLot:0x098F4872be1299D9A0DbC44293F1Ab7771D84a00
+
 ## Feature
  * 购买指定号码（5x70 + 1x25）0.01ETH/ticket
  * 每5万个block抽奖一次，按照megamillions的规则
@@ -32,11 +39,10 @@
  * 面向用户的接口尽量简单稳定，需要在主协议中体现
  * 管理接口可以灵活，尽量留在子协议中，便于后续扩展
 ## 运营流程
-	* 开新奖池，开奖blocknumber是N
+	* 开一堆新奖池，开奖blocknumber是N
 	* 等待用户购买
 	* blocknumber到达N
-	* 开新奖池，开奖blocknumber是N+m
-	* 上一个奖池计算中奖和奖金
+	* 计算N的中奖和奖金
 
 ## 费用分析
  ### buyTicket
@@ -51,6 +57,10 @@
 
 
 ## TODO
+ * 网页交互 
+ 	* 购买 P1
+ 	* 查看总奖池及总历史奖池 P2
+ 	* 查看个人的获奖和个人历史分红 P1
  * 支持逻辑升级 
  * 优化gas使用
  * 完善测试用例，正向反向都要测到
@@ -58,10 +68,6 @@
  	* 创建奖池
  	* 开奖
  	* 汇总奖池
- * 网页交互
- 	* 购买
- 	* 查看总奖池及总历史奖池
- 	* 查看个人的获奖和个人历史分红
  * 购买和摇奖 done
  * ERC 721 done
  * 积分机制（ERC 20） done
@@ -75,7 +81,7 @@
  	* 创建奖金池和抽奖同时进行 done
  	* 可以一次性创建多个奖金池，每次客户购买会根据当前的block自动切换 done
  * 历史购买者分成10% done
- 	* 支持每个奖池分成给奖池生成之前的所有历史ticket
+ 	* 支持每个奖池分成给当前奖池及之前的所有历史ticket
  * 每次开奖后剩余积分转移到下个奖池 done
  * 开发者分成2% done
  * 邀请朋友得ticket done
