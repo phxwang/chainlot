@@ -45,7 +45,8 @@ interface ChainLotPoolInterface {
 }
 
 interface ChainLotPoolFactoryInterface {
-	function newPool(uint8 _maxWhiteNumber, 
+	function newPool(uint latestPoolBlockNumber,
+						uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
 						uint8 _whiteNumberCount, 
 						uint8 _yellowNumberCount, 

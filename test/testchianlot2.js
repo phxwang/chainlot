@@ -10,7 +10,8 @@ var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 //return;
 
 contract("ChainLot", async (accounts) => {
-
+	console.log("from: " + web3.eth.accounts[0]);
+	
 	let chainlot = await ChainLot.deployed();
 	let chainlotticket = await ChainLotTicket.deployed();
 	let factory = await ChainLotPoolFactory.deployed();
@@ -23,7 +24,7 @@ contract("ChainLot", async (accounts) => {
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
 	await chainlotticket.setMinter(chainlot.address, true);
 	await factory.transferOwnership(chainlot.address);
-	
+
 	for(i=0; i<5; i++) {
 		console.log("new pool progress: " + i);
 		let r = await chainlot.newPool();
@@ -35,6 +36,9 @@ contract("ChainLot", async (accounts) => {
 
 	r = await cltoken.approveAndCall(chainlotpublic.address, 1e11, "0x020101", {from:web3.eth.accounts[5]});
 	console.log(JSON.stringify(r.logs));
+
+	cl = await chainlotpublic.chainlot();
+	console.log("cl: " + cl);
 
 	r = await chainlotpublic.sendTransaction({from:web3.eth.accounts[5], value:2e11});
 	console.log(JSON.stringify(r.logs));

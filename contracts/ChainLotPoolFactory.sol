@@ -4,13 +4,13 @@ import "./ChainLotPool.sol";
 
 
 contract ChainLotPoolFactory is owned {
-  	uint latestPoolBlockNumber;
   	uint poolCount;
 
   	event GenerateNewPool(uint latestPoolBlockNumber, uint nextPoolBlockNumber, uint length);
 	
 	//pool range: n*awardIntervalNumber ~ (n+1)awardIntervalNumber-1
-  	function newPool(uint8 maxWhiteNumber, 
+  	function newPool(uint latestPoolBlockNumber,
+  						uint8 maxWhiteNumber, 
 						uint8 maxYellowNumber, 
 						uint8 whiteNumberCount, 
 						uint8 yellowNumberCount, 
@@ -28,7 +28,6 @@ contract ChainLotPoolFactory is owned {
 		etherPerTicket, awardRulesArray);
 	poolCount ++;
 	GenerateNewPool(latestPoolBlockNumber, nextPoolBlockNumber, poolCount);
-	latestPoolBlockNumber = nextPoolBlockNumber;
 	
   	return ChainLotPoolInterface(clp);
   }

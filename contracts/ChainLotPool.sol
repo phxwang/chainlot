@@ -99,7 +99,7 @@ contract ChainLotPool is owned{
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot) {
+						ChainLotInterface _chainLot) public {
   		chainLotTicket = _chainLotTicket;
 		clToken = _clToken;
 		chainLot = _chainLot;
@@ -339,11 +339,11 @@ contract ChainLotPool is owned{
 		TransferHistoryCut(tx.origin, userCut);
 	}
 
-	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut) {
+	function listUserHistoryCut(address user, uint[] ticketIds) external returns(uint _historyCut) {
 		return calculateUserHistoryCut(ticketIds, user, true);
 	}
 
-	function calculateUserHistoryCut(uint[] ticketIds, address user, bool onlyList) internal view returns(uint _cut) {
+	function calculateUserHistoryCut(uint[] ticketIds, address user, bool onlyList) internal returns(uint _cut) {
 		if(totalTicketCountSum == 0)
 			return 0;
 		uint historyTicketCountSum = 0;

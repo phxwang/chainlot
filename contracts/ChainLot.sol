@@ -24,6 +24,7 @@ contract ChainLot is owned{
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	uint8 public totalNumberCount;
+	uint public latestPoolBlockNumber;
 
 	uint[] awardRulesArray;
 	
@@ -72,9 +73,10 @@ contract ChainLot is owned{
 	ChainLotPoolInterface public currentPool;
 
 	function newPool() public onlyOwner {
-		ChainLotPoolInterface newed = clpFactory.newPool(maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
+		ChainLotPoolInterface newed = clpFactory.newPool(latestPoolBlockNumber,maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray);
 		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this));
+		latestPoolBlockNumber = newed.poolBlockNumber();
 		if(address(newed) != 0) {
 			chainlotPools.push(newed);
 			chainlotPoolsMap[address(newed)] = true;
