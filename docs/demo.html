@@ -4711,8 +4711,9 @@ var clpAbi = [
             <div class="container">
                 <div class="message">
                   CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of the awards in every pool after the purchasement. One new award pool will be initialed in every 10000 block. All the reward will be returned with CryptoLottoToken(CLT).
+                  <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click to get test coins</a>）</h5>
                 </div>
-                <div class="cta-group">
+                <div class="cta-group" id="cta-group">
                 	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
                     <input type="text" id="number0" name="number0" class="cta" length=2/></input>
                     <input type="text" id="number1" name="number1" class="cta" length=2/></input>
@@ -4728,7 +4729,6 @@ var clpAbi = [
                 <div class="banner-title hidden-xs">
                     <h2 id="message1">Current Award Pool: <span id="pooltokens"></span> ETH, Total Award Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Award Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
-                    <h5>（The SmartContract is deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click to get test coins</a>）</h5>
                 </div>
                 <h4 id="transaction_message"></h4>
             </div>
@@ -4844,12 +4844,12 @@ var clpAbi = [
     web3js.version.getNetwork((err, netId) => {
       //alert(netId);
       if(netId < 0) {
-        document.getElementById('transaction_message').innerHTML="Please switch MetaMask to Rinkeby";
+        document.getElementById('env_message').innerHTML="Please switch MetaMask to Rinkeby";
       }
       else {
         //alert(web3js.eth.accounts);
       	if(web3js.eth.accounts.length == 0) {
-      		 document.getElementById('transaction_message').innerHTML="Please Unlock Your MetaMask";
+      		 document.getElementById('env_message').innerHTML="Please Unlock Your MetaMask";
       	}
       	else {
       	   clp = web3js.eth.contract(clpAbi).at(clpAddress);
@@ -4860,10 +4860,8 @@ var clpAbi = [
     });  
   }
   else {
-    document.getElementById('transaction_message').innerHTML="Can't Detect Ethereum Wallet，Please use MetaMask on PC version Chrome，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>Click to Install</a>";
-    document.getElementById('files').style.display='none';
-    document.getElementById('resources').style.display='none';
-    document.getElementById('message1').style.display='none';
+    document.getElementById('env_message').innerHTML="Can't Detect Ethereum Wallet，Please use MetaMask on PC version Chrome，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>Click to Install</a>";
+    document.getElementById('cta-group').style.display='none';
   }
   
 </script>
