@@ -124,8 +124,13 @@ contract("ChainLot", async (accounts) => {
 		console.log(web3.fromWei(historyCutSum, 'ether'));
 	}	
 
-	let totalTokenSum = await chainlot.tokenSum();
-	console.log("total token sum: " + web3.fromWei(totalTokenSum, 'ether'));
+	//let totalTokenSum = await chainlot.tokenSum();
+	//console.log("total token sum: " + web3.fromWei(totalTokenSum, 'ether'));
+
+	let results = await chainlotpublic.retrievePoolInfo();
+	console.log("pool token sum: " + web3.fromWei(results[0], 'ether'));
+	console.log("pool number: " + results[1]);
+	console.log("total token sum: " + web3.fromWei(results[2], 'ether'));
 
 })
 

@@ -7,7 +7,7 @@ import "./CLToken.sol";
 contract ChainLotTicket is ERC721, owned {
   /*** CONSTANTS ***/
 
-  string public constant name = "ChainLotTicket";
+  string public constant name = "CrytoLottoTicket";
   string public constant symbol = "CLTK";
 
   bytes4 constant InterfaceID_ERC165 =

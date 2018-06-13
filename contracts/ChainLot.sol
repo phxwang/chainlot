@@ -233,4 +233,10 @@ contract ChainLot is owned{
   	return poolCuts;
   }
 
+  function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens)  {
+  	poolTokens = currentPool.tokenSum();
+  	poolBlockNumber = currentPool.poolBlockNumber();
+  	totalPoolTokens = tokenSum;
+  }
+
 }

@@ -3,7 +3,7 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="author" content="">
-    <title> CryptoMega | Decentralized Lottery </title>
+    <title> CryptoLotto6 | Decentralized Lottery on Ethereum</title>
     <style type="text/css">
     /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
@@ -355,7 +355,7 @@ img {
   margin: 35px 0 75px;
 }
 .middle-content .cta-group .cta {
-  width: 250px;
+  width: 100px;
 }
 .middle-content .cta-group .cta {
   margin-right: 15px;
@@ -4649,6 +4649,28 @@ var clpAbi = [
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "retrievePoolInfo",
+      "outputs": [
+        {
+          "name": "poolTokens",
+          "type": "uint256"
+        },
+        {
+          "name": "poolBlockNumber",
+          "type": "uint256"
+        },
+        {
+          "name": "totalPoolTokens",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     }
   ];
 
@@ -4664,8 +4686,8 @@ var clpAbi = [
             <div class="align-center header-inner">
                 <div class="container clearfix">
                     <div class="logo">
-                        <a href="https://CryptoMega.org/">
-                            <h1>CrytoMega</h1>
+                        <a href="https://CryptoLotto6.org/">
+                            <h1>CrytoLotto6</h1>
                         </a>
                     </div>
                     <div id="nav-icon">
@@ -4676,9 +4698,9 @@ var clpAbi = [
                         <ul>
                             <li><a href="https://www.github.com/phxwang/chainlot" target="_blank"> Github </a>
                             </li>
-                            <li>Your CMT：XXX 
+                            <li><a href="https://rinkeby.etherscan.io/token/0xa430b7cd6e4d2fcd35197e94e00b0b6a2373e617#balances" target="_blank">CLT Holders </a>
                             </li>
-                            <li><a href="javascript:sellToken(1)">Sell CMT</a>
+                            <li><a href="javascript:sellToken()">Sell CLT</a>
                             </li>
                         </ul>
                     </div>
@@ -4688,24 +4710,26 @@ var clpAbi = [
         <div class="middle-content">
             <div class="container">
                 <div class="message">
-                  CryptoMega.org是一个基于Ethereum的抽奖网络，任何人都可以购买奖券，参与抽奖，并且每个人的奖券都是网络的分红股权。每10000个block为一个奖池。每个奖池中中奖金额的10%会作为分红给所有历史购买过奖券的人。
+                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of the awards in every pool after the purchasement. One new award pool will be initialed in every 10000 block. All the reward will be returned with CryptoLottoToken(CLT).
                 </div>
                 <div class="cta-group">
-                	<h4 id="transaction_message">填写6个号码（前五个为1-70，第六个为1-25）</h4>
+                	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
                     <input type="text" id="number0" name="number0" class="cta" length=2/></input>
                     <input type="text" id="number1" name="number1" class="cta" length=2/></input>
                     <input type="text" id="number2" name="number2" class="cta" length=2/></input>
                     <input type="text" id="number3" name="number3" class="cta" length=2/></input>
                     <input type="text" id="number4" name="number4" class="cta" length=2/></input>
                     <input type="text" id="number5" name="number5" class="cta" length=2/></input>
-                    <h4 id="transaction_message">输入购买数量，每张奖券0.01ETH</h4>
-                    <input type="text" id="count" name="count" class="cta" /></input>
-                    <button  onclick="javascript:buyTicket()" >buy tickets </button>
+                    <h4 id="">Enter purchase count, 0.01ETH/ticket</h4>
+                    <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
+                    <button onclick="javascript:buyTicket(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Purchase Tickets </button>
+                    <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
                 </div>
                 <div class="banner-title hidden-xs">
-                    <h2 id="message1">当前奖池大小：xx ETH，开奖Block：xx，历史奖池大小：xx ETH</h2>
-                    <h5>（目前整个智能合约运行在<a target="_blank"  href="https://www.rinkeby.io/">Rinkeby测试网络</a>上，Ether和CST都只作为demo使用，不需要支付任何实际的费用，<a target="_blank"  href="https://www.rinkeby.io/#faucet">点击获取测试用Ether</a>）</h5>
+                    <h2 id="message1">Current Pool：<span id="pooltokens"></span> ETH，Award Block：<span id="poolblocknumber"></span>，History Pools：<span id="allpooltokens"></span> ETH</h2>
+                    <h5>（The SmartContract is deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click to get test coins</a>）</h5>
                 </div>
+                <h4 id="transaction_message"></h4>
             </div>
         </div>
     </div>
@@ -4714,142 +4738,123 @@ var clpAbi = [
     <!--Explore cs section starts-->
     <div id="resources" class="explore-cs-main">
         <div class="container">
-            <h2> 历史购买 </h2>
-        	<a href="https://rinkeby.etherscan.io/address/0xfa4b70aa18da8509072c03d650a415a128924a94" target="_blank"><h4>查看全部智能合约日志</h4></a>
+            <h2> Purchase List In Current Pool</h2>
+        	<a href="https://rinkeby.etherscan.io/address/0x1f848ea862bb31f662393923bed0e832d6284d70" target="_blank"><h4>Click to see all purchase list</h4></a>
             <div id="list1" class="resource-blocks text-left">
                 
             </div>
         </div>
     </div>
-	<div>
-		<div class="container"><h4 id="status">IPFS Node: offline</span></h4></div>
-	</div>
 </div>
 
 
 <script>
 
-  function buyTicket() {
-    toBuyNumber = "0x";
-    for(i=0;i<6;i++) {
-      n = document.getElementById("number"+i).value;
-      toBuyNumber += "0" + n;
-    }
-    alert(toBuyNumber);
+  function buyTicket(isRandom) {
 
     count = document.getElementById("count").value;
-    alert(count);
-    clp.buyTicket(toBuyNumber, "0x0", {value:count*1e16}, function(err,r){
-      console.log(r);
-      var span = document.getElementById('transaction_message');
-      span.innerHTML = ["购买后约1分钟生效。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
-      var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
-        if(err)console.log(err);
-        console.log(result);
-        event.stopWatching();
-      });
-    })
+    if(count <= 0) {
+      alert("invalid count: " + count);
+      return;
+    }
+
+    if(isRandom) {
+      clp.buyRandom("0x0", {value:count*1e16}, function(err,r){
+        if(!err) {
+          console.log(r);
+          var span = document.getElementById('transaction_message');
+          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
+          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
+            if(err)console.log(err);
+            console.log(result);
+            event.stopWatching();
+          });
+        }
+      })
+    }
+    else {
+      toBuyNumber = "0x";
+      for(i=0;i<6;i++) {
+        n = parseInt(document.getElementById("number"+i).value,10);
+        if((i<5 && (n<=0 || n>70)) || (i==5 && (n<=0 || n>25))) {
+          alert("wrong number: " + n);
+          return;
+        }
+        hexNum = n.toString(16);
+        if(hexNum.length < 2) hexNum = "0" + hexNum;
+        toBuyNumber += hexNum;
+      }
+
+      clp.buyTicket(toBuyNumber, "0x0", {value:count*1e16}, function(err,r){
+        if(!err) {
+          console.log(r);
+          var span = document.getElementById('transaction_message');
+          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
+          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
+            if(err)console.log(err);
+            console.log(result);
+            event.stopWatching();
+          });
+        }
+      })
+    }
   }
 
-  function sellToken(tokenCount) {
-    console.log("sell" + web3js.toWei(tokenCount, "ether"));
+  function sellToken() {
+    /*console.log("sell" + web3js.toWei(tokenCount, "ether"));
     cst.approveAndCall(register.address, web3js.toWei(tokenCount, "ether"), [], function(err, r) {
       console.log(r)
       register.Sell({fromBlock: "latest", toBlock: "pending" }).watch(function(err, r){
         console.log(JSON.stringify(r));
         updateCSTStatus();
       });
-    });
+    });*/
   }
 
   function updatePoolStatus() {
-    cst.totalSupply(function(err, result){
-          document.getElementById("token_supply").innerHTML = web3js.fromWei(result, "ether");
-          var totalSupply = result;
-
-          cst.balanceOf(registerAddress, function(err, result){
-            document.getElementById("market_token_count").innerHTML = web3js.fromWei((totalSupply - result), "ether");
-          });
-        });
-
-        cst.balanceOf(web3js.eth.accounts[0], function(err, result){
-          document.getElementById("token_count").innerHTML = web3js.fromWei(result, "ether");
-        });
-
-        register.getPrice(function(err, result){
-          document.getElementById("price").innerHTML = web3js.fromWei(result, "ether");
-
+    clp.retrievePoolInfo(function(err, result){
+          if(!err) {
+            document.getElementById("pooltokens").innerHTML = web3js.fromWei(result[0], "ether"); 
+            document.getElementById("poolblocknumber").innerHTML = result[1];
+            document.getElementById("allpooltokens").innerHTML = web3js.fromWei(result[2], "ether");            
+          }
+          
         });
   }
 
   function updateHistoryTickets() {
-    register.list(0,12, true, function(err,result){
-          if(err)console.log(err);
-          console.log(result);
-          var lines = [];
-          lines.push('<div class="row clearfix">');
-
-          //获得每个文件的预览图地址
-          for(i=0;i<result.length; i++){
-          	if(i!=0&&i%3==0) {
-          		lines.push('</div>');
-          		lines.push('<div class="row clearfix">');
-          	}
-
-            r = result[i];
-            crc = web3js.eth.contract(crcAbi).at(r);
-            crc.previewFileHash((function(contractAddress){
-              return function(err,result) {
-                if(err)console.log(err);
-                  console.log(result);
-                console.log(contractAddress);
-                
-                document.getElementById(contractAddress).innerHTML = 
-                ["<a target='_blank' id='link",contractAddress,"' href='javascript:buyFile(\"",contractAddress,"\")'>\
-                	<img src=",ipfsHost,result," alt=''>\
-                      <h5 id='title",contractAddress,"'class='hidden-xs ellipsis multiline title'>\
-                      点击购买（0.01 ether）</h5>\
-                      <div class='date'>文件地址：",contractAddress,"</div></a>"
-                      ].join("");
-                //console.log(document.getElementById(contractAddress).innerHTML);
-              }
-            })(r));
-          
-            lines.push(['<div class="col-4" id="',r,'"></div>'].join(''));
-          }
-          lines.push('</div>');
-          document.getElementById('list1').innerHTML = lines.join("")
-        });
   }
 
   //document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
   
   var web3js;
-  var clpAddress = "0xfa4b70aa18da8509072c03d650a415a128924a94";
+  //var clpAddress = "0xfa4b70aa18da8509072c03d650a415a128924a94";
+  var clpAddress = "0x1f848ea862bb31f662393923bed0e832d6284d70";
 
   if(typeof web3 != 'undefined') {
     web3js = new Web3(web3.currentProvider);
 
-    web3.version.getNetwork((err, netId) => {
+    web3js.version.getNetwork((err, netId) => {
       //alert(netId);
       if(netId < 0) {
-        document.getElementById('transaction_message').innerHTML="请到MetaMask切换到Rinkeby测试网络";
+        document.getElementById('transaction_message').innerHTML="Please switch MetaMask to Rinkeby";
       }
       else {
-        alert(web3js.eth.accounts);
+        //alert(web3js.eth.accounts);
       	if(web3js.eth.accounts.length == 0) {
-      		 document.getElementById('transaction_message').innerHTML="请解锁MetaMask钱包";
+      		 document.getElementById('transaction_message').innerHTML="Please Unlock Your MetaMask";
       	}
       	else {
       	   clp = web3js.eth.contract(clpAbi).at(clpAddress);
+           updatePoolStatus();
       	}
         
       }   
     });  
   }
   else {
-    document.getElementById('transaction_message').innerHTML="未检测到Ethereum钱包，请使用PC版Chrome浏览器并安装MetaMask，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>点击安装</a>";
+    document.getElementById('transaction_message').innerHTML="Can't Detect Ethereum Wallet，Please use MetaMask on PC version Chrome，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>Click to Install</a>";
     document.getElementById('files').style.display='none';
     document.getElementById('resources').style.display='none';
     document.getElementById('message1').style.display='none';

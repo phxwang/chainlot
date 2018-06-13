@@ -34,4 +34,8 @@ contract ChainLotPublic is owned {
 		buyRandom(0);
 	}
 
+	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens) {
+		return chainlot.retrievePoolInfo();
+	}
+
 }

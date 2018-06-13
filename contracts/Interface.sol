@@ -8,6 +8,7 @@ interface ChainLotInterface {
 	function buyTicket(bytes numbers, address referer) payable public;
 	function buyRandom(address referer) payable public;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
+	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens);
 }
 
 interface CLTokenInterface {
@@ -29,6 +30,7 @@ interface ChainLotTicketInterface {
 
 interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
+	function tokenSum() external view returns(uint tokenSum);
 	function buyTicket(bytes numbers, address referer) payable public;
 	function buyRandom(address referer) payable public;
 	//calculate jackpot 

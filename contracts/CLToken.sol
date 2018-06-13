@@ -160,7 +160,7 @@ contract TokenERC20 {
 
 contract CLToken is owned, TokenERC20 {
 
-    string public constant name = "ChainLotToken";
+    string public constant name = "CryptoLottoToken";
     string public constant symbol = "CLT";
 
     mapping (address => bool) public frozenAccount;
