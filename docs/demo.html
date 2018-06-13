@@ -3011,16 +3011,16 @@ textarea#abi-inerface:focus{
   border-top: 1px solid rgba(255,255,255,0.14);
 }
 .banner-title h2{
-  height: 100px;
-  line-height: 100px;
+  height: 45px;
+  line-height: 45px;
   /*border-top: 1px solid rgba(255,255,255,0.14);*/
   position: relative;
   background-color: #111114;
 }
 @media screen and (min-width: 768px) and (max-height: 670px){
   .banner-title h2{
-    height: 80px;
-    line-height: 80px;
+    height: 45px;
+    line-height: 45px;
     font-size: 26px;
   }
 }
@@ -4726,7 +4726,8 @@ var clpAbi = [
                     <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
                 </div>
                 <div class="banner-title hidden-xs">
-                    <h2 id="message1">Current Award Pool：<span id="pooltokens"></span> ETH，Next Award Block：<span id="poolblocknumber"></span>，Total Award Pool：<span id="allpooltokens"></span> ETH</h2>
+                    <h2 id="message1">Current Award Pool: <span id="pooltokens"></span> ETH, Total Award Pool: <span id="allpooltokens"></span> ETH</h2>
+                    <h2 id="message1">Next Award Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
                     <h5>（The SmartContract is deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click to get test coins</a>）</h5>
                 </div>
                 <h4 id="transaction_message"></h4>
@@ -4820,6 +4821,11 @@ var clpAbi = [
           }
           
         });
+
+    web3js.eth.getBlockNumber(function(err, result){
+      if(!err)
+        document.getElementById("currentblocknumber").innerHTML = result;
+    });
   }
 
   function updateHistoryTickets() {
