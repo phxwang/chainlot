@@ -19,6 +19,7 @@ module.exports = async function(deployer, network) {
 
 	}
 	else if (network == "rinkeby") {
+		web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "pheonix", 0)
 		await Promise.all([
 			deployer.deploy(Migrations),
 			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, 10000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]),
@@ -35,7 +36,7 @@ module.exports = async function(deployer, network) {
 		let chainlotpublic = await ChainLotPublic.deployed();
 
 		console.log("ChainLotPublic: " + chainlotpublic.address);
-		
+
 		await chainlotpublic.setChainLotAddress(chainlot.address);
 		await chainlotpublic.setCLTokenAddress(cltoken.address);
 		await chainlot.setChainLotTicketAddress(chainlotticket.address);

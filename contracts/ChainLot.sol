@@ -36,6 +36,7 @@ contract ChainLot is owned{
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
   	ChainLotPoolFactoryInterface public clpFactory;
+  	ChainLotPoolInterface public currentPool;
   
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
@@ -69,8 +70,6 @@ contract ChainLot is owned{
 		totalNumberCount = maxWhiteNumberCount + maxYellowNumberCount;
 		awardRulesArray = _awardRulesArray;
 	}
-
-	ChainLotPoolInterface public currentPool;
 
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(latestPoolBlockNumber,maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
@@ -234,7 +233,7 @@ contract ChainLot is owned{
   }
 
   function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens)  {
-  	poolTokens = currentPool.tokenSum();
+  	poolTokens = clToken.balanceOf(currentPool);
   	poolBlockNumber = currentPool.poolBlockNumber();
   	totalPoolTokens = tokenSum;
   }

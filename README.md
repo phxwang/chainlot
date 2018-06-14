@@ -2,12 +2,12 @@
 
 
 ## DEMO
- * ChainLotPublic:0xfa4b70aa18da8509072c03d650a415a128924a94
+ * http://rinkeby.cryptolotto6.org/demo.html
 
 ## Feature
  * 购买指定号码（5x70 + 1x25）0.01ETH/ticket
  * 每5万个block抽奖一次，按照megamillions的规则
-  * 5+1 jackpot
+  * 5+1 jackpot all
   * 5+0 5000 ETH
   * 4+1 50 ETH
   * 4+0 2.5 ETH
@@ -59,8 +59,10 @@
  		* 随机 done
  	* 查看总奖池及总历史奖池 P2 done
  	* 查看购买历史 P2 done
+ 	* 用户邀请用户 P1
  	* 查看个人token P2
- * 支持逻辑升级 
+ * 支持逻辑升级
+ 	* 分拆存储层和表现层，便于升级
  * 优化gas使用
  * 完善测试用例，正向反向都要测到
  * 完整的运营脚本
