@@ -3,7 +3,7 @@ var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 
 module.exports = async function(callback) {
 	console.log("from: " + web3.eth.accounts[0]);
-	web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "pheonix", 0)
+	web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "Z7YFSFD5927v7jW5ig", 0)
 
 	try {
 		let chainlot = await ChainLot.deployed();
