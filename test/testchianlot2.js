@@ -28,23 +28,23 @@ contract("ChainLot", async (accounts) => {
 	for(i=0; i<5; i++) {
 		console.log("new pool progress: " + i);
 		let r = await chainlot.newPool();
-		console.log(JSON.stringify(r.logs))
+		//console.log(JSON.stringify(r.logs))
 	}
 
 	r = await cltoken.sendTransaction({from:web3.eth.accounts[5], value:5e11});
-	console.log(JSON.stringify(r.logs));
+	//console.log(JSON.stringify(r.logs));
 
 	r = await cltoken.approveAndCall(chainlotpublic.address, 1e11, "0x020101", {from:web3.eth.accounts[5]});
-	console.log(JSON.stringify(r.logs));
+	//console.log(JSON.stringify(r.logs));
 
 	cl = await chainlotpublic.chainlot();
-	console.log("cl: " + cl);
+	//console.log("cl: " + cl);
 
 	r = await chainlotpublic.sendTransaction({from:web3.eth.accounts[5], value:2e11});
-	console.log(JSON.stringify(r.logs));
+	//console.log(JSON.stringify(r.logs));
 
 	r = await chainlotticket.ticketsOfOwner(web3.eth.accounts[5]);
-	console.log("tickets: " + r);
+	//console.log("tickets: " + r);
 
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
@@ -61,8 +61,10 @@ contract("ChainLot", async (accounts) => {
 		console.log("prepare awards");
 		r = await pool.prepareAwards();
 		console.log(JSON.stringify(r.logs));
+
+		return;
 		
-		console.log("match awards, progress: " + i*100);
+		console.log("match awards, progress: " + 100);
 		r = await pool.matchAwards(100);
 		console.log(JSON.stringify(r.logs));
 		

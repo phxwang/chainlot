@@ -3002,13 +3002,11 @@ textarea#abi-inerface:focus{
   }
 }
 .banner-title{
-  position: absolute;
   bottom: 0;
   text-align: center;
   width: 100%;
   left: 0;
   background-color: #111114;
-  border-top: 1px solid rgba(255,255,255,0.14);
 }
 .banner-title h2{
   height: 45px;
@@ -4696,7 +4694,7 @@ var clpAbi = [
                     </div>
                     <div class="navigation">
                         <ul>
-                            <li><a href="https://rinkeby.etherscan.io/token/0xa430b7cd6e4d2fcd35197e94e00b0b6a2373e617#balances" target="_blank">CLT Holders </a>
+                            <li><a href="https://rinkeby.etherscan.io/token/0xa0f2321754804c63326b4113c4fe4214e50df392#balances" target="_blank">CLT Holders </a>
                             </li>
                             <li><a href="javascript:sellToken()">Sell CLT</a>
                             </li>
@@ -4708,7 +4706,7 @@ var clpAbi = [
         <div class="middle-content">
             <div class="container">
                 <div class="message">
-                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 10000 block. All the prize will be returned as CryptoLottoToken(CLT).
+                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 1000 block. All the prize will be returned as CryptoLottoToken(CLT).
                   <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
                 </div>
                 <div class="cta-group" id="cta-group">
@@ -4723,22 +4721,23 @@ var clpAbi = [
                     <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
                     <button onclick="javascript:buyTicket(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Purchase Tickets </button>
                     <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
+                    <h4>Send this link to friends to get free tickets: <span id="invite_link"></span></h4>
+                    <h4 id="transaction_message"></h4>
                 </div>
                 <div class="banner-title hidden-xs">
                     <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH, Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
                 </div>
-                <h4 id="transaction_message"></h4>
             </div>
         </div>
     </div>
 
 
     <!--Explore cs section starts-->
-    <div id="resources" class="explore-cs-main">
+    <div id="resources">
         <div class="container">
             <h2> Purchase List</h2>
-        	<a href="https://rinkeby.etherscan.io/address/0x1f848ea862bb31f662393923bed0e832d6284d70" target="_blank"><h4>Click to see all purchase list</h4></a>
+        	<a href="https://rinkeby.etherscan.io/address/0x630517187c1a1046a19e627777e902aeb23d10cf" target="_blank"><h4>Click to see all purchase list</h4></a>
             <div id="list1" class="resource-blocks text-left">
             </div>
         </div>
@@ -4762,6 +4761,13 @@ var clpAbi = [
 
   function buyTicket(isRandom) {
 
+    hash = window.location.hash.substring(1);
+    console.log("hash: " + hash + ", length" + hash.length); 
+    referer = "0x0";
+    if(hash.length == 42) referer = hash;
+
+    console.log("referer: " + referer);
+
     count = document.getElementById("count").value;
     if(count <= 0) {
       alert("invalid count: " + count);
@@ -4769,7 +4775,7 @@ var clpAbi = [
     }
 
     if(isRandom) {
-      clp.buyRandom("0x0", {value:count*1e16}, function(err,r){
+      clp.buyRandom(referer, {value:count*1e16}, function(err,r){
         if(!err) {
           console.log(r);
           var span = document.getElementById('transaction_message');
@@ -4795,7 +4801,7 @@ var clpAbi = [
         toBuyNumber += hexNum;
       }
 
-      clp.buyTicket(toBuyNumber, "0x0", {value:count*1e16}, function(err,r){
+      clp.buyTicket(toBuyNumber, referer, {value:count*1e16}, function(err,r){
         if(!err) {
           console.log(r);
           var span = document.getElementById('transaction_message');
@@ -4803,6 +4809,8 @@ var clpAbi = [
           var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
             if(err)console.log(err);
             console.log(result);
+            var span = document.getElementById('transaction_message');
+            span.innerHTML = ["Ticket Number: ", result].join("");
             event.stopWatching();
           });
         }
@@ -4824,6 +4832,7 @@ var clpAbi = [
   function updatePoolStatus() {
     clp.retrievePoolInfo(function(err, result){
           if(!err) {
+            console.log(JSON.stringify(result));
             document.getElementById("pooltokens").innerHTML = web3js.fromWei(result[0], "ether"); 
             document.getElementById("poolblocknumber").innerHTML = result[1];
             document.getElementById("allpooltokens").innerHTML = web3js.fromWei(result[2], "ether");            
@@ -4835,6 +4844,10 @@ var clpAbi = [
       if(!err)
         document.getElementById("currentblocknumber").innerHTML = result;
     });
+
+    link = window.location.href;
+    if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
+    document.getElementById("invite_link").innerHTML =  link + "#" + web3js.eth.accounts[0];
   }
 
   function updateHistoryTickets() {
@@ -4845,7 +4858,8 @@ var clpAbi = [
   
   var web3js;
   //var clpAddress = "0xfa4b70aa18da8509072c03d650a415a128924a94";
-  var clpAddress = "0x1f848ea862bb31f662393923bed0e832d6284d70";
+  //var clpAddress = "0x1f848ea862bb31f662393923bed0e832d6284d70";
+  var clpAddress = "0x630517187c1a1046a19e627777e902aeb23d10cf";
 
   if(typeof web3 != 'undefined') {
     web3js = new Web3(web3.currentProvider);

@@ -22,7 +22,7 @@ module.exports = async function(deployer, network) {
 		web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "Z7YFSFD5927v7jW5ig", 0)
 		await Promise.all([
 			deployer.deploy(Migrations),
-			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, 10000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]),
+			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, 1000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(CLToken, 1e12),
 			deployer.deploy(ChainLotPoolFactory),

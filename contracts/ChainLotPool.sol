@@ -65,6 +65,7 @@ contract ChainLotPool is owned{
   	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
   	event TransferUnawarded(address from, address to, uint value);
+  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift);
 
   	function ChainLotPool(uint _poolBlockNumber,
   						uint8 _maxWhiteNumber, 
@@ -174,7 +175,7 @@ contract ChainLotPool is owned{
 	function prepareAwards() onlyOwner external {
 		require(!preparedAwards);
 		require(block.number > poolBlockNumber);
-		jackpotNumbers = genRandomNumbers(poolBlockNumber, 7);
+		jackpotNumbers = genRandomNumbers(poolBlockNumber, 3);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
 		preparedAwards = true;
 		/*uint bytesLength = 32;
@@ -383,6 +384,8 @@ contract ChainLotPool is owned{
 		uint hash = uint(block.blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
 		uint random = hash * addressInt;
+		GenRandomNumbers(random, blockNumber, hash, addressInt, shift);
+		require(random != 0);
 		random = random >> shift;
 		bytes memory numbers = new bytes(maxWhiteNumberCount+maxYellowNumberCount);
 		for(uint8 i=0;i<maxWhiteNumberCount;i++) {

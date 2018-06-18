@@ -52,6 +52,7 @@ contract ChainLot is owned{
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
   	event TransferUnawarded(address from, address to, uint value);
   	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
+  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift);
   	event LOG(uint msg);
 
 	function ChainLot(uint8 _maxWhiteNumber, 
@@ -232,10 +233,11 @@ contract ChainLot is owned{
   	return poolCuts;
   }
 
-  function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens)  {
+  function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount)  {
   	poolTokens = clToken.balanceOf(currentPool);
   	poolBlockNumber = currentPool.poolBlockNumber();
   	totalPoolTokens = tokenSum;
+  	poolCount = chainlotPools.length;
   }
 
 }
