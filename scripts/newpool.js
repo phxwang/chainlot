@@ -9,7 +9,7 @@ module.exports = async function(callback) {
 	try {
 		let chainlot = await ChainLot.deployed();
 
-		for(i=0; i<50; i++) {
+		for(i=0; i<5; i++) {
 			console.log("new pool progress: " + i);
 			let r = await chainlot.newPool();
 			console.log(JSON.stringify(r.logs))

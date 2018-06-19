@@ -61,8 +61,6 @@ contract("ChainLot", async (accounts) => {
 		console.log("prepare awards");
 		r = await pool.prepareAwards();
 		console.log(JSON.stringify(r.logs));
-
-		return;
 		
 		console.log("match awards, progress: " + 100);
 		r = await pool.matchAwards(100);

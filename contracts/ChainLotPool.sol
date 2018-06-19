@@ -22,6 +22,7 @@ contract ChainLotPool is owned{
 	bool public preparedAwards;
 	uint public historyCut;
 	uint public tokenSum;
+	uint public stage; //TODO: use stage to store drawing status
 	
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
@@ -65,7 +66,7 @@ contract ChainLotPool is owned{
   	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
   	event TransferUnawarded(address from, address to, uint value);
-  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift);
+  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
 
   	function ChainLotPool(uint _poolBlockNumber,
   						uint8 _maxWhiteNumber, 
@@ -175,7 +176,7 @@ contract ChainLotPool is owned{
 	function prepareAwards() onlyOwner external {
 		require(!preparedAwards);
 		require(block.number > poolBlockNumber);
-		jackpotNumbers = genRandomNumbers(poolBlockNumber, 3);
+		jackpotNumbers = genRandomNumbers(poolBlockNumber, 8);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
 		preparedAwards = true;
 		/*uint bytesLength = 32;
@@ -379,12 +380,13 @@ contract ChainLotPool is owned{
       	}
 	}
 
-	function genRandomNumbers(uint blockNumber, uint shift) internal view returns(bytes _numbers){
+	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){
 		require(blockNumber < block.number);
 		uint hash = uint(block.blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
-		uint random = hash * addressInt;
-		GenRandomNumbers(random, blockNumber, hash, addressInt, shift);
+		uint256 random = addressInt * hash;
+		random = uint256(keccak256(block.timestamp, block.difficulty, hash, addressInt));
+		GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
 		require(random != 0);
 		random = random >> shift;
 		bytes memory numbers = new bytes(maxWhiteNumberCount+maxYellowNumberCount);

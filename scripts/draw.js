@@ -13,25 +13,23 @@ module.exports = async function(callback) {
 		let chainlotticket = await ChainLotTicket.deployed();
 		let cltoken = await CLToken.deployed();
 
-		for(i=0; i<100; i++) {
+		for(i=2; i<100; i++) {
 			let address = await chainlot.chainlotPools(i);
 			if(address == "0x") break;
 
 			let pool = await ChainLotPool.at(address);
 			let token = await cltoken.balanceOf(address);
 			let prepared = await pool.preparedAwards();
+			let currentPoolIndex = await chainlot.currentPoolIndex();
+				
 
 			currentBlockNumber = web3.eth.blockNumber;
-			poolBlockNumber = await pool.poolBlockNumber();
+			let poolBlockNumber = await pool.poolBlockNumber();
 
 			if(token != 0 && !prepared && poolBlockNumber < currentBlockNumber) {
 				console.log(["pool ", i, "(", address, ")", ", pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", drawed: ", prepared].join(""));
-				let currentPoolIndex = await chainlot.currentPoolIndex();
-				let poolAddress = await chainlot.chainlotPools(i);
-				let pool = await ChainLotPool.at(poolAddress);
-				console.log("award pool: " + poolAddress);
-
+				
 				console.log("prepare awards");
 				r = await pool.prepareAwards();
 				console.log(JSON.stringify(r.logs));
@@ -62,11 +60,13 @@ module.exports = async function(callback) {
 				r = await pool.sendAwards(100)
 				console.log(JSON.stringify(r.logs));
 
+			}
+
+			if(token!=0 && prepared) {
 				console.log("transfer unawarded");
 				let nextPoolAddress = await chainlot.chainlotPools(currentPoolIndex);
 				r = await pool.transferUnawarded(nextPoolAddress);
 				console.log(JSON.stringify(r.logs));
-
 			}
 		}
 

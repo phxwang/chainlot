@@ -52,7 +52,7 @@ contract ChainLot is owned{
   	event GenerateNewPool(uint currentPoolBlockNumber, uint nextPoolBlockNumber, uint length);
   	event TransferUnawarded(address from, address to, uint value);
   	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
-  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift);
+  	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
   	event LOG(uint msg);
 
 	function ChainLot(uint8 _maxWhiteNumber, 
