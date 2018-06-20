@@ -392,7 +392,7 @@ contract ChainLotPool is owned{
       		TransferUnawarded(address(this), to, toBeTransfer);
       	}
 
-      	stage == DrawingStage.UNAWARED_TRANSFERED;
+      	stage = DrawingStage.UNAWARED_TRANSFERED;
 	}
 
 	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){

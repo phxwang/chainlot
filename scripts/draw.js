@@ -26,52 +26,75 @@ module.exports = async function(callback) {
 			currentBlockNumber = web3.eth.blockNumber;
 			let poolBlockNumber = await pool.poolBlockNumber();
 
-			if(token != 0 && stage == 0 && poolBlockNumber < currentBlockNumber) {
+			if(token != 0 && stage < 8 && poolBlockNumber < currentBlockNumber) {
 				console.log(["pool ", i, "(", address, ")", ", pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
-				
-				console.log("prepare awards");
-				r = await pool.prepareAwards();
-				console.log(JSON.stringify(r.logs));
 
-				if(r.logs.length != 2) break;
-
-				ticketCount = r.logs[1].args.allTicketsCount;
-				
-				//TODO: use ticket number to determine match round
-				console.log("match awards, ticketCount: " + ticketCount);
-				r = await pool.matchAwards(ticketCount);
-				console.log(JSON.stringify(r.logs));
-
-
-				for(i =0 ; i<8 ; i++) {
-					console.log("calculate awards, rule id " + i);
-					r = await pool.calculateAwards(i, 100)
-					console.log(JSON.stringify(r.logs));
+				while(stage < 8) {
+					switch(parseInt(stage)) {
+						case 0:
+							console.log("prepare awards");
+							r = await pool.prepareAwards();
+							console.log(JSON.stringify(r.logs));
+							break;
+						case 1:
+							ticketCount = await pool.getAllTicketsCount();
+							console.log("match awards, ticketCount: " + ticketCount);
+							r = await pool.matchAwards(ticketCount);
+							console.log(JSON.stringify(r.logs));
+							break;
+						case 2:
+							for(i =0 ; i<9 ; i++) {
+								console.log("calculate awards, rule id " + i);
+								r = await pool.calculateAwards(i, 100);
+								console.log(JSON.stringify(r.logs));
+							}
+							break;
+						case 3:
+							console.log("split awards");
+							r = await pool.splitAward();
+							console.log(JSON.stringify(r.logs));
+							break;
+						case 4:
+							for(i =0 ; i<9 ; i++) {
+								console.log("distribute awards, rule id " + i);
+								r = await pool.distributeAwards(i, 100);
+								console.log(JSON.stringify(r.logs));
+							}
+							break;
+						case 5:
+							console.log("send awards");
+							r = await pool.sendAwards(100)
+							console.log(JSON.stringify(r.logs));
+							break;
+						case 6:
+							console.log("transfer unawarded");
+							let nextPoolAddress = await chainlot.chainlotPools(currentPoolIndex);
+							r = await pool.transferUnawarded(nextPoolAddress);
+							console.log(JSON.stringify(r.logs));
+							break;
+						default:
+							return;
+					}
+					stage = await showStage(pool);
 				}
+				
 
-				console.log("split awards");
-				r = await pool.splitAward();
-				console.log(JSON.stringify(r.logs));
+			
+
+			
+
+				
 
 
-				for(i =0 ; i<8 ; i++) {
-					console.log("distribute awards, rule id " + i);
-					r = await pool.distributeAwards(i, 100);
-					console.log(JSON.stringify(r.logs));
-				}
+				
 
-				console.log("send awards");
-				r = await pool.sendAwards(100)
-				console.log(JSON.stringify(r.logs));
+				
 
 			}
 
 			if(token!=0 && stage > 0) {
-				console.log("transfer unawarded");
-				let nextPoolAddress = await chainlot.chainlotPools(currentPoolIndex);
-				r = await pool.transferUnawarded(nextPoolAddress);
-				console.log(JSON.stringify(r.logs));
+				
 			}
 		}
 
@@ -80,4 +103,10 @@ module.exports = async function(callback) {
 	} catch(e) {
 		console.log(e);
 	}
+}
+
+var showStage = async function(pool) {
+	let stage = await pool.stage();
+	console.log("stage: " + stage);
+	return stage;
 }
