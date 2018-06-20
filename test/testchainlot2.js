@@ -61,35 +61,57 @@ contract("ChainLot", async (accounts) => {
 		console.log("prepare awards");
 		r = await pool.prepareAwards();
 		console.log(JSON.stringify(r.logs));
+
+		await showStage(pool);
 		
-		console.log("match awards, progress: " + 100);
-		r = await pool.matchAwards(100);
-		console.log(JSON.stringify(r.logs));
+		for(i=0; i<10; i++) {
+			console.log("match awards, progress: " + i*5);
+			r = await pool.matchAwards(5);
+			console.log(JSON.stringify(r.logs));
+			stage = await showStage(pool);
+			if(stage == 2) break;
+		}
+
+		
 		
 		for(i =0 ; i<2 ; i++) {
 			console.log("calculate awards, rule id " + i);
 			r = await pool.calculateAwards(i, 100)
 			console.log(JSON.stringify(r.logs));
+			await showStage(pool);
 		}
 
 		console.log("split awards");
 		r = await pool.splitAward();
 		console.log(JSON.stringify(r.logs));
 
+		await showStage(pool);
+
 
 		for(i =0 ; i<2 ; i++) {
 			console.log("distribute awards, rule id " + i);
 			r = await pool.distributeAwards(i, 100);
 			console.log(JSON.stringify(r.logs));
+
+			await showStage(pool);
 		}
 
-		console.log("send awards");
-		r = await pool.sendAwards(100)
-		console.log(JSON.stringify(r.logs));
+		for(i=0; i<2; i++) {
+			console.log("send awards: " + i*5);
+			r = await pool.sendAwards(5)
+			console.log(JSON.stringify(r.logs));
+			stage = await showStage(pool);
+			if(stage == 6) break;
+		}
+		
+
+		await showStage(pool);
 
 		console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
 		let clbalance = await cltoken.balanceOf(cltoken.address);
 		console.log("cltoken balance of cltoken: " + web3.fromWei(clbalance, 'ether'));
+
+		await showStage(pool);
 
 		let poolSize = await chainlot.currentPoolIndex();
 		for(i=0; i<=poolSize; i++) {
@@ -102,6 +124,8 @@ contract("ChainLot", async (accounts) => {
 		let nextPoolAddress = await chainlot.chainlotPools(pi+1);
 		r = await pool.transferUnawarded(nextPoolAddress);
 		console.log(JSON.stringify(r.logs));
+
+		await showStage(pool);
 
 		for(i=0; i<=poolSize; i++) {
 			let address = await chainlot.chainlotPools(i);
@@ -133,6 +157,12 @@ contract("ChainLot", async (accounts) => {
 	console.log("total token sum: " + web3.fromWei(results[2], 'ether'));
 
 })
+
+var showStage = async function(pool) {
+	let stage = await pool.stage();
+	console.log("stage: " + stage);
+	return stage;
+}
 
 
 

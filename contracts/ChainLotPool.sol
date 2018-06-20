@@ -61,6 +61,7 @@ contract ChainLotPool is owned{
 	event ToBeAward(bytes jackpotNumbers, bytes32 ticketNumber, uint ticketCount, uint ticketId, address user, uint blockNumber, uint awardValue);
 	event MatchAwards(bytes jackpotNumbers, uint lastMatchedTicketIndex, uint endIndex, uint allTicketsCount);
 	event MatchRule(bytes jackpotNumbers, bytes32 ticketNumber, uint ticketCount, uint ticketId, uint blockNumber, uint ruleId, uint ruleEther);
+	event DistributeAwards(uint ruleId, uint toDistCount, uint distributedIndex, uint ticketIdsLength, uint awardRulesLength);
   	event TransferAward(address winner, uint value);
   	event TransferDevCut(address dev, uint value);
   	event TransferHistoryCut(address user, uint value);
@@ -192,7 +193,7 @@ contract ChainLotPool is owned{
 	//match winners
 	function matchAwards(uint8 toMatchCount) onlyOwner external {
 		require(stage == DrawingStage.PRPARED);
-		//require(lastMatchedTicketIndex < allTicketsId.length);
+		
 		bytes memory mJackpotNumbers = jackpotNumbers;
 		//statistic winners
 		uint endIndex = lastMatchedTicketIndex + toMatchCount;
@@ -222,9 +223,6 @@ contract ChainLotPool is owned{
 		        //match one rule!
 		        winnerTickets[ruleId].ticketIds.push(ticketId);
 		        MatchRule(mJackpotNumbers, numbers, count, ticketId, blockNumber, ruleId, awardRules[ruleId].awardEther);
-			}
-			else {
-				//MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, 0);
 			}
 		}
 
@@ -265,10 +263,10 @@ contract ChainLotPool is owned{
 
 	        awardResults[ruleId].totalWinnersAward += totalWinnersAward;
 	        awardResults[ruleId].totalTicketCount += totalTicketCount;
-	      }
+			//move pointer
+	     	winnerTickets[ruleId].processedIndex = endIndex;
 	      
-	      //move pointer
-	      winnerTickets[ruleId].processedIndex = endIndex;
+	      }
 
 	      if(ruleId == awardRules.length -1 && winnerTickets[ruleId].processedIndex == winnerTickets[ruleId].ticketIds.length) {
 	      	stage = DrawingStage.CALCULATED;
@@ -297,7 +295,8 @@ contract ChainLotPool is owned{
   		//validate last step
 	  	//bytes memory jackpotNumbers = jackpotNumbers;
 	  	uint endIndex = winnerTickets[ruleId].distributedIndex + toDistCount;
-	  	if(endIndex > winnerTickets[ruleId].ticketIds.length) endIndex = winnerTickets[ruleId].ticketIds.length;
+	  	uint ticketIdsLength = winnerTickets[ruleId].ticketIds.length;
+	  	if(endIndex > ticketIdsLength) endIndex = ticketIdsLength;
   		if(awardResults[ruleId].totalTicketCount > 0) {
   			for(uint j=winnerTickets[ruleId].distributedIndex;j<endIndex; j++){
 	          uint ticketId = winnerTickets[ruleId].ticketIds[j];
@@ -310,8 +309,11 @@ contract ChainLotPool is owned{
 	    	}
   		}
 	  	winnerTickets[ruleId].distributedIndex = endIndex;
-	  	if(ruleId == awardRules.length -1 && winnerTickets[ruleId].distributedIndex == winnerTickets[ruleId].ticketIds.length) {
-	  		stage == DrawingStage.DISTRIBUTED;
+
+	  	DistributeAwards(ruleId, toDistCount, endIndex, ticketIdsLength, awardRules.length);
+
+	  	if(ruleId == awardRules.length -1 && endIndex == ticketIdsLength) {
+	  		stage = DrawingStage.DISTRIBUTED;
 	  	}
   	}
 

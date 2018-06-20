@@ -15,11 +15,11 @@ module.exports = async function(callback) {
 
 			let pool = await ChainLotPool.at(address);
 			let token = await cltoken.balanceOf(address);
-			let prepared = await pool.preparedAwards();
+			let stage = await pool.stage();
 			let poolBlockNumber = await pool.poolBlockNumber();
 			if(token != 0)
 				console.log(["pool ", i, "(", address, ")(", poolBlockNumber, "), pool ether: ", 
-					web3.fromWei(token, 'ether'), " ETH", ", drawed: ", prepared].join(""));
+					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
 		}
 
 

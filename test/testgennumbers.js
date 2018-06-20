@@ -4,7 +4,7 @@ var CLToken = artifacts.require("./CLToken.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
-
+return;
 contract("ChainLot", async (accounts) => {
 	console.log("from: " + web3.eth.accounts[0]);
 	
