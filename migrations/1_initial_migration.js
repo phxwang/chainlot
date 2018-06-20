@@ -10,8 +10,8 @@ module.exports = async function(deployer, network) {
 	if(network == "develop") {
 		await Promise.all([
 			deployer.deploy(Migrations),
-	 	   	//deployer.deploy(ChainLot, 2, 2, 2, 1, 1e10, 10, [0,1,1e10, 2,1,2e16]),
-			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e10, 10, [0,1,1e10, 2,1,2e16]),
+	 	   	deployer.deploy(ChainLot, 2, 2, 2, 1, 1e10, 10, [0,1,1e10, 2,1,2e16]),
+			//deployer.deploy(ChainLot, 70, 25, 5, 1, 1e10, 10, [0,1,1e10, 2,1,2e16]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(CLToken, 100000000000),
 			deployer.deploy(ChainLotPoolFactory),

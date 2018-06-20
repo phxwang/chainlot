@@ -19,11 +19,13 @@ contract ChainLotPool is owned{
 	
 	uint public lastMatchedTicketIndex;
 	bytes public jackpotNumbers;
-	bool public preparedAwards;
 	uint public historyCut;
 	uint public tokenSum;
-	uint public stage; //TODO: use stage to store drawing status
-	
+
+	enum DrawingStage {INITIED, PRPARED, MATCHED, CALCULATED, SPLITED, DISTRIBUTED, SENT, UNAWARED_TRANSFERED}
+	DrawingStage public stage = DrawingStage.INITIED; 
+
+
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
   	mapping(uint => winnerTicketQueue) public distributeTickets;
@@ -116,6 +118,7 @@ contract ChainLotPool is owned{
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public{
+		require(stage == DrawingStage.INITIED);
 		require(block.number < poolBlockNumber);
 		require(address(clToken) != 0);
 	    uint ticketCount = msg.value/etherPerTicket;
@@ -174,11 +177,11 @@ contract ChainLotPool is owned{
 
 	//calculate jackpot 
 	function prepareAwards() onlyOwner external {
-		require(!preparedAwards);
+		require(stage == DrawingStage.INITIED);
 		require(block.number > poolBlockNumber);
 		jackpotNumbers = genRandomNumbers(poolBlockNumber, 8);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
-		preparedAwards = true;
+		stage = DrawingStage.PRPARED;
 		/*uint bytesLength = 32;
     	if(bytesLength > jackpotNumbers.length) bytesLength = jackpotNumbers.length;
     	for(uint i=0; i<bytesLength; i++) {
@@ -188,14 +191,12 @@ contract ChainLotPool is owned{
 
 	//match winners
 	function matchAwards(uint8 toMatchCount) onlyOwner external {
-		require(preparedAwards);
+		require(stage == DrawingStage.PRPARED);
 		//require(lastMatchedTicketIndex < allTicketsId.length);
 		bytes memory mJackpotNumbers = jackpotNumbers;
 		//statistic winners
 		uint endIndex = lastMatchedTicketIndex + toMatchCount;
 		if(endIndex > allTicketsId.length) endIndex = allTicketsId.length;
-
-		MatchAwards(mJackpotNumbers, lastMatchedTicketIndex, endIndex, allTicketsId.length);
 
 		for(uint i = lastMatchedTicketIndex; i < endIndex; i ++) {
 			uint ticketId = allTicketsId[i];
@@ -225,13 +226,15 @@ contract ChainLotPool is owned{
 			else {
 				//MatchRule(jackpotNumbers, allTickets[i].numbers, allTickets[i].count, allTickets[i].user, allTickets[i].blockNumber, ruleId, 0);
 			}
-			
-			lastMatchedTicketIndex = i+1;
 		}
-	}
 
-	function getAllTicketsCount() external view returns(uint count){
-		return allTicketsId.length;
+		lastMatchedTicketIndex = endIndex;
+
+		MatchAwards(mJackpotNumbers, lastMatchedTicketIndex, endIndex, allTicketsId.length);
+
+		if(lastMatchedTicketIndex == allTicketsId.length) {
+			stage = DrawingStage.MATCHED;
+		}
 	}
 
   	struct awardResultByRule {
@@ -241,7 +244,7 @@ contract ChainLotPool is owned{
   	mapping(uint => awardResultByRule) awardResults;
 
   	function calculateAwards(uint8 ruleId, uint8 toCalcCount) onlyOwner external {
-	  	require(lastMatchedTicketIndex == allTicketsId.length);
+	  	require(stage == DrawingStage.MATCHED);
 	  	require(block.number >= poolBlockNumber);
 	  	//calculate winners award, from top to bottom, top winners takes all
 	    
@@ -267,12 +270,16 @@ contract ChainLotPool is owned{
 	      //move pointer
 	      winnerTickets[ruleId].processedIndex = endIndex;
 
+	      if(ruleId == awardRules.length -1 && winnerTickets[ruleId].processedIndex == winnerTickets[ruleId].ticketIds.length) {
+	      	stage = DrawingStage.CALCULATED;
+	      }
+
   	}
 
   	function splitAward() onlyOwner external {
+  		require(stage == DrawingStage.CALCULATED);
   		uint totalBalance = clToken.balanceOf(this);
   		for(uint8 i=0; i<awardRules.length; i++) {
-  			require(winnerTickets[i].processedIndex == winnerTickets[i].ticketIds.length);
   			if(totalBalance >=  awardResults[i].totalWinnersAward) {
 	          totalBalance -= awardResults[i].totalWinnersAward;
 	        }
@@ -282,10 +289,11 @@ contract ChainLotPool is owned{
 	        }
 	        SplitAward(i, awardResults[i].totalWinnersAward, totalBalance);
   		}
-
+  		stage = DrawingStage.SPLITED;
   	}
 
   	function distributeAwards(uint8 ruleId, uint toDistCount) onlyOwner external {
+  		require(stage == DrawingStage.SPLITED);
   		//validate last step
 	  	//bytes memory jackpotNumbers = jackpotNumbers;
 	  	uint endIndex = winnerTickets[ruleId].distributedIndex + toDistCount;
@@ -302,12 +310,17 @@ contract ChainLotPool is owned{
 	    	}
   		}
 	  	winnerTickets[ruleId].distributedIndex = endIndex;
+	  	if(ruleId == awardRules.length -1 && winnerTickets[ruleId].distributedIndex == winnerTickets[ruleId].ticketIds.length) {
+	  		stage == DrawingStage.DISTRIBUTED;
+	  	}
   	}
 
   	function sendAwards(uint toAwardCount) onlyOwner external {
+  		require(stage == DrawingStage.DISTRIBUTED);
+
 		uint endIndex = awardIndex + toAwardCount;
 		if(endIndex > toBeAward.length) endIndex = toBeAward.length;
-		//TODO: validate last step
+		
 	  	uint devCut = 0;
 	  	uint _historyCut = 0;
 	  	uint hCut = 0;
@@ -333,6 +346,9 @@ contract ChainLotPool is owned{
 			AddHistoryCut(_historyCut, historyCut);
 		}
 	    awardIndex = endIndex;
+	    if(awardIndex == toBeAward.length) {
+	    	stage = DrawingStage.SENT;
+	    }
 	}
 
 	function withdrawHistoryCut(uint[] ticketIds) external {
@@ -366,18 +382,15 @@ contract ChainLotPool is owned{
 	}
 
 	function transferUnawarded(address to) onlyOwner external {
-		//require(preparedAwards);
-      	//require(awardIndex == toBeAward.length);
-      	//require(lastMatchedTicketIndex == allTicketsId.length);
+		require(stage == DrawingStage.SENT);
 
-      	for(uint i=0; i<awardRules.length; i++){
-          	//require(winnerTickets[i].distributedIndex == winnerTickets[i].ticketIds.length);
-      	}
       	uint toBeTransfer = clToken.balanceOf(this) - historyCut;
       	if(toBeTransfer > 0) {
       		clToken.transfer(to, toBeTransfer);
       		TransferUnawarded(address(this), to, toBeTransfer);
       	}
+
+      	stage == DrawingStage.UNAWARED_TRANSFERED;
 	}
 
 	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){
@@ -401,6 +414,10 @@ contract ChainLotPool is owned{
 
 		}
 		return numbers;
+	}
+
+	function getAllTicketsCount() external view returns(uint count){
+		return allTicketsId.length;
 	}
 
 }

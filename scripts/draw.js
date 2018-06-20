@@ -13,7 +13,7 @@ module.exports = async function(callback) {
 		let chainlotticket = await ChainLotTicket.deployed();
 		let cltoken = await CLToken.deployed();
 
-		for(i=2; i<100; i++) {
+		for(i=0; i<100; i++) {
 			let address = await chainlot.chainlotPools(i);
 			if(address == "0x") break;
 
@@ -33,11 +33,16 @@ module.exports = async function(callback) {
 				console.log("prepare awards");
 				r = await pool.prepareAwards();
 				console.log(JSON.stringify(r.logs));
+
+				if(r.logs.length != 2) break;
+
+				ticketCount = r.logs[1].args.allTicketsCount;
 				
 				//TODO: use ticket number to determine match round
-				console.log("match awards, progress: " + 100);
-				r = await pool.matchAwards(100);
+				console.log("match awards, ticketCount: " + ticketCount);
+				r = await pool.matchAwards(ticketCount);
 				console.log(JSON.stringify(r.logs));
+
 				
 				for(i =0 ; i<8 ; i++) {
 					console.log("calculate awards, rule id " + i);
