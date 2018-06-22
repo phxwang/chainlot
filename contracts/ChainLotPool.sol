@@ -22,7 +22,7 @@ contract ChainLotPool is owned{
 	uint public historyCut;
 	uint public tokenSum;
 
-	enum DrawingStage {INITIED, PRPARED, MATCHED, CALCULATED, SPLITED, DISTRIBUTED, SENT, UNAWARED_TRANSFERED}
+	enum DrawingStage {INITIED, PREPARED, MATCHED, CALCULATED, SPLITED, DISTRIBUTED, SENT, UNAWARED_TRANSFERED}
 	DrawingStage public stage = DrawingStage.INITIED; 
 
 
@@ -176,23 +176,41 @@ contract ChainLotPool is owned{
 	    return ticketId;
 	}
 
+	//callback from utils
+	function setJackpotNumbers(bytes _jackpotNumbers) onlyOwner external {
+		jackpotNumbers = _jackpotNumbers;
+	}
+
+	function getAwardRulesLength() onlyOwner external returns(uint length) {
+		return awardRules.length;
+	}
+
+	function pushWinnerTicket(uint ruleId, uint ticketId) onlyOwner external {
+		winnerTickets[ruleId].ticketIds.push(ticketId);
+	}
+
+	function getJackpotNumbers() onlyOwner external returns (bytes32 numbers) {
+		bytes memory mJackpotNumbers = jackpotNumbers;
+		uint bytesLength = 32;
+    	if(bytesLength > mJackpotNumbers.length) bytesLength = mJackpotNumbers.length;
+    	for(uint i=0; i<bytesLength; i++) {
+      		numbers |= bytes32(mJackpotNumbers[i]&0xFF)>>(i*8);
+    	}
+	}
+
 	//calculate jackpot 
 	function prepareAwards() onlyOwner external {
 		require(stage == DrawingStage.INITIED);
 		require(block.number > poolBlockNumber);
+
 		jackpotNumbers = genRandomNumbers(poolBlockNumber, 8);
 		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
-		stage = DrawingStage.PRPARED;
-		/*uint bytesLength = 32;
-    	if(bytesLength > jackpotNumbers.length) bytesLength = jackpotNumbers.length;
-    	for(uint i=0; i<bytesLength; i++) {
-      		numbers |= bytes32(jackpotNumbers[i]&0xFF)>>(i*8);
-    	}*/
+		stage = DrawingStage.PREPARED;
 	}
 
 	//match winners
 	function matchAwards(uint8 toMatchCount) onlyOwner external {
-		require(stage == DrawingStage.PRPARED);
+		require(stage == DrawingStage.PREPARED);
 		
 		bytes memory mJackpotNumbers = jackpotNumbers;
 		//statistic winners
