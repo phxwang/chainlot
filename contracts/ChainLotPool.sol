@@ -33,6 +33,7 @@ contract ChainLotPool is owned{
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
   	ChainLotInterface public  chainLot;
+  	address public drawingToolAddress;
   
   	awardData[] private toBeAward;
   	uint private awardIndex;
@@ -55,6 +56,14 @@ contract ChainLotPool is owned{
     	uint processedIndex;
     	uint distributedIndex;
   	}
+
+  	struct awardResultByRule {
+  		uint totalWinnersAward;
+  		uint totalTicketCount;
+ 	}
+  	mapping(uint => awardResultByRule) awardResults;
+
+  	
 
   	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
@@ -104,11 +113,18 @@ contract ChainLotPool is owned{
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot) public {
+						ChainLotInterface _chainLot, 
+						address _drawingToolAddress) public {
   		chainLotTicket = _chainLotTicket;
 		clToken = _clToken;
 		chainLot = _chainLot;
 		owner = tx.origin;
+		drawingToolAddress = _drawingToolAddress;
+  	}
+
+  	modifier onlyDrawingTool {
+        require(drawingToolAddress == msg.sender);
+        _;
   	}
 
   	function getRuleKey(uint _whiteNumberCount, uint _yellowNumberCount) internal view returns(uint index){
@@ -177,19 +193,19 @@ contract ChainLotPool is owned{
 	}
 
 	//callback from utils
-	function setJackpotNumbers(bytes _jackpotNumbers) onlyOwner external {
+	function setJackpotNumbers(bytes _jackpotNumbers) onlyDrawingTool external {
 		jackpotNumbers = _jackpotNumbers;
 	}
 
-	function getAwardRulesLength() onlyOwner external returns(uint length) {
+	function getAwardRulesLength() onlyDrawingTool external view returns(uint length) {
 		return awardRules.length;
 	}
 
-	function pushWinnerTicket(uint ruleId, uint ticketId) onlyOwner external {
+	function pushWinnerTicket(uint ruleId, uint ticketId) onlyDrawingTool external {
 		winnerTickets[ruleId].ticketIds.push(ticketId);
 	}
 
-	function getJackpotNumbers() onlyOwner external returns (bytes32 numbers) {
+	function getJackpotNumbers() onlyDrawingTool external view returns (bytes32 numbers) {
 		bytes memory mJackpotNumbers = jackpotNumbers;
 		uint bytesLength = 32;
     	if(bytesLength > mJackpotNumbers.length) bytesLength = mJackpotNumbers.length;
@@ -198,115 +214,50 @@ contract ChainLotPool is owned{
     	}
 	}
 
-	//calculate jackpot 
-	function prepareAwards() onlyOwner external {
-		require(stage == DrawingStage.INITIED);
-		require(block.number > poolBlockNumber);
-
-		jackpotNumbers = genRandomNumbers(poolBlockNumber, 8);
-		PrepareAward(jackpotNumbers, poolBlockNumber, allTicketsId.length);
-		stage = DrawingStage.PREPARED;
+	function getWinnerTicketCount(uint8 ruleId) onlyDrawingTool external view returns(uint count) {
+		count = winnerTickets[ruleId].ticketIds.length;
 	}
 
-	//match winners
-	function matchAwards(uint8 toMatchCount) onlyOwner external {
-		require(stage == DrawingStage.PREPARED);
-		
-		bytes memory mJackpotNumbers = jackpotNumbers;
-		//statistic winners
-		uint endIndex = lastMatchedTicketIndex + toMatchCount;
-		if(endIndex > allTicketsId.length) endIndex = allTicketsId.length;
-
-		for(uint i = lastMatchedTicketIndex; i < endIndex; i ++) {
-			uint ticketId = allTicketsId[i];
-			address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
-	        (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
-	      	
-			uint matchedWhiteCount = 0;
-			uint matchedYellowCount = 0;
-			for(uint j = 0; j < maxWhiteNumberCount; j++) {
-				if(numbers[j] == mJackpotNumbers[j]) {
-					matchedWhiteCount ++;
-				}
-			}
-			for(j = maxWhiteNumberCount; j < mJackpotNumbers.length; j++) {
-				if(numbers[j] == mJackpotNumbers[j]) {
-					matchedYellowCount ++;
-				}
-			}
-
-			uint ruleId = awardRulesIndex[getRuleKey(matchedWhiteCount, matchedYellowCount)] - 1;
-			
-			if(ruleId >= 0 && ruleId < awardRules.length) {
-		        //match one rule!
-		        winnerTickets[ruleId].ticketIds.push(ticketId);
-		        MatchRule(mJackpotNumbers, numbers, count, ticketId, blockNumber, ruleId, awardRules[ruleId].awardEther);
-			}
-		}
-
-		lastMatchedTicketIndex = endIndex;
-
-		MatchAwards(mJackpotNumbers, lastMatchedTicketIndex, endIndex, allTicketsId.length);
-
-		if(lastMatchedTicketIndex == allTicketsId.length) {
-			stage = DrawingStage.MATCHED;
-		}
+	function getProcessedIndex(uint8 ruleId) onlyDrawingTool external view returns(uint index) {
+		index = winnerTickets[ruleId].processedIndex;
 	}
 
-  	struct awardResultByRule {
-  		uint totalWinnersAward;
-  		uint totalTicketCount;
- 	}
-  	mapping(uint => awardResultByRule) awardResults;
+	function getAwardEther(uint8 ruleId) onlyDrawingTool external view returns(uint _ether) {
+		_ether = awardRules[ruleId].awardEther;
+	}
 
-  	function calculateAwards(uint8 ruleId, uint8 toCalcCount) onlyOwner external {
-	  	require(stage == DrawingStage.MATCHED);
-	  	require(block.number >= poolBlockNumber);
-	  	//calculate winners award, from top to bottom, top winners takes all
-	    
-	      if(winnerTickets[ruleId].ticketIds.length > winnerTickets[ruleId].processedIndex) {
-	        uint totalWinnersAward = 0;
-	        uint totalTicketCount = 0;
-	        uint endIndex = winnerTickets[ruleId].processedIndex + toCalcCount;
-	        if(endIndex > winnerTickets[ruleId].ticketIds.length) endIndex = winnerTickets[ruleId].ticketIds.length;
-	        for(uint j=winnerTickets[ruleId].processedIndex;j<endIndex; j++) {
-	          uint ticketId = winnerTickets[ruleId].ticketIds[j];
-	          address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
-	          (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
-	          totalWinnersAward += count * awardRules[ruleId].awardEther;
-	          totalTicketCount += count;
-	        }
+	function addTotalWinnersAward(uint8 ruleId, uint totalWinnersAward) onlyDrawingTool external {
+		 awardResults[ruleId].totalWinnersAward += totalWinnersAward;
+	}
 
-	        CalculateAwards(ruleId, endIndex, awardRules[ruleId].awardEther, totalWinnersAward, totalTicketCount);
+	function addTotalTicketCount(uint8 ruleId, uint totalTicketCount) onlyDrawingTool external {
+		 awardResults[ruleId].totalTicketCount += totalTicketCount;
+	}
 
-	        awardResults[ruleId].totalWinnersAward += totalWinnersAward;
-	        awardResults[ruleId].totalTicketCount += totalTicketCount;
-			//move pointer
-	     	winnerTickets[ruleId].processedIndex = endIndex;
-	      
-	      }
+	function setStage(DrawingStage _stage) onlyDrawingTool external {
+		stage = _stage;
+	}
 
-	      if(ruleId == awardRules.length -1 && winnerTickets[ruleId].processedIndex == winnerTickets[ruleId].ticketIds.length) {
-	      	stage = DrawingStage.CALCULATED;
-	      }
+	function setProcessedIndex(uint8 ruleId, uint index) onlyDrawingTool external {
+		winnerTickets[ruleId].processedIndex = index;
+	}
 
-  	}
+	function setLastMatchedTicketIndex(uint index) onlyDrawingTool external {
+		lastMatchedTicketIndex = index;
+	}
 
-  	function splitAward() onlyOwner external {
-  		require(stage == DrawingStage.CALCULATED);
-  		uint totalBalance = clToken.balanceOf(this);
-  		for(uint8 i=0; i<awardRules.length; i++) {
-  			if(totalBalance >=  awardResults[i].totalWinnersAward) {
-	          totalBalance -= awardResults[i].totalWinnersAward;
-	        }
-	        else {
-	          awardResults[i].totalWinnersAward = totalBalance;
-	          totalBalance = 0;
-	        }
-	        SplitAward(i, awardResults[i].totalWinnersAward, totalBalance);
-  		}
-  		stage = DrawingStage.SPLITED;
-  	}
+	function getWinnerTicket(uint8 ruleId, uint j) onlyDrawingTool external returns(uint id) {
+		id = winnerTickets[ruleId].ticketIds[j];
+	}
+
+	function getTotalWinnersAward(uint8 ruleId) onlyDrawingTool external view returns(uint award) {
+		award = awardResults[ruleId].totalWinnersAward;
+	}
+
+	function setTotalWinnersAward(uint8 ruleId, uint award) external onlyDrawingTool {
+		awardResults[ruleId].totalWinnersAward = award;
+	}
+
 
   	function distributeAwards(uint8 ruleId, uint toDistCount) onlyOwner external {
   		require(stage == DrawingStage.SPLITED);

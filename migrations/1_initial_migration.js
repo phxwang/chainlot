@@ -4,6 +4,7 @@ var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
+var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 
 module.exports = async function(deployer, network) {
@@ -15,7 +16,8 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(CLToken, 100000000000),
 			deployer.deploy(ChainLotPoolFactory),
-			deployer.deploy(ChainLotPublic)
+			deployer.deploy(ChainLotPublic),
+			deployer.deploy(DrawingTool)
 		]);
 
 	}

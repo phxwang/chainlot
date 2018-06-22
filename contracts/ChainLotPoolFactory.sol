@@ -34,8 +34,9 @@ contract ChainLotPoolFactory is owned {
 
   function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot) onlyOwner external {
-  	ChainLotPool(pool).setPool(_chainLotTicket, _clToken, _chainLot);
+						ChainLotInterface _chainLot, 
+						address _drawingToolAddress) onlyOwner external {
+  	ChainLotPool(pool).setPool(_chainLotTicket, _clToken, _chainLot, _drawingToolAddress);
 
   }
 }

@@ -33,15 +33,7 @@ interface ChainLotPoolInterface {
 	function tokenSum() external view returns(uint tokenSum);
 	function buyTicket(bytes numbers, address referer) payable public;
 	function buyRandom(address referer) payable public;
-	//calculate jackpot 
-	/*function prepareAwards() external returns(bytes32 numbers);
-	function matchAwards(uint8 toMatchCount) external;
-	function calculateAwards(uint8 ruleId, uint8 toCalcCount) external;
-	function splitAward() external;
-	function distributeAwards() external;
-	function sendAwards() external;*/
 	function withdrawHistoryCut(uint[] ticketIds) external;
-	//function transferUnawarded(address to) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
 }
@@ -58,7 +50,8 @@ interface ChainLotPoolFactoryInterface {
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot)  external; 
+						ChainLotInterface _chainLot, 
+						address _drawingToolAddress)  external; 
 
 }
 

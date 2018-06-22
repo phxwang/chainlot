@@ -4,6 +4,7 @@ var CLToken = artifacts.require("./CLToken.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
+var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 //a = [70, 25, 5, 1, 1e16, 10000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]];
 //console.log(a);
@@ -17,6 +18,8 @@ contract("ChainLot", async (accounts) => {
 	let factory = await ChainLotPoolFactory.deployed();
 	let cltoken = await CLToken.deployed();
 	let chainlotpublic = await ChainLotPublic.deployed();
+	let drawingtool = await DrawingTool.deployed();
+
 	await chainlotpublic.setChainLotAddress(chainlot.address);
 	await chainlotpublic.setCLTokenAddress(cltoken.address);
 	await chainlot.setChainLotTicketAddress(chainlotticket.address);
@@ -24,6 +27,8 @@ contract("ChainLot", async (accounts) => {
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
 	await chainlotticket.setMinter(chainlot.address, true);
 	await factory.transferOwnership(chainlot.address);
+	await chainlot.setDrawingToolAddress(drawingtool.address);
+	await drawingtool.init(chainlotticket.address, cltoken.address);
 
 	for(i=0; i<5; i++) {
 		console.log("new pool progress: " + i);
@@ -59,14 +64,14 @@ contract("ChainLot", async (accounts) => {
 		let pool = await ChainLotPool.at(address);
 
 		console.log("prepare awards");
-		r = await pool.prepareAwards();
+		r = await drawingtool.prepareAwards(address);
 		console.log(JSON.stringify(r.logs));
 
 		await showStage(pool);
 		
 		for(i=0; i<10; i++) {
 			console.log("match awards, progress: " + i*5);
-			r = await pool.matchAwards(5);
+			r = await drawingtool.matchAwards(address, 5);
 			console.log(JSON.stringify(r.logs));
 			stage = await showStage(pool);
 			if(stage == 2) break;
@@ -76,19 +81,19 @@ contract("ChainLot", async (accounts) => {
 		
 		for(i =0 ; i<2 ; i++) {
 			console.log("calculate awards, rule id " + i);
-			r = await pool.calculateAwards(i, 100)
+			r = await drawingtool.calculateAwards(address, i, 100)
 			console.log(JSON.stringify(r.logs));
 			await showStage(pool);
 		}
 
 		console.log("split awards");
-		r = await pool.splitAward();
+		r = await drawingtool.splitAward(address);
 		console.log(JSON.stringify(r.logs));
 
 		await showStage(pool);
 
 
-		for(i =0 ; i<2 ; i++) {
+		/*for(i =0 ; i<2 ; i++) {
 			console.log("distribute awards, rule id " + i);
 			r = await pool.distributeAwards(i, 100);
 			console.log(JSON.stringify(r.logs));
@@ -145,8 +150,8 @@ contract("ChainLot", async (accounts) => {
 			console.log("history cut of account " + account + "("+i+"):  " + JSON.stringify(cut));
 			historyCutSum += Number(cut[pi]);
 		}
-		console.log(web3.fromWei(historyCutSum, 'ether'));
-	}	
+		console.log(web3.fromWei(historyCutSum, 'ether'));*/
+	}
 
 	//let totalTokenSum = await chainlot.tokenSum();
 	//console.log("total token sum: " + web3.fromWei(totalTokenSum, 'ether'));
