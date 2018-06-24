@@ -151,7 +151,7 @@ contract ChainLot is owned{
   	clpFactory = ChainLotPoolFactoryInterface(factoryAddress);
   }
 
-  function setDrawingToolAddress(address _drawingToolAddress) {
+  function setDrawingToolAddress(address _drawingToolAddress) onlyOwner external{
   	drawingToolAddress = _drawingToolAddress;
   }
 
