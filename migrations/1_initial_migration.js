@@ -30,6 +30,7 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(CLToken, 1e12),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(ChainLotPublic),
+			deployer.deploy(DrawingTool)
 		]);
 
 		let chainlot = await ChainLot.deployed();
@@ -37,6 +38,7 @@ module.exports = async function(deployer, network) {
 		let factory = await ChainLotPoolFactory.deployed();
 		let cltoken = await CLToken.deployed();
 		let chainlotpublic = await ChainLotPublic.deployed();
+		let drawingtool = await DrawingTool.deployed();
 
 		console.log("ChainLotPublic: " + chainlotpublic.address);
 
@@ -47,6 +49,8 @@ module.exports = async function(deployer, network) {
 		await chainlot.setChainLotPoolFactoryAddress(factory.address);
 		await chainlotticket.setMinter(chainlot.address, true);
 		await factory.transferOwnership(chainlot.address);
+		await chainlot.setDrawingToolAddress(drawingtool.address);
+		await drawingtool.init(chainlotticket.address, cltoken.address);
 
 
 		for(i=0; i<5; i++) {

@@ -12,6 +12,7 @@ module.exports = async function(callback) {
 		let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
 		let cltoken = await CLToken.deployed();
+		let drawingtool = await DrawingTool.deployed();
 
 		for(i=0; i<100; i++) {
 			let address = await chainlot.chainlotPools(i);
@@ -34,43 +35,43 @@ module.exports = async function(callback) {
 					switch(parseInt(stage)) {
 						case 0:
 							console.log("prepare awards");
-							r = await pool.prepareAwards();
+							r = await drawingtool.prepareAwards(address);
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 1:
 							ticketCount = await pool.getAllTicketsCount();
 							console.log("match awards, ticketCount: " + ticketCount);
-							r = await pool.matchAwards(ticketCount);
+							r = await drawingtool.matchAwards(address, ticketCount);
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 2:
 							for(i =0 ; i<9 ; i++) {
 								console.log("calculate awards, rule id " + i);
-								r = await pool.calculateAwards(i, 100);
+								r = await drawingtool.calculateAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
 							}
 							break;
 						case 3:
 							console.log("split awards");
-							r = await pool.splitAward();
+							r = await drawingtool.splitAward(address);
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 4:
 							for(i =0 ; i<9 ; i++) {
 								console.log("distribute awards, rule id " + i);
-								r = await pool.distributeAwards(i, 100);
+								r = await drawingtool.distributeAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
 							}
 							break;
 						case 5:
 							console.log("send awards");
-							r = await pool.sendAwards(100)
+							r = await drawingtool.sendAwards(address, 100)
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 6:
 							console.log("transfer unawarded");
 							let nextPoolAddress = await chainlot.chainlotPools(currentPoolIndex);
-							r = await pool.transferUnawarded(nextPoolAddress);
+							r = await drawingtool.transferUnawarded(address, nextPoolAddress);
 							console.log(JSON.stringify(r.logs));
 							break;
 						default:
