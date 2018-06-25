@@ -167,6 +167,9 @@ contract ChainLotPool is owned{
 				buyCount = ticketCount - ticketPerNumber * (numberCount - 1);
 
 			_buyTicket(tx.origin, numbers, buyCount, msg.value);
+			if(referer != 0 && tx.origin != referer) {
+	    		_buyTicket(referer, numbers, buyCount, msg.value);	
+	    }
 		}
 	}
 
@@ -327,33 +330,46 @@ contract ChainLotPool is owned{
 	}
 
 	function withdrawHistoryCut(uint[] ticketIds) external {
-		uint userCut = calculateUserHistoryCut(ticketIds, tx.origin, false);
-	  	clToken.transfer(tx.origin, userCut);
-		TransferHistoryCut(tx.origin, userCut);
+		uint userCut; uint[] memory cutIdList; uint cutCount;
+		(userCut, cutIdList, cutCount) = calculateUserHistoryCut(ticketIds, tx.origin);
+		if(userCut > 0) {
+			clToken.transfer(tx.origin, userCut);
+			TransferHistoryCut(tx.origin, userCut);
+			for(uint i=0; i<cutCount; i++) {
+				withdrawed[cutIdList[i]] = true;
+			}
+		}	  	
 	}
 
-	function listUserHistoryCut(address user, uint[] ticketIds) external returns(uint _historyCut) {
-		return calculateUserHistoryCut(ticketIds, user, true);
+	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut) {
+		uint userCut; uint[] memory cutIdList; uint cutCount;
+		(userCut, cutIdList, cutCount) = calculateUserHistoryCut(ticketIds, user);
+		return userCut;
 	}
 
-	function calculateUserHistoryCut(uint[] ticketIds, address user, bool onlyList) internal returns(uint _cut) {
-		if(totalTicketCountSum == 0)
-			return 0;
+	function calculateUserHistoryCut(uint[] ticketIds, address user) internal view returns(uint _cut, uint[] _cutIdList, uint _cutCount) {
 		uint historyTicketCountSum = 0;
 	  	address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
-	  	for(uint i=0; i<ticketIds.length; i++) {
-	  		(mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketIds[i]);
-	  		if(withdrawed[ticketIds[i]] == false 
-	  			&& blockNumber < poolBlockNumber 
-	  			&& chainLotTicket.ownerOf(ticketIds[i]) == user) {
-	  			historyTicketCountSum += count;	
-	  			if(!onlyList) {
-	  				withdrawed[ticketIds[i]] = true;
-	  			}
-	  		}		
+	  	uint[] memory cutIdList = new uint[](ticketIds.length);
+	  	uint cutCount = 0;
+
+	  	if(totalTicketCountSum != 0) {
+		  	for(uint i=0; i<ticketIds.length; i++) {
+		  		uint tid = ticketIds[i];
+		  		(mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(tid);
+		  		if(withdrawed[tid] == false 
+		  			&& blockNumber < poolBlockNumber 
+		  			&& chainLotTicket.ownerOf(tid) == user) {
+		  			historyTicketCountSum += count;	
+		  			cutIdList[cutCount] = tid;
+		  			cutCount ++;
+		  		}		
+		  	}
+		  	_cut = historyTicketCountSum * historyCut / totalTicketCountSum;
 	  	}
 	  	
-	  	return historyTicketCountSum * historyCut / totalTicketCountSum;
+	  	_cutIdList = cutIdList;
+	  	_cutCount = cutCount;
 	}
 
 	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){

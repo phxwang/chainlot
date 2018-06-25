@@ -4475,7 +4475,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                         <ul>
                             <li><a href="" target="_blank" id="token_link">CLT Holders </a>
                             </li>
-                            <li><a href="javascript:sellToken()">Sell CLT</a>
+                            <li><a href="" target="_blank" id="my_token_link">My CLT</a>
                             </li>
                         </ul>
                     </div>
@@ -4516,9 +4516,9 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     <div id="resources">
         <div class="container">
             <h2> Purchase List</h2>
-        	<a href="" target="_blank" id="purchase_list"><h4>Click to see all purchase list</h4></a>
-            <div id="list1" class="resource-blocks text-left">
+            <div id="purchase_list" class="resource-blocks text-left">
             </div>
+        	  <a href="" target="_blank" id="purchase_list_link"><h4>Click to see all purchase list</h4></a>
         </div>
         <div class="container">
           <h2>Prize List</h2>
@@ -4554,7 +4554,11 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     }
 
     if(isRandom) {
-      clp.buyRandom(1, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
+      if(count <= 20) 
+        numberCount = count;
+      else
+        numberCount = 20;
+      clp.buyRandom(numberCount, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
         if(!err) {
           console.log(r);
           var span = document.getElementById('transaction_message');
@@ -4628,31 +4632,58 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
     document.getElementById("invite_link").innerHTML =  link + "#" + web3js.eth.accounts[0];
 
-    document.getElementById("purchase_list").href="https://rinkeby.etherscan.io/address/"+clpAddress;
+    document.getElementById("purchase_list_link").href="https://rinkeby.etherscan.io/address/"+clpAddress;
 
     clp.clToken(function(err, result){
       if(!err) {
         console.log(result);
         document.getElementById("token_link").href="https://rinkeby.etherscan.io/token/"+result+"#balances";
+        document.getElementById("my_token_link").href="https://rinkeby.etherscan.io/token/"+result+"?a="+web3js.eth.accounts[0];
+        
       }
     });
+  }
+
+  function updateHistoryTickets() {
     clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
       if(!err && result.length > 0) {
         for(id in result) {
-          console.log(id);
+          //console.log(id);
           clticket.getTicket(id, function(err, result) {
             console.log(result);
           });
         }
       }
     })
+
+    clticket.totalSupply(function(err, result) {
+      if(!err) {
+        length = result;
+        start = length - 10;
+        if(start < 0) start = 0
+          for(i=start; i<length; i++) {
+            //console.log(i);
+            clticket.getTicket(i, function(err, result) {
+              //console.log(result);
+              //console.log(bytes32ToDec(result[2]));
+              document.getElementById("purchase_list").innerHTML += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
+            });
+          }
+      }
+    })
   }
 
-  function updateHistoryTickets() {
+  function bytes32ToDec(str) {
+    result = [];
+    for(i=2; i<str.length; i+=2) {
+      r = parseInt(str.substring(i, i+2), 16);
+      if(r == 0) break;
+      result.push(r);
+    }
+    return result;
   }
 
   //document.getElementById('files').addEventListener('change', handleFileSelect, false);
-
   
   var web3js;
   var clpAddress = "0xfcbe5eadc91239d26e66eba87624d2dbbd2452f3";
@@ -4679,6 +4710,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
              clp = web3js.eth.contract(clpAbi).at(clpAddress);
              clticket = web3js.eth.contract(clticketAbi).at(clticketAddress);
              updatePoolStatus();
+             updateHistoryTickets();
           }
           
         }   

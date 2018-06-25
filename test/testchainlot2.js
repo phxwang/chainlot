@@ -54,7 +54,7 @@ contract("ChainLot", async (accounts) => {
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
 		console.log("from account: " + id);
-		r = await chainlotpublic.buyRandom(22, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e11});
+		r = await chainlotpublic.buyRandom(13, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e11});
 		//console.log(JSON.stringify(r.logs));	
 	}
 
@@ -133,7 +133,7 @@ contract("ChainLot", async (accounts) => {
 		await showPoolToken(chainlot, cltoken);
 		
 
-		/*let historyCutSum = 0;
+		let historyCutSum = 0;
 		for(i=0; i<web3.eth.accounts.length; i++) {
 			account = web3.eth.accounts[i];
 			let abalance = await cltoken.balanceOf(account);
@@ -141,11 +141,15 @@ contract("ChainLot", async (accounts) => {
 
 			let tickets = await chainlotticket.ticketsOfOwner(account);
 			console.log("tickets of account " + account + "("+i+"):  " + JSON.stringify(tickets));
-			let cut = await chainlot.listUserHistoryCut(account, 0, 3, tickets);
+			let cut = await chainlotpublic.listUserHistoryCut(account, 0, 3, tickets);
 			console.log("history cut of account " + account + "("+i+"):  " + JSON.stringify(cut));
 			historyCutSum += Number(cut[pi]);
+			r = await chainlotpublic.withDrawHistoryCut(0,3,tickets, {from:account});
+			console.log(JSON.stringify(r.logs));
+			let cut1 = await chainlotpublic.listUserHistoryCut(account, 0, 3, tickets);
+			console.log("after withdraw " + account + "("+i+"):  " + JSON.stringify(cut1));
 		}
-		console.log(web3.fromWei(historyCutSum, 'ether'));*/
+		console.log("historyCutSum: " + web3.fromWei(historyCutSum, 'ether'));
 	}
 
 	let results = await chainlotpublic.retrievePoolInfo();
