@@ -20,12 +20,15 @@ contract ChainLotPool is owned{
 	uint public lastMatchedTicketIndex;
 	bytes public jackpotNumbers;
 	uint public historyCut;
+	uint public devCut;
+	uint public futureCut;
 	uint public tokenSum;
 
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
   	mapping(uint => winnerTicketQueue) public distributeTickets;
 	awardRule[] public awardRules;
+
   	ChainLotTicketInterface public chainLotTicket;
   	CLTokenInterface public clToken;
   	ChainLotInterface public  chainLot;
@@ -136,13 +139,8 @@ contract ChainLotPool is owned{
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public{
-		require(stage == DrawingStage.INITIED);
-		require(block.number < poolBlockNumber);
-		require(address(clToken) != 0);
-	    uint ticketCount = msg.value/etherPerTicket;
-	    require(ticketCount > 0);
-	    clToken.buy.value(msg.value)();
-	    tokenSum += msg.value;
+		uint ticketCount = beforeBuy();
+
 	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
 	    if(referer != 0 && tx.origin != referer) {
 	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
@@ -153,9 +151,35 @@ contract ChainLotPool is owned{
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(address referer) payable public{
-		bytes memory numbers = genRandomNumbers(block.number - 1, 0);
-		buyTicket(numbers, referer);
+	function buyRandom(uint8 numberCount, address referer) payable public{
+		require(numberCount > 0);
+
+		uint ticketCount = beforeBuy();
+
+		if(numberCount > ticketCount) numberCount = uint8(ticketCount);
+		uint ticketPerNumber = ticketCount / numberCount;
+
+		for(uint8 i=0; i<numberCount; i++) {
+			bytes memory numbers = genRandomNumbers(block.number - 1, i*7);
+
+			uint buyCount = ticketPerNumber;
+			if(numberCount > 1 && i == numberCount - 1) 
+				buyCount = ticketCount - ticketPerNumber * (numberCount - 1);
+
+			_buyTicket(tx.origin, numbers, buyCount, msg.value);
+		}
+	}
+
+	function beforeBuy() internal returns(uint ticketCount) {
+		require(stage == DrawingStage.INITIED);
+		require(block.number < poolBlockNumber);
+		require(address(clToken) != 0);
+
+	   	ticketCount = msg.value/etherPerTicket;
+	    require(ticketCount > 0);
+
+	    clToken.buy.value(msg.value)();
+	    tokenSum += msg.value;
 	}
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
@@ -286,8 +310,16 @@ contract ChainLotPool is owned{
 			clToken.transfer(to, value);
 	}
 
-	function addHistoryCut(uint cut) onlyDrawingTool external {
-		historyCut += cut;
+	function setHistoryCut(uint cut) onlyDrawingTool external {
+		historyCut = cut;
+	}
+
+	function setDevCut(uint cut) onlyDrawingTool external {
+		devCut = cut;
+	}
+
+	function setFutureCut(uint cut) onlyDrawingTool external {
+		futureCut = cut;
 	}
 
 	function setAwardIndex(uint index) onlyDrawingTool external {

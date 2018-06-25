@@ -2,6 +2,7 @@ var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var CLToken = artifacts.require("./CLToken.sol");
+var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 module.exports = async function(callback) {
 	console.log("from: " + web3.eth.accounts[0] + ", balance: " 

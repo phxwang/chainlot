@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="author" content="">
     <title> CryptoLotto6 | Decentralized Lottery on Ethereum</title>
+    <meta http-equiv="refresh" content="30">
     <style type="text/css">
     /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
@@ -4452,8 +4453,246 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
 	</style>
 
+</head>
+
+<body>
+<div class="main-outer text-center">
+    <!-- Homepage Banner -->
+    <div class="introduction-banner">
+        <div class="header sticky-header">
+            <div class="align-center header-inner">
+                <div class="container clearfix">
+                    <div class="logo">
+                        <a href="https://CryptoLotto6.org/">
+                            <h1>CryptoLotto6 (Rinkeby Version)</h1>
+                        </a>
+                    </div>
+                    <div id="nav-icon">
+                        <span></span> <span></span>
+                        <span></span>
+                    </div>
+                    <div class="navigation">
+                        <ul>
+                            <li><a href="" target="_blank" id="token_link">CLT Holders </a>
+                            </li>
+                            <li><a href="javascript:sellToken()">Sell CLT</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="middle-content">
+            <div class="container">
+                <div class="message">
+                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 1000 block. All the prize will be returned as CryptoLottoToken(CLT).
+                  <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
+                </div>
+                <div class="cta-group" id="cta-group">
+                	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
+                    <input type="text" id="number0" name="number0" class="cta" length=2/></input>
+                    <input type="text" id="number1" name="number1" class="cta" length=2/></input>
+                    <input type="text" id="number2" name="number2" class="cta" length=2/></input>
+                    <input type="text" id="number3" name="number3" class="cta" length=2/></input>
+                    <input type="text" id="number4" name="number4" class="cta" length=2/></input>
+                    <input type="text" id="number5" name="number5" class="cta" length=2/></input>
+                    <h4 id="">Enter ticket count to purchase (0.01ETH/ticket).</h4>
+                    <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
+                    <button onclick="javascript:buyTicket(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Purchase Tickets </button>
+                    <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
+                    <h4>Send this link to friends to get free tickets: <span id="invite_link"></span></h4>
+                    <h4 id="transaction_message"></h4>
+                </div>
+                <div class="banner-title hidden-xs">
+                    <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH, Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
+                    <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Explore cs section starts-->
+    <div id="resources">
+        <div class="container">
+            <h2> Purchase List</h2>
+        	<a href="" target="_blank" id="purchase_list"><h4>Click to see all purchase list</h4></a>
+            <div id="list1" class="resource-blocks text-left">
+            </div>
+        </div>
+        <div class="container">
+          <h2>Prize List</h2>
+          <li>5+1 Jackpot </li>
+                <li>5+0 5000 ETH</li>
+                <li>4+1 50 ETH</li>
+                <li>4+0 2.5 ETH</li>
+                <li>3+1 1 ETH</li>
+                <li>3+0 0.05 ETH</li>
+                <li>2+1 0.05 ETH</li>
+                <li>1+1 0.02 ETH</li>
+                <li>0+1 0.01 ETH</li>
+        </div>
+    </div>
+</div>
+
+
 <script>
-var clpAbi = [
+
+  function buyTicket(isRandom) {
+
+    hash = window.location.hash.substring(1);
+    console.log("hash: " + hash + ", length" + hash.length); 
+    referer = "0x0";
+    if(hash.length == 42) referer = hash;
+
+    console.log("referer: " + referer);
+
+    count = document.getElementById("count").value;
+    if(count <= 0) {
+      alert("invalid count: " + count);
+      return;
+    }
+
+    if(isRandom) {
+      clp.buyRandom(1, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
+        if(!err) {
+          console.log(r);
+          var span = document.getElementById('transaction_message');
+          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
+          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
+            if(err)console.log(err);
+            console.log(result);
+            event.stopWatching();
+          });
+        }
+      })
+    }
+    else {
+      toBuyNumber = "0x";
+      for(i=0;i<6;i++) {
+        n = parseInt(document.getElementById("number"+i).value,10);
+        if((i<5 && (n<=0 || n>70)) || (i==5 && (n<=0 || n>25))) {
+          alert("wrong number: " + n);
+          return;
+        }
+        hexNum = n.toString(16);
+        if(hexNum.length < 2) hexNum = "0" + hexNum;
+        toBuyNumber += hexNum;
+      }
+
+      clp.buyTicket(toBuyNumber, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
+        if(!err) {
+          console.log(r);
+          var span = document.getElementById('transaction_message');
+          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
+          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
+            if(err)console.log(err);
+            console.log(result);
+            var span = document.getElementById('transaction_message');
+            span.innerHTML = ["Ticket Number: ", result].join("");
+            event.stopWatching();
+          });
+        }
+      })
+    }
+  }
+
+  function sellToken() {
+    /*console.log("sell" + web3js.toWei(tokenCount, "ether"));
+    cst.approveAndCall(register.address, web3js.toWei(tokenCount, "ether"), [], function(err, r) {
+      console.log(r)
+      register.Sell({fromBlock: "latest", toBlock: "pending" }).watch(function(err, r){
+        console.log(JSON.stringify(r));
+        updateCSTStatus();
+      });
+    });*/
+  }
+
+  function updatePoolStatus() {
+    clp.retrievePoolInfo(function(err, result){
+          if(!err) {
+            console.log(JSON.stringify(result));
+            document.getElementById("pooltokens").innerHTML = web3js.fromWei(result[0], "ether"); 
+            document.getElementById("poolblocknumber").innerHTML = result[1];
+            document.getElementById("allpooltokens").innerHTML = web3js.fromWei(result[2], "ether");            
+          }
+          
+        });
+
+    web3js.eth.getBlockNumber(function(err, result){
+      if(!err)
+        document.getElementById("currentblocknumber").innerHTML = result;
+    });
+
+    link = window.location.href;
+    if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
+    document.getElementById("invite_link").innerHTML =  link + "#" + web3js.eth.accounts[0];
+
+    document.getElementById("purchase_list").href="https://rinkeby.etherscan.io/address/"+clpAddress;
+
+    clp.clToken(function(err, result){
+      if(!err) {
+        console.log(result);
+        document.getElementById("token_link").href="https://rinkeby.etherscan.io/token/"+result+"#balances";
+      }
+    });
+    clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
+      if(!err && result.length > 0) {
+        for(id in result) {
+          console.log(id);
+          clticket.getTicket(id, function(err, result) {
+            console.log(result);
+          });
+        }
+      }
+    })
+  }
+
+  function updateHistoryTickets() {
+  }
+
+  //document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+  
+  var web3js;
+  var clpAddress = "0xfcbe5eadc91239d26e66eba87624d2dbbd2452f3";
+  var clticketAddress  = "0x7dc67bfd21b4bf1cf13c1df9f10e92f2a698f2ab";
+  var clp;
+  var clticket;
+
+
+  window.onload = function() {
+    if(typeof web3 != 'undefined') {
+      web3js = new Web3(web3.currentProvider);
+
+      web3js.version.getNetwork((err, netId) => {
+        //alert(netId);
+        if(netId < 0) {
+          document.getElementById('env_message').innerHTML="Please switch MetaMask to Rinkeby";
+        }
+        else {
+          //alert(web3js.eth.accounts);
+          if(web3js.eth.accounts.length == 0) {
+             document.getElementById('env_message').innerHTML="Please Unlock Your MetaMask";
+          }
+          else {
+             clp = web3js.eth.contract(clpAbi).at(clpAddress);
+             clticket = web3js.eth.contract(clticketAbi).at(clticketAddress);
+             updatePoolStatus();
+          }
+          
+        }   
+      });  
+    }
+    else {
+      document.getElementById('env_message').innerHTML="Can't Detect Ethereum Wallet，Please use MetaMask on PC version Chrome，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>Click to Install</a>";
+      document.getElementById('cta-group').style.display='none';
+    }
+  }
+
+  
+
+  var clpAbi = [
     {
       "constant": true,
       "inputs": [],
@@ -4584,6 +4823,10 @@ var clpAbi = [
       "constant": false,
       "inputs": [
         {
+          "name": "numberCount",
+          "type": "uint8"
+        },
+        {
           "name": "referer",
           "type": "address"
         }
@@ -4664,6 +4907,10 @@ var clpAbi = [
         {
           "name": "totalPoolTokens",
           "type": "uint256"
+        },
+        {
+          "name": "poolCount",
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -4672,227 +4919,443 @@ var clpAbi = [
     }
   ];
 
-
-</script>
-</head>
-
-<body>
-<div class="main-outer text-center">
-    <!-- Homepage Banner -->
-    <div class="introduction-banner">
-        <div class="header sticky-header">
-            <div class="align-center header-inner">
-                <div class="container clearfix">
-                    <div class="logo">
-                        <a href="https://CryptoLotto6.org/">
-                            <h1>CryptoLotto6 (Rinkeby Version)</h1>
-                        </a>
-                    </div>
-                    <div id="nav-icon">
-                        <span></span> <span></span>
-                        <span></span>
-                    </div>
-                    <div class="navigation">
-                        <ul>
-                            <li><a href="" target="_blank" id="token_link">CLT Holders </a>
-                            </li>
-                            <li><a href="javascript:sellToken()">Sell CLT</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="middle-content">
-            <div class="container">
-                <div class="message">
-                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 1000 block. All the prize will be returned as CryptoLottoToken(CLT).
-                  <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
-                </div>
-                <div class="cta-group" id="cta-group">
-                	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
-                    <input type="text" id="number0" name="number0" class="cta" length=2/></input>
-                    <input type="text" id="number1" name="number1" class="cta" length=2/></input>
-                    <input type="text" id="number2" name="number2" class="cta" length=2/></input>
-                    <input type="text" id="number3" name="number3" class="cta" length=2/></input>
-                    <input type="text" id="number4" name="number4" class="cta" length=2/></input>
-                    <input type="text" id="number5" name="number5" class="cta" length=2/></input>
-                    <h4 id="">Enter ticket count to purchase (0.01ETH/ticket).</h4>
-                    <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
-                    <button onclick="javascript:buyTicket(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Purchase Tickets </button>
-                    <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
-                    <h4>Send this link to friends to get free tickets: <span id="invite_link"></span></h4>
-                    <h4 id="transaction_message"></h4>
-                </div>
-                <div class="banner-title hidden-xs">
-                    <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH, Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
-                    <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!--Explore cs section starts-->
-    <div id="resources">
-        <div class="container">
-            <h2> Purchase List</h2>
-        	<a href="" target="_blank" id="purchase_list"><h4>Click to see all purchase list</h4></a>
-            <div id="list1" class="resource-blocks text-left">
-            </div>
-        </div>
-        <div class="container">
-          <h2>Prize List</h2>
-          <li>5+1 Jackpot </li>
-                <li>5+0 5000 ETH</li>
-                <li>4+1 50 ETH</li>
-                <li>4+0 2.5 ETH</li>
-                <li>3+1 1 ETH</li>
-                <li>3+0 0.05 ETH</li>
-                <li>2+1 0.05 ETH</li>
-                <li>1+1 0.02 ETH</li>
-                <li>0+1 0.01 ETH</li>
-        </div>
-    </div>
-</div>
-
-
-<script>
-
-  function buyTicket(isRandom) {
-
-    hash = window.location.hash.substring(1);
-    console.log("hash: " + hash + ", length" + hash.length); 
-    referer = "0x0";
-    if(hash.length == 42) referer = hash;
-
-    console.log("referer: " + referer);
-
-    count = document.getElementById("count").value;
-    if(count <= 0) {
-      alert("invalid count: " + count);
-      return;
-    }
-
-    if(isRandom) {
-      clp.buyRandom(referer, {value:count*1e16}, function(err,r){
-        if(!err) {
-          console.log(r);
-          var span = document.getElementById('transaction_message');
-          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
-          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
-            if(err)console.log(err);
-            console.log(result);
-            event.stopWatching();
-          });
+  var clticketAbi = [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
         }
-      })
-    }
-    else {
-      toBuyNumber = "0x";
-      for(i=0;i<6;i++) {
-        n = parseInt(document.getElementById("number"+i).value,10);
-        if((i<5 && (n<=0 || n>70)) || (i==5 && (n<=0 || n>25))) {
-          alert("wrong number: " + n);
-          return;
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
         }
-        hexNum = n.toString(16);
-        if(hexNum.length < 2) hexNum = "0" + hexNum;
-        toBuyNumber += hexNum;
-      }
-
-      clp.buyTicket(toBuyNumber, referer, {value:count*1e16}, function(err,r){
-        if(!err) {
-          console.log(r);
-          var span = document.getElementById('transaction_message');
-          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
-          var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
-            if(err)console.log(err);
-            console.log(result);
-            var span = document.getElementById('transaction_message');
-            span.innerHTML = ["Ticket Number: ", result].join("");
-            event.stopWatching();
-          });
+      ],
+      "name": "ticketIndexToApproved",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
         }
-      })
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalTicketCountSum",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "ticketIndexToOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "ownershipTicketCount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "minters",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Mint",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_interfaceID",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "ticketsOfOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_minter",
+          "type": "address"
+        },
+        {
+          "name": "_enable",
+          "type": "bool"
+        }
+      ],
+      "name": "setMinter",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "name": "_numbers",
+          "type": "bytes"
+        },
+        {
+          "name": "_count",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_ticketId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTicket",
+      "outputs": [
+        {
+          "name": "mintedBy",
+          "type": "address"
+        },
+        {
+          "name": "mintedAt",
+          "type": "uint64"
+        },
+        {
+          "name": "numbers",
+          "type": "bytes32"
+        },
+        {
+          "name": "count",
+          "type": "uint256"
+        },
+        {
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     }
-  }
-
-  function sellToken() {
-    /*console.log("sell" + web3js.toWei(tokenCount, "ether"));
-    cst.approveAndCall(register.address, web3js.toWei(tokenCount, "ether"), [], function(err, r) {
-      console.log(r)
-      register.Sell({fromBlock: "latest", toBlock: "pending" }).watch(function(err, r){
-        console.log(JSON.stringify(r));
-        updateCSTStatus();
-      });
-    });*/
-  }
-
-  function updatePoolStatus() {
-    clp.retrievePoolInfo(function(err, result){
-          if(!err) {
-            console.log(JSON.stringify(result));
-            document.getElementById("pooltokens").innerHTML = web3js.fromWei(result[0], "ether"); 
-            document.getElementById("poolblocknumber").innerHTML = result[1];
-            document.getElementById("allpooltokens").innerHTML = web3js.fromWei(result[2], "ether");            
-          }
-          
-        });
-
-    web3js.eth.getBlockNumber(function(err, result){
-      if(!err)
-        document.getElementById("currentblocknumber").innerHTML = result;
-    });
-
-    link = window.location.href;
-    if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
-    document.getElementById("invite_link").innerHTML =  link + "#" + web3js.eth.accounts[0];
-
-    document.getElementById("purchase_list").href="https://rinkeby.etherscan.io/address/"+clpAddress;
-
-    clp.clToken(function(err, result){
-      if(!err) {
-        console.log(result);
-        document.getElementById("token_link").href="https://rinkeby.etherscan.io/token/"+result+"#balances";
-      }
-    })
-  }
-
-  function updateHistoryTickets() {
-  }
-
-  //document.getElementById('files').addEventListener('change', handleFileSelect, false);
-
-  
-  var web3js;
-  var clpAddress = "0x8822c4c386b6d9dd7106d1525ff1d7302d8a7992";
-
-  if(typeof web3 != 'undefined') {
-    web3js = new Web3(web3.currentProvider);
-
-    web3js.version.getNetwork((err, netId) => {
-      //alert(netId);
-      if(netId < 0) {
-        document.getElementById('env_message').innerHTML="Please switch MetaMask to Rinkeby";
-      }
-      else {
-        //alert(web3js.eth.accounts);
-      	if(web3js.eth.accounts.length == 0) {
-      		 document.getElementById('env_message').innerHTML="Please Unlock Your MetaMask";
-      	}
-      	else {
-      	   clp = web3js.eth.contract(clpAbi).at(clpAddress);
-           updatePoolStatus();
-      	}
-        
-      }   
-    });  
-  }
-  else {
-    document.getElementById('env_message').innerHTML="Can't Detect Ethereum Wallet，Please use MetaMask on PC version Chrome，<a href='https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn' target='_blank'>Click to Install</a>";
-    document.getElementById('cta-group').style.display='none';
-  }
+  ];
   
 </script>
 

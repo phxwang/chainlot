@@ -6,7 +6,7 @@ interface ChainLotInterface {
 	    uint _count) external returns (uint);
 
 	function buyTicket(bytes numbers, address referer) payable public;
-	function buyRandom(address referer) payable public;
+	function buyRandom(uint8 numberCount, address referer) payable public;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount);
 }
@@ -32,7 +32,7 @@ interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
 	function tokenSum() external view returns(uint tokenSum);
 	function buyTicket(bytes numbers, address referer) payable public;
-	function buyRandom(address referer) payable public;
+	function buyRandom(uint8 numberCount, address referer) payable public;
 	function withdrawHistoryCut(uint[] ticketIds) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;

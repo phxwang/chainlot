@@ -54,7 +54,7 @@ contract("ChainLot", async (accounts) => {
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
 		console.log("from account: " + id);
-		r = await chainlotpublic.buyRandom(web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:1e11});
+		r = await chainlotpublic.buyRandom(22, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e11});
 		//console.log(JSON.stringify(r.logs));	
 	}
 
@@ -71,7 +71,7 @@ contract("ChainLot", async (accounts) => {
 		
 		for(i=0; i<10; i++) {
 			console.log("match awards, progress: " + i*5);
-			r = await drawingtool.matchAwards(pooladdress, 5);
+			r = await drawingtool.matchAwards(pooladdress, 25);
 			console.log(JSON.stringify(r.logs));
 			stage = await showStage(pool);
 			if(stage == 2) break;
@@ -102,7 +102,7 @@ contract("ChainLot", async (accounts) => {
 		}
 
 		await showPoolToken(chainlot, cltoken);
-		
+
 		for(i=0; i<2; i++) {
 			console.log("send awards: " + i*5);
 			r = await drawingtool.sendAwards(pooladdress, 100)

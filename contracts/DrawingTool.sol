@@ -15,10 +15,9 @@ contract DrawingTool is owned{
 	event DistributeAwards(uint ruleId, uint toDistCount, uint distributedIndex, uint ticketIdsLength, uint awardRulesLength);
   	event TransferAward(address winner, uint value);
   	event TransferDevCut(address dev, uint value);
-  	event TransferHistoryCut(address user, uint value);
-  	event AddHistoryCut(uint added, uint total);
   	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
+  	event CutAward(uint historyCut, uint devCut, uint futureCut);
   	event TransferUnawarded(address from, address to, uint value);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
 
@@ -176,6 +175,12 @@ contract DrawingTool is owned{
   		require(pool.stage() == ChainLotPool.DrawingStage.CALCULATED);
 
   		uint totalBalance = clToken.balanceOf(poolAddress);
+  		uint historyCut = totalBalance/10;
+  		uint futureCut = totalBalance/10;
+  		uint devCut = totalBalance/50;
+
+  		totalBalance = totalBalance - historyCut - futureCut - devCut;
+
   		for(uint8 i=0; i<pool.getAwardRulesLength(); i++) {
   			if(totalBalance >=  pool.getTotalWinnersAward(i)) {
 	          totalBalance -= pool.getTotalWinnersAward(i);
@@ -186,6 +191,13 @@ contract DrawingTool is owned{
 	        }
 	        SplitAward(i, pool.getTotalWinnersAward(i), totalBalance);
   		}
+
+  		pool.setHistoryCut(historyCut);
+  		pool.setDevCut(devCut);
+  		pool.setFutureCut(futureCut);
+
+  		CutAward(historyCut, devCut, futureCut);
+
   		pool.setStage(ChainLotPool.DrawingStage.SPLITED);
   	}
 
@@ -237,32 +249,19 @@ contract DrawingTool is owned{
 		uint toBeAwardLength = pool.getToBeAwardLength();
 		if(endIndex > toBeAwardLength) endIndex = toBeAwardLength;
 		
-	  	uint devCut = 0;
-	  	uint historyCut = 0;
-	  	uint hCut = 0;
-	  	uint userAward = 0;
 	  	address user; uint value; 
 	  	for(uint i=pool.awardIndex(); i<endIndex; i++) {
 	  		(user, value) = pool.toBeAward(i);
-			userAward = value * 88/100;
-			//10% history user cut
-			hCut = value/10;
-			historyCut += hCut;
-			//2% dev cut
-			devCut += value - userAward - hCut;
-			pool.transfer(user, userAward);
-      		TransferAward(user, userAward);
+			pool.transfer(user, value);
+      		TransferAward(user, value);
 		}
+
+		uint devCut = pool.devCut();
 
 		if(devCut > 0) {
 			pool.transfer(owner, devCut);
 			TransferDevCut(owner, devCut);
-		}
-		
-		//history cut only shared to ticket owners before this pool
-		if(historyCut > 0) {
-			pool.addHistoryCut(historyCut);
-			AddHistoryCut(historyCut, pool.historyCut());
+			pool.setDevCut(0);
 		}
 
 	    pool.setAwardIndex(endIndex);

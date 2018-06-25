@@ -11,8 +11,8 @@ contract ChainLotPublic is owned {
 		chainlot.buyTicket.value(msg.value)(numbers, referer);
 	}
 	
-	function buyRandom(address referer) payable public {
-		chainlot.buyRandom.value(msg.value)(referer);
+	function buyRandom(uint8 numberCount, address referer) payable public {
+		chainlot.buyRandom.value(msg.value)(numberCount, referer);
 	}
 
 	function setChainLotAddress(address chainlotAddress) onlyOwner external {
@@ -31,7 +31,7 @@ contract ChainLotPublic is owned {
 	}
 
 	function () payable public {
-		buyRandom(0);
+		buyRandom(1, 0);
 	}
 
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount) {

@@ -114,9 +114,9 @@ contract ChainLot is owned{
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(address referer) payable public{
+	function buyRandom(uint8 numberCount, address referer) payable public{
 		checkAndSwitchPool();
-	    currentPool.buyRandom.value(msg.value)(referer);
+	    currentPool.buyRandom.value(msg.value)(numberCount, referer);
 	    tokenSum += msg.value;
 	}
 
