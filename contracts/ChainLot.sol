@@ -182,11 +182,11 @@ contract ChainLot is owned{
   	//return poolCuts;
   }
 
-  function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount)  {
+  function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint _currentPoolIndex)  {
   	poolTokens = clToken.balanceOf(currentPool);
   	poolBlockNumber = currentPool.poolBlockNumber();
   	totalPoolTokens = tokenSum;
-  	poolCount = chainlotPools.length;
+  	_currentPoolIndex = currentPoolIndex;
   }
 
   function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count) {

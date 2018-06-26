@@ -139,7 +139,7 @@ contract("ChainLot", async (accounts) => {
 		await showPoolToken(chainlot, cltoken);
 		
 
-		/*let historyCutSum = 0;
+		let historyCutSum = 0;
 		for(i=0; i<web3.eth.accounts.length; i++) {
 			account = web3.eth.accounts[i];
 			let abalance = await cltoken.balanceOf(account);
@@ -155,7 +155,7 @@ contract("ChainLot", async (accounts) => {
 			let cut1 = await chainlotpublic.listUserHistoryCut(account, 0, 3, tickets);
 			console.log("after withdraw " + account + "("+i+"):  " + JSON.stringify(cut1));
 		}
-		console.log("historyCutSum: " + web3.fromWei(historyCutSum, 'ether'));*/
+		console.log("historyCutSum: " + web3.fromWei(historyCutSum, 'ether'));
 	}
 
 	let results = await chainlotpublic.retrievePoolInfo();

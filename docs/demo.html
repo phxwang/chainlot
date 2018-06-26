@@ -4515,6 +4515,12 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     <!--Explore cs section starts-->
     <div id="resources">
         <div class="container">
+            <div id="winner_list" class="resource-blocks">
+            <h2> Winner List</h2>
+            <li></li>
+            </div>
+        </div>
+        <div class="container">
             <div id="purchase_list" class="resource-blocks">
             <h2> Purchase List</h2>
             <li></li>
@@ -4692,13 +4698,22 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             for(i=0; i<result.length; i++) {
               totalEth += parseInt(result[i],10)
             }
-            console.log(JSON.stringify(result));
+            //console.log(JSON.stringify(result));
             document.getElementById("history_cut").innerHTML 
               += ["<li>", web3js.fromWei(totalEth, "ether"), " ETH </li>"].join("");
           }
           
         })
       }
+    })
+
+    clp.getWinnerList(0,10,function(err, result) {
+      //console.log(JSON.stringify(result));
+      for(i=0; i<result[0].length; i++) {
+        document.getElementById("winner_list").innerHTML += 
+              ["<li>", result[0][i], " have won ", web3js.fromWei(result[1][i], "ether"), " ETH at block ", result[2][i], "</li>"].join("");
+      }
+      
     })
 
     clticket.totalSupply(function(err, result) {
@@ -4732,8 +4747,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   //document.getElementById('files').addEventListener('change', handleFileSelect, false);
   
   var web3js;
-  var clpAddress = "0xf5e19de7d55981b3222b75c68e02bb2af1c0d7b2";
-  var clticketAddress  = "0xa5d6cc33c9ee8a3e4f3c40c9e221e79de97b1ee7";
+  var clpAddress = "0xae6423d6a8cdd42b655cafd9679bc9ace912c1e1";
+  var clticketAddress  = "0x58a3e1bb13475e4af5a8ff07c38237e32b406866";
   var clp;
   var clticket;
 
@@ -5006,6 +5021,37 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         {
           "name": "poolCount",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "poolStart",
+          "type": "uint256"
+        },
+        {
+          "name": "poolEnd",
+          "type": "uint256"
+        }
+      ],
+      "name": "getWinnerList",
+      "outputs": [
+        {
+          "name": "_winners",
+          "type": "address[]"
+        },
+        {
+          "name": "_values",
+          "type": "uint256[]"
+        },
+        {
+          "name": "_blocks",
+          "type": "uint256[]"
         }
       ],
       "payable": false,
