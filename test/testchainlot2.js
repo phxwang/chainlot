@@ -36,6 +36,12 @@ contract("ChainLot", async (accounts) => {
 		//console.log(JSON.stringify(r.logs))
 	}
 
+	//r = await chainlotpublic.getWinnerList(0, 10);
+	//console.log(JSON.stringify(r));
+
+	//return;
+
+
 	r = await cltoken.sendTransaction({from:web3.eth.accounts[5], value:5e11});
 	//console.log(JSON.stringify(r.logs));
 
@@ -133,7 +139,7 @@ contract("ChainLot", async (accounts) => {
 		await showPoolToken(chainlot, cltoken);
 		
 
-		let historyCutSum = 0;
+		/*let historyCutSum = 0;
 		for(i=0; i<web3.eth.accounts.length; i++) {
 			account = web3.eth.accounts[i];
 			let abalance = await cltoken.balanceOf(account);
@@ -149,7 +155,7 @@ contract("ChainLot", async (accounts) => {
 			let cut1 = await chainlotpublic.listUserHistoryCut(account, 0, 3, tickets);
 			console.log("after withdraw " + account + "("+i+"):  " + JSON.stringify(cut1));
 		}
-		console.log("historyCutSum: " + web3.fromWei(historyCutSum, 'ether'));
+		console.log("historyCutSum: " + web3.fromWei(historyCutSum, 'ether'));*/
 	}
 
 	let results = await chainlotpublic.retrievePoolInfo();
@@ -157,6 +163,8 @@ contract("ChainLot", async (accounts) => {
 	console.log("pool number: " + results[1]);
 	console.log("total token sum: " + web3.fromWei(results[2], 'ether'));
 
+	results = await chainlotpublic.getWinnerList(0, 10);
+	console.log(JSON.stringify(results));
 })
 
 var showPoolToken = async function(chainlot, cltoken) {

@@ -189,4 +189,30 @@ contract ChainLot is owned{
   	poolCount = chainlotPools.length;
   }
 
+  function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count) {
+  	require(_poolEnd > poolStart);
+  	uint poolEnd = _poolEnd;
+  	if(poolEnd > chainlotPools.length) poolEnd = chainlotPools.length;
+
+  	uint winnersCount = 0;
+  	uint poolWinnersCount = 0;
+  	address winner; uint value; uint blockNumber;
+
+	for(uint i = 0; i < poolEnd - poolStart; i++) {
+		poolWinnersCount= chainlotPools[i].awardIndex();
+		blockNumber = chainlotPools[i].poolBlockNumber();
+		for(uint j=0; j<poolWinnersCount; j++) {
+			if(winnersCount >= 512) break;
+
+			(winner, value) = chainlotPools[i].toBeAward(j);
+			winners[winnersCount] = winner;
+			values[winnersCount] = value;
+			blocks[winnersCount] = blockNumber;
+			winnersCount ++;
+		}
+	}
+  	
+  	count = winnersCount;
+  }
+
 }

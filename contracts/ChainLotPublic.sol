@@ -39,6 +39,23 @@ contract ChainLotPublic is owned {
 		return chainlot.retrievePoolInfo();
 	}
 
+	function getWinnerList(uint poolStart, uint poolEnd) external view returns (address[] _winners, uint[] _values, uint[] _blocks) {
+		address[512] memory winnersResult;uint[512] memory valuesResult;uint[512] memory blocksResult;uint count;
+
+		(winnersResult, valuesResult, blocksResult, count) = chainlot.getWinnerList(poolStart, poolEnd);
+		if(count > 0) {
+			address[] memory winners = new address[](count);
+			uint[] memory values = new uint[](count);
+			uint[] memory blocks = new uint[](count);
+			for(uint i=0;i<count; i++) {
+				winners[i] = winnersResult[i];
+				values[i] = valuesResult[i];
+				blocks[i] = blocksResult[i];
+			}
+			return(winners, values, blocks);
+		}
+	}
+
 	//withdraw history cut from pools
   	function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external {
   		chainlot.withDrawHistoryCut(poolStart, poolEnd, ticketIds);
@@ -50,8 +67,8 @@ contract ChainLotPublic is owned {
 	  	
 	  	uint[512] memory pcresult = chainlot.listUserHistoryCut(user, poolStart, poolEnd, ticketIds);
 	  	uint[] memory poolCuts = new uint[](poolEnd - poolStart);
-	  	for(uint i = poolStart; i < poolEnd; i++) {
-	  		poolCuts[i] = pcresult[i-poolStart];
+	  	for(uint i = 0; i < poolEnd - poolStart; i++) {
+	  		poolCuts[i] = pcresult[i];
 	  	}
 	  	return poolCuts;
 	}

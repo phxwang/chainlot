@@ -11,6 +11,7 @@ interface ChainLotInterface {
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount);
 	function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external;
 	function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[512] _poolCuts);
+	function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count);
 }
 
 interface CLTokenInterface {
@@ -38,6 +39,8 @@ interface ChainLotPoolInterface {
 	function withdrawHistoryCut(uint[] ticketIds) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
+	function awardIndex() external view returns(uint index);
+	function toBeAward(uint index) external view returns(address winner, uint value);
 }
 
 interface ChainLotPoolFactoryInterface {
