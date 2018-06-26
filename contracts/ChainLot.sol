@@ -170,9 +170,10 @@ contract ChainLot is owned{
   }
 
 
-  function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[512] poolCuts) {
-  	require(poolEnd > poolStart);
-  	require(poolEnd <= chainlotPools.length);
+  function listUserHistoryCut(address user, uint poolStart, uint _poolEnd, uint[] ticketIds) external view returns(uint[512] poolCuts) {
+  	require(_poolEnd > poolStart);
+  	uint poolEnd = _poolEnd;
+  	if(poolEnd > chainlotPools.length) poolEnd = chainlotPools.length;
 
   	//uint[] memory poolCuts = new uint[](poolEnd - poolStart);
 	for(uint i = poolStart; i < poolEnd; i++) {

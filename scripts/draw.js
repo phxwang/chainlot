@@ -32,7 +32,7 @@ module.exports = async function(callback) {
 				console.log(["pool ", i, "(", address, ")", ", pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
 
-				while(stage < 8) {
+				while(stage < 7) {
 					switch(parseInt(stage)) {
 						case 0:
 							console.log("prepare awards");
@@ -76,23 +76,11 @@ module.exports = async function(callback) {
 							console.log(JSON.stringify(r.logs));
 							break;
 						default:
-							return;
+							break;
 					}
 					stage = await showStage(pool);
 				}
-				
-
-			
-
-			
-
-				
-
-
-				
-
-				
-
+	
 			}
 
 			if(token!=0 && stage > 0) {

@@ -4515,13 +4515,30 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     <!--Explore cs section starts-->
     <div id="resources">
         <div class="container">
+            <div id="purchase_list" class="resource-blocks">
             <h2> Purchase List</h2>
-            <div id="purchase_list" class="resource-blocks text-left">
+            <li></li>
             </div>
         	  <a href="" target="_blank" id="purchase_list_link"><h4>Click to see all purchase list</h4></a>
         </div>
         <div class="container">
+            <div id="my_purchase_list" class="resource-blocks">
+            <h2> My Tickets</h2>
+            <li></li>
+            </div>
+        </div>
+        <div class="container">
+            <div id="history_cut" class="resource-blocks">
+            <h2> History Cut</h2>
+            <h4>All your tickets will share 10% of every pool</h4>
+            </div>
+            <div><a href="javascript:withDrawHistoryCut()">withdraw history cut</a></div>
+            <div><span id="history_transaction_message"></span></div>
+        </div>
+        <div class="container">
+          <div class="resource-blocks">
           <h2>Prize List</h2>
+          <li></li>
           <li>5+1 Jackpot </li>
                 <li>5+0 5000 ETH</li>
                 <li>4+1 50 ETH</li>
@@ -4531,6 +4548,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 <li>2+1 0.05 ETH</li>
                 <li>1+1 0.02 ETH</li>
                 <li>0+1 0.01 ETH</li>
+          </div>
         </div>
     </div>
 </div>
@@ -4554,10 +4572,10 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     }
 
     if(isRandom) {
-      if(count <= 20) 
+      if(count <= 10) 
         numberCount = count;
       else
-        numberCount = 20;
+        numberCount = 10;
       clp.buyRandom(numberCount, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
         if(!err) {
           console.log(r);
@@ -4586,7 +4604,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
       clp.buyTicket(toBuyNumber, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
         if(!err) {
-          console.log(r);
+          //console.log(r);
           var span = document.getElementById('transaction_message');
           span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join("");
           var event = clp.BuyTicket({fromBlock: "latest", toBlock: "pending" }).watch(function(err, result){
@@ -4612,6 +4630,19 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     });*/
   }
 
+  function withDrawHistoryCut() {
+    clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
+      if(!err && result.length > 0) {
+        clp.withDrawHistoryCut(0, 10, result, function(err, result) {
+          if(!err) {
+            var span = document.getElementById('history_transaction_message');
+            span.innerHTML = ["Withdraw transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join(""); 
+          }
+        })
+      }
+    })
+  }
+
   function updatePoolStatus() {
     clp.retrievePoolInfo(function(err, result){
           if(!err) {
@@ -4620,7 +4651,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             document.getElementById("poolblocknumber").innerHTML = result[1];
             document.getElementById("allpooltokens").innerHTML = web3js.fromWei(result[2], "ether");            
           }
-          
         });
 
     web3js.eth.getBlockNumber(function(err, result){
@@ -4650,9 +4680,24 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         for(id in result) {
           //console.log(id);
           clticket.getTicket(id, function(err, result) {
-            console.log(result);
+            //console.log(result);
+            document.getElementById("my_purchase_list").innerHTML += 
+              ["<li>", "[", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
           });
         }
+
+        clp.listUserHistoryCut(web3js.eth.accounts[0], 0, 10, result, function(err, result) {
+          if(!err) {
+            totalEth = 0;
+            for(i=0; i<result.length; i++) {
+              totalEth += parseInt(result[i],10)
+            }
+            console.log(JSON.stringify(result));
+            document.getElementById("history_cut").innerHTML 
+              += ["<li>", web3js.fromWei(totalEth, "ether"), " ETH </li>"].join("");
+          }
+          
+        })
       }
     })
 
@@ -4666,7 +4711,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             clticket.getTicket(i, function(err, result) {
               //console.log(result);
               //console.log(bytes32ToDec(result[2]));
-              document.getElementById("purchase_list").innerHTML += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
+              document.getElementById("purchase_list").innerHTML 
+              += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
             });
           }
       }
@@ -4686,8 +4732,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   //document.getElementById('files').addEventListener('change', handleFileSelect, false);
   
   var web3js;
-  var clpAddress = "0xfcbe5eadc91239d26e66eba87624d2dbbd2452f3";
-  var clticketAddress  = "0x7dc67bfd21b4bf1cf13c1df9f10e92f2a698f2ab";
+  var clpAddress = "0xf5e19de7d55981b3222b75c68e02bb2af1c0d7b2";
+  var clticketAddress  = "0xa5d6cc33c9ee8a3e4f3c40c9e221e79de97b1ee7";
   var clp;
   var clticket;
 
@@ -4834,6 +4880,23 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "TransferHistoryCut",
+      "type": "event"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -4943,6 +5006,59 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         {
           "name": "poolCount",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "poolStart",
+          "type": "uint256"
+        },
+        {
+          "name": "poolEnd",
+          "type": "uint256"
+        },
+        {
+          "name": "ticketIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "withDrawHistoryCut",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "poolStart",
+          "type": "uint256"
+        },
+        {
+          "name": "poolEnd",
+          "type": "uint256"
+        },
+        {
+          "name": "ticketIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "listUserHistoryCut",
+      "outputs": [
+        {
+          "name": "_poolCuts",
+          "type": "uint256[]"
         }
       ],
       "payable": false,

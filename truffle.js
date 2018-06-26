@@ -13,7 +13,7 @@ module.exports = {
       port: 8545,
       from: "0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", // default address to use for any transaction Truffle makes during migrations
       network_id: 4,
-      gasPrice: 1000000000 // Gas limit used for deploys
+      gasPrice: 2000000000 // Gas limit used for deploys
     }
   }
 };

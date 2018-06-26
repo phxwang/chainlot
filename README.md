@@ -57,13 +57,13 @@
  	* 购买 P1 
  		* 指定 done
  		* 随机 done
-    * 支持随机购买多个数字 half done
+    * 支持随机购买多个数字 done
  	* 查看总奖池及总历史奖池 P2 done
  	* 用户邀请用户 P1 done
  	* 查看个人token P2
-  * 查看个人购买记录 P1 half done
-  * 查看历史购买记录 P2 half done
-  * 查看历史获奖记录 P2
+  * 查看个人购买记录 P1 done
+  * 查看历史购买记录 P2 done
+  * 查看历史分成 P2 half done
  * 支持逻辑升级
   * 分拆存储层和表现层，便于升级
   * Migrates的用法
