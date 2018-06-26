@@ -160,9 +160,10 @@ contract ChainLot is owned{
   }
 
   //withdraw history cut from pools
-  function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external {
-  	require(poolEnd > poolStart);
-  	require(poolEnd <= chainlotPools.length);
+  function withDrawHistoryCut(uint poolStart, uint _poolEnd, uint[] ticketIds) external {
+  	require(_poolEnd > poolStart);
+  	uint poolEnd = _poolEnd;
+  	if(poolEnd > chainlotPools.length) poolEnd = chainlotPools.length;
 
   	for(uint i = poolStart; i < poolEnd; i++) {
   		chainlotPools[i].withdrawHistoryCut(ticketIds);
