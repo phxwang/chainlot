@@ -4633,7 +4633,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   function withDrawHistoryCut() {
     clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
       if(!err && result.length > 0) {
-        clp.withDrawHistoryCut(0, 10, result, function(err, result) {
+        clp.withDrawHistoryCut(0, 10, result, function(err, r) {
           if(!err) {
             var span = document.getElementById('history_transaction_message');
             span.innerHTML = ["Withdraw transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join(""); 
