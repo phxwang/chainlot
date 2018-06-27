@@ -17,7 +17,7 @@ module.exports = async function(callback) {
 			let token = await cltoken.balanceOf(address);
 			let stage = await pool.stage();
 			let poolBlockNumber = await pool.poolBlockNumber();
-			if(token != 0)
+			//if(token != 0)
 				console.log(["pool ", i, "(", address, ")(", poolBlockNumber, "), pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
 		}

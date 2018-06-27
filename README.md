@@ -59,6 +59,9 @@
  * 支持逻辑升级
   * 分拆存储层和表现层，便于升级
   * Migrates的用法
+  * 测试局部升级
+    * 升级pool和poolfactory
+    * 升级chainlot
  * 网页交互 
   * 购买 P1 
     * 指定 done

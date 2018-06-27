@@ -54,6 +54,7 @@ contract ChainLot is owned{
   	event TransferUnawarded(address from, address to, uint value);
   	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
+  	event MigrateFrom(address chainlotAddress, address poolAddress);
   	event LOG(uint msg);
 
 	function ChainLot(uint8 _maxWhiteNumber, 
@@ -79,15 +80,18 @@ contract ChainLot is owned{
 		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this), drawingToolAddress);
 		latestPoolBlockNumber = newed.poolBlockNumber();
 		if(address(newed) != 0) {
-			chainlotPools.push(newed);
-			chainlotPoolsMap[address(newed)] = true;
+			addPool(newed);
+		}
+	}
 
-			if(address(currentPool)==0) {
-				currentPool = newed;
-				currentPoolIndex = chainlotPools.length - 1;
-				SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
-			}
+	function addPool(ChainLotPoolInterface newed) internal onlyOwner {
+		chainlotPools.push(newed);
+		chainlotPoolsMap[address(newed)] = true;
 
+		if(address(currentPool)==0) {
+			currentPool = newed;
+			currentPoolIndex = chainlotPools.length - 1;
+			SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
 		}
 	}
 
@@ -159,6 +163,10 @@ contract ChainLot is owned{
   	clToken.transfer(owner, value);
   }
 
+  function getPoolCount() external view returns(uint count) {
+  	count = chainlotPools.length;
+  }
+
   //withdraw history cut from pools
   function withDrawHistoryCut(uint poolStart, uint _poolEnd, uint[] ticketIds) external {
   	require(_poolEnd > poolStart);
@@ -214,6 +222,19 @@ contract ChainLot is owned{
 	}
   	
   	count = winnersCount;
+  }
+
+  function migrateFrom(address chainlotAddress) onlyOwner external{
+  	ChainLot old = ChainLot(chainlotAddress);
+  	for(uint i=0; i<=old.currentPoolIndex(); i++) {
+  		address poolAddress = old.chainlotPools(i);
+  		if(!chainlotPoolsMap[poolAddress]) {
+  			addPool(ChainLotPoolInterface(poolAddress));
+  			MigrateFrom(chainlotAddress, poolAddress);
+  		}
+  	}
+  	currentPool = old.currentPool();
+	currentPoolIndex = old.currentPoolIndex();
   }
 
 }
