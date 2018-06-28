@@ -1,29 +1,13 @@
-var ChainLot = artifacts.require("./ChainLot.sol");
-var ChainLotPool = artifacts.require("./ChainLotPool.sol");
-var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
-var CLToken = artifacts.require("./CLToken.sol");
-var DrawingTool = artifacts.require("./DrawingTool.sol");
-
-module.exports = async function(callback) {
-	console.log("from: " + web3.eth.accounts[0] + ", balance: " 
-		+ web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]), "ether"));
-	web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "Z7YFSFD5927v7jW5ig", 0)
+var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool, ChainLotPool, web3) {
+	let results = await chainlot.retrievePoolInfo();
+	console.log("pool token sum: " + web3.fromWei(results[0], 'ether'));
+	console.log("pool number: " + results[1]);
+	console.log("total token sum: " + web3.fromWei(results[2], 'ether'));
+	console.log("current pool count: " + results[3]);
 
 	try {
-		let chainlot = await ChainLot.deployed();
-		let chainlotticket = await ChainLotTicket.deployed();
-		let cltoken = await CLToken.deployed();
-		let drawingtool = await DrawingTool.deployed();
 
-		doDrawing(chainlot, chainlotticket, cltoken, drawingtool);
-
-	} catch(e) {
-		console.log(e);
-	}
-}
-
-var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool) {
-	for(i=0; i<100; i++) {
+		for(i=0; i<results[3]; i++) {
 			let address = await chainlot.chainlotPools(i);
 			if(address == "0x") break;
 
@@ -36,7 +20,7 @@ var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool) {
 			currentBlockNumber = web3.eth.blockNumber;
 			let poolBlockNumber = await pool.poolBlockNumber();
 
-			if(token != 0 && stage < 8 && poolBlockNumber < currentBlockNumber) {
+			if(token != 0 && stage < 7 && poolBlockNumber < currentBlockNumber) {
 				console.log(["pool ", i, "(", address, ")", ", pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
 
@@ -95,10 +79,18 @@ var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool) {
 				
 			}
 		}
+	}
+	catch(e) {
+		console.log(e);
+	}
 }
 
 var showStage = async function(pool) {
 	let stage = await pool.stage();
 	console.log("stage: " + stage);
 	return stage;
+}
+
+module.exports = {
+	doDrawing : doDrawing
 }

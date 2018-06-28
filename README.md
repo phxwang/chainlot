@@ -61,7 +61,10 @@
   * Migrates的用法
   * 测试局部升级
     * 升级pool和poolfactory
-    * 升级chainlot
+    * 升级chainlot done
+    * 升级chainlotpublic
+ * 自动运维的脚本
+  * 定时生成新的pool和定时开奖
  * 网页交互 
   * 购买 P1 
     * 指定 done
