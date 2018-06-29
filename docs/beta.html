@@ -4463,8 +4463,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             <div class="align-center header-inner">
                 <div class="container clearfix">
                     <div class="logo">
-                        <a href="https://CryptoLotto6.org/">
-                            <h1>CryptoLotto6 (Rinkeby Version)</h1>
+                        <a href="https://www.cryptoLotto6.org/beta.html">
+                            <h1>Crypto Lotto 6 (Beta)</h1>
                         </a>
                     </div>
                     <div id="nav-icon">
@@ -4485,8 +4485,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         <div class="middle-content">
             <div class="container">
                 <div class="message">
-                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 1000 block. All the prize will be returned as CryptoLottoToken(CLT).
-                  <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
+                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 50000 block. All the prize will be returned as CryptoLottoToken(CLT).
                 </div>
                 <div class="cta-group" id="cta-group">
                 	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
@@ -4504,7 +4503,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <h4 id="transaction_message"></h4>
                 </div>
                 <div class="banner-title hidden-xs">
-                    <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH, Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
+                    <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH</h2><h2>Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
                 </div>
             </div>
@@ -4644,7 +4643,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         clp.withDrawHistoryCut(0, 200, result, function(err, r) {
           if(!err) {
             var span = document.getElementById('history_transaction_message');
-            span.innerHTML = ["Withdraw transaction will be validated in about 1 minutes。<a target='_blank' href='https://rinkeby.etherscan.io/tx/",r,"'>transaction: ",r,"</a><br>"].join(""); 
+            span.innerHTML = ["Withdraw transaction will be validated in about 1 minutes。<a target='_blank' href='",txLink,r,"'>transaction: ",r,"</a><br>"].join(""); 
           }
         })
       }
@@ -4751,9 +4750,9 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   //config
   var clpAddress = "0xae6423d6a8cdd42b655cafd9679bc9ace912c1e1";
   var clticketAddress  = "0x58a3e1bb13475e4af5a8ff07c38237e32b406866";
-  var txLink = "https://rinkeby.etherscan.io/tx/";
-  var addressLink = "https://rinkeby.etherscan.io/address/";
-  var tokenLink = "https://rinkeby.etherscan.io/token/";
+  var txLink = "https://www.etherscan.io/tx/";
+  var addressLink = "https://www.etherscan.io/address/";
+  var tokenLink = "https://www.etherscan.io/token/";
 
 
   var web3js;

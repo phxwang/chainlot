@@ -19,7 +19,7 @@ module.exports = async function(callback) {
 		let drawingtool = await DrawingTool.deployed();
 
 		i = 0;
-		while(i < 100) {
+		while(i < 10000) {
 			
 			block = web3.eth.blockNumber
 			console.log(block);

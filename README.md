@@ -64,7 +64,10 @@
     * 升级chainlot done
     * 升级chainlotpublic
  * 自动运维的脚本
-  * 定时生成新的pool和定时开奖
+  * 定时生成新的pool和定时开奖 done
+ * 部署beta版
+
+## DONE
  * 网页交互 
   * 购买 P1 
     * 指定 done
