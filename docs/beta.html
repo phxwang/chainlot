@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="author" content="">
     <title> CryptoLotto6 | Decentralized Lottery on Ethereum</title>
-    <meta http-equiv="refresh" content="30">
+    <!--<meta http-equiv="refresh" content="30">-->
     <style type="text/css">
     /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
@@ -269,7 +269,6 @@ img {
 .introduction-banner {
   /*background: url("../images/dawn_topbanner.jpg") no-repeat;*/
   background-position: center center;
-  height:80%;
   background-size: cover;
 }
 @media screen and (min-width: 768px) and (max-height: 730px){
@@ -3016,29 +3015,9 @@ textarea#abi-inerface:focus{
   position: relative;
   background-color: #111114;
 }
-@media screen and (min-width: 768px) and (max-height: 670px){
-  .banner-title h2{
-    height: 45px;
-    line-height: 45px;
-    font-size: 26px;
-  }
-}
-@media screen and (min-width: 768px) and (max-height: 620px){
-  .banner-title h2{
-    height: 45px;
-    line-height: 45px;
-    font-size: 20px;
-  }
-}
-@media screen and (max-height: 881px){
-  .middle-content .main-logo-wrapper img{
-    width: 250px;
-  }
-}
-@media screen and (min-width: 768px) and (max-width: 800px){
-  .resource-blocks h5{
-    font-size:14px;
-  }
+
+.resource-blocks h2{
+  margin-bottom: 10px;
 }
 
 /*to make font size consistence in iphone devices*/
@@ -4508,28 +4487,23 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 </div>
             </div>
         </div>
-    </div>
 
-
-    <!--Explore cs section starts-->
+        <!--Explore cs section starts-->
     <div id="resources">
         <div class="container">
             <div id="winner_list" class="resource-blocks">
             <h2> Winner List</h2>
-            <li></li>
             </div>
         </div>
         <div class="container">
             <div id="purchase_list" class="resource-blocks">
             <h2> Purchase List</h2>
-            <li></li>
             </div>
-        	  <a href="" target="_blank" id="purchase_list_link"><h4>Click to see all purchase list</h4></a>
+            <a href="" target="_blank" id="purchase_list_link"><h4>Click to see all purchase list</h4></a>
         </div>
         <div class="container">
             <div id="my_purchase_list" class="resource-blocks">
             <h2> My Tickets</h2>
-            <li></li>
             </div>
             <div><h4>All the tickets are stored in ERC 721 based smart contract and can be exchanged. 
               <a id="ticket_link" href="" target="_blank">Click to view</a></h4></div>
@@ -4545,7 +4519,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         <div class="container">
           <div class="resource-blocks">
           <h2>Prize List</h2>
-          <li></li>
           <li>5+1 Jackpot </li>
                 <li>5+0 5000 ETH</li>
                 <li>4+1 50 ETH</li>
@@ -4557,6 +4530,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 <li>0+1 0.01 ETH</li>
           </div>
         </div>
+    </div>
     </div>
 </div>
 
@@ -4671,7 +4645,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
     document.getElementById("purchase_list_link").href=addressLink+clpAddress;
 
-    document.getElementById("ticket_link").href=addressLink+clticketAddress;
 
     clp.clToken(function(err, result){
       if(!err) {
@@ -4681,60 +4654,85 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         
       }
     });
+
+    clp.clToken(function(err, result){
+      if(!err) {
+        console.log(result);
+        document.getElementById("token_link").href=tokenLink+result+"#balances";
+        document.getElementById("my_token_link").href=tokenLink+result+"?a="+web3js.eth.accounts[0];
+        
+      }
+    });
+
+   
+             
   }
 
   function updateHistoryTickets() {
-    clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
-      if(!err && result.length > 0) {
-        for(id in result) {
-          //console.log(id);
-          clticket.getTicket(id, function(err, result) {
-            //console.log(result);
-            document.getElementById("my_purchase_list").innerHTML += 
-              ["<li>", "[", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
-          });
-        }
+    clp.chainLotTicket(function(err, result){
+      if(!err) {
+        console.log(result);
+        clticketAddress = result;
+        clticket = web3js.eth.contract(clticketAbi).at(clticketAddress);
 
-        clp.listUserHistoryCut(web3js.eth.accounts[0], 0, 200, result, function(err, result) {
-          if(!err) {
-            totalEth = 0;
-            for(i=0; i<result.length; i++) {
-              totalEth += parseInt(result[i],10)
+        document.getElementById("ticket_link").href=addressLink+clticketAddress;
+
+
+        clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
+          if(!err && result.length > 0) {
+            for(id in result) {
+              //console.log(id);
+              clticket.getTicket(id, function(err, result) {
+                //console.log(result);
+                document.getElementById("my_purchase_list").innerHTML += 
+                  ["<li>", "[", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
+              });
             }
-            //console.log(JSON.stringify(result));
-            document.getElementById("history_cut").innerHTML 
-              += ["<li>", web3js.fromWei(totalEth, "ether"), " ETH </li>"].join("");
+
+            clp.listUserHistoryCut(web3js.eth.accounts[0], 0, 200, result, function(err, result) {
+              if(!err) {
+                totalEth = 0;
+                for(i=0; i<result.length; i++) {
+                  totalEth += parseInt(result[i],10)
+                }
+                //console.log(JSON.stringify(result));
+                document.getElementById("history_cut").innerHTML 
+                  += ["<li>", web3js.fromWei(totalEth, "ether"), " ETH </li>"].join("");
+              }
+              
+            })
+          }
+        })
+
+        clp.getWinnerList(0,10,function(err, result) {
+          //console.log(JSON.stringify(result));
+          for(i=0; i<result[0].length; i++) {
+            document.getElementById("winner_list").innerHTML += 
+                  ["<li>", result[0][i], " have won ", web3js.fromWei(result[1][i], "ether"), " ETH at block ", result[2][i], "</li>"].join("");
           }
           
         })
-      }
-    })
 
-    clp.getWinnerList(0,10,function(err, result) {
-      //console.log(JSON.stringify(result));
-      for(i=0; i<result[0].length; i++) {
-        document.getElementById("winner_list").innerHTML += 
-              ["<li>", result[0][i], " have won ", web3js.fromWei(result[1][i], "ether"), " ETH at block ", result[2][i], "</li>"].join("");
-      }
-      
-    })
-
-    clticket.totalSupply(function(err, result) {
-      if(!err) {
-        length = result;
-        start = length - 10;
-        if(start < 0) start = 0
-          for(i=start; i<length; i++) {
-            //console.log(i);
-            clticket.getTicket(i, function(err, result) {
-              //console.log(result);
-              //console.log(bytes32ToDec(result[2]));
-              document.getElementById("purchase_list").innerHTML 
-              += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
-            });
+        clticket.totalSupply(function(err, result) {
+          if(!err) {
+            length = result;
+            start = length - 10;
+            if(start < 0) start = 0
+              for(i=start; i<length; i++) {
+                //console.log(i);
+                clticket.getTicket(i, function(err, result) {
+                  //console.log(result);
+                  //console.log(bytes32ToDec(result[2]));
+                  document.getElementById("purchase_list").innerHTML 
+                  += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
+                });
+              }
           }
+        })
+
       }
-    })
+    });
+    
   }
 
   function bytes32ToDec(str) {
@@ -4748,8 +4746,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   }
 
   //config
-  var clpAddress = "0xae6423d6a8cdd42b655cafd9679bc9ace912c1e1";
-  var clticketAddress  = "0x58a3e1bb13475e4af5a8ff07c38237e32b406866";
+  var clpAddress = "0x3305a21dc896083fff2cb5e2502edf5ad8d35783";
   var txLink = "https://www.etherscan.io/tx/";
   var addressLink = "https://www.etherscan.io/address/";
   var tokenLink = "https://www.etherscan.io/token/";
@@ -4758,6 +4755,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   var web3js;
   var clp;
   var clticket;
+  var clticketAddress;
 
 
   window.onload = function() {
@@ -4776,7 +4774,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           }
           else {
              clp = web3js.eth.contract(clpAbi).at(clpAddress);
-             clticket = web3js.eth.contract(clticketAbi).at(clticketAddress);
              updatePoolStatus();
              updateHistoryTickets();
           }
@@ -4792,7 +4789,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
   
 
-  var clpAbi = [
+  var clpAbi =  [
     {
       "constant": true,
       "inputs": [],
@@ -4825,6 +4822,20 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "constant": true,
       "inputs": [],
       "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chainLotTicket",
       "outputs": [
         {
           "name": "",
@@ -4986,6 +4997,20 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "constant": false,
       "inputs": [
         {
+          "name": "ticketAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setChainLotTicketAddress",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "_from",
           "type": "address"
         },
@@ -5026,7 +5051,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           "type": "uint256"
         },
         {
-          "name": "poolCount",
+          "name": "currentPoolIndex",
           "type": "uint256"
         }
       ],

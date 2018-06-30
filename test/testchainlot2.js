@@ -27,7 +27,6 @@ contract("ChainLot", async (accounts) => {
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
 	await chainlotticket.setMinter(chainlot.address, true);
 	await factory.transferOwnership(chainlot.address);
-	await chainlot.setDrawingToolAddress(drawingtool.address);
 	await drawingtool.init(chainlotticket.address, cltoken.address);
 
 	for(i=0; i<5; i++) {
@@ -68,6 +67,8 @@ contract("ChainLot", async (accounts) => {
 		let pooladdress = await chainlot.chainlotPools(pi);
 		console.log(pi + ": " + pooladdress);
 		let pool = await ChainLotPool.at(pooladdress);
+
+		await pool.setDrawingToolAddress(drawingtool.address);
 
 		console.log("prepare awards");
 		r = await drawingtool.prepareAwards(pooladdress);

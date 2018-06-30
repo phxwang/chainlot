@@ -37,8 +37,7 @@ contract ChainLot is owned{
   	CLTokenInterface public clToken;
   	ChainLotPoolFactoryInterface public clpFactory;
   	ChainLotPoolInterface public currentPool;
-  	address drawingToolAddress;
-  
+  	
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
 	event ToBeAward(bytes jackpotNumbers, bytes32 ticketNumber, uint ticketCount, uint ticketId, address user, uint blockNumber, uint awardValue);
@@ -77,7 +76,7 @@ contract ChainLot is owned{
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(latestPoolBlockNumber,maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray);
-		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this), drawingToolAddress);
+		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this));
 		latestPoolBlockNumber = newed.poolBlockNumber();
 		if(address(newed) != 0) {
 			addPool(newed);
@@ -95,7 +94,7 @@ contract ChainLot is owned{
 		}
 	}
 
-	function checkAndSwitchPool() internal {
+	function checkAndSwitchPool() public {
 		require(address(currentPool) != 0);
 
 		//find the right pool
@@ -153,10 +152,6 @@ contract ChainLot is owned{
 
   function setChainLotPoolFactoryAddress(address factoryAddress) onlyOwner external {
   	clpFactory = ChainLotPoolFactoryInterface(factoryAddress);
-  }
-
-  function setDrawingToolAddress(address _drawingToolAddress) onlyOwner external{
-  	drawingToolAddress = _drawingToolAddress;
   }
 
   function withDrawDevCut(uint value) onlyOwner external {

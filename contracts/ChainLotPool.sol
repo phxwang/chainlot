@@ -117,13 +117,15 @@ contract ChainLotPool is owned{
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot, 
-						address _drawingToolAddress) public {
+						ChainLotInterface _chainLot) public {
   		chainLotTicket = _chainLotTicket;
 		clToken = _clToken;
 		chainLot = _chainLot;
 		owner = tx.origin;
-		drawingToolAddress = _drawingToolAddress;
+  	}
+
+  	function setDrawingToolAddress(address _drawingToolAddress) onlyOwner external {
+  		drawingToolAddress = _drawingToolAddress;
   	}
 
   	modifier onlyDrawingTool {

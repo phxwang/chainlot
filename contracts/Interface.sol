@@ -55,8 +55,7 @@ interface ChainLotPoolFactoryInterface {
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						CLTokenInterface _clToken,
-						ChainLotInterface _chainLot, 
-						address _drawingToolAddress)  external; 
+						ChainLotInterface _chainLot)  external; 
 
 }
 

@@ -30,8 +30,8 @@ module.exports = async function(callback) {
 				console.log(JSON.stringify(r.logs))
 
 				//buy one ticket
-				console.log("buy one ticket");
-				r = await chainlot.buyRandom(1, "0",{from:web3.eth.accounts[0], value:1e16});
+				console.log("check and switch pool");
+				r = await chainlot.checkAndSwitchPool();
 				console.log(JSON.stringify(r.logs))
 				
 				//draw last pool

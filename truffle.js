@@ -13,11 +13,11 @@ module.exports = {
       port: 8545,
       from: "0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", // default address to use for any transaction Truffle makes during migrations
       network_id: 4,
-      gasPrice: 2000000000 // Gas limit used for deploys
+      gasPrice: 10000000000 // Gas limit used for deploys
     },
     main: {
       host: "127.0.0.1", // Connect to geth on the specified
-      port: 9545,
+      port: 9555,
       from: "0xd3db3028e92d98ce48e5e21256696d2e5ae04d9e", // default address to use for any transaction Truffle makes during migrations
       network_id: 0,
       gasPrice: 1000000000 // Gas limit used for deploys

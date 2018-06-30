@@ -24,6 +24,8 @@ var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool, C
 				console.log(["pool ", i, "(", address, ")", ", pool ether: ", 
 					web3.fromWei(token, 'ether'), " ETH", ", stage: ", stage].join(""));
 
+				await pool.setDrawingToolAddress(drawingtool.address);
+
 				while(stage < 7) {
 					switch(parseInt(stage)) {
 						case 0:

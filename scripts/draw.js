@@ -15,6 +15,8 @@ module.exports = async function(callback) {
 		let cltoken = await CLToken.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
+		console.log(drawingtool.address);
+
 		doDrawing(chainlot, chainlotticket, cltoken, drawingtool);
 
 	} catch(e) {

@@ -211,16 +211,18 @@ contract DrawingTool is owned{
 	  	uint distributedIndex = pool.getDistributedIndex(ruleId);
 	  	
 
-	  	uint endIndex = distributedIndex + toDistCount;
-	  	if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
+	  	if(winnerTicketCount > distributedIndex) {
+	  		uint endIndex = distributedIndex + toDistCount;
+		  	if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
 
-	  	doDistribute(pool, ruleId, distributedIndex, endIndex);
+		  	doDistribute(pool, ruleId, distributedIndex, endIndex);
 
-	  	if(ruleId == pool.getAwardRulesLength() -1 && endIndex == winnerTicketCount) {
-	  		pool.setStage(ChainLotPool.DrawingStage.DISTRIBUTED);
+		  	if(ruleId == pool.getAwardRulesLength() -1 && endIndex == winnerTicketCount) {
+		  		pool.setStage(ChainLotPool.DrawingStage.DISTRIBUTED);
+		  	}
+
+		  	DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());
 	  	}
-
-	  	DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());
   	}
 
   	function doDistribute(ChainLotPool pool, uint8 ruleId, uint distributedIndex, uint endIndex) onlyOwner internal{
