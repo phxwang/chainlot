@@ -56,18 +56,21 @@
  * 完善测试用例，正向反向都要测到
  * 网页格式美化
  * 适配移动
+ * 部署beta版到main net
+ * 建一个telegram群
+ * 支持一次购买多个奖池的ticket
+ * 安全性检查
+  * 所有的外部操作都要在状态改变之后
+
+## DONE
  * 支持逻辑升级
-  * 分拆存储层和表现层，便于升级
-  * Migrates的用法
-  * 测试局部升级
-    * 升级pool和poolfactory
+  * 分拆存储层和表现层，便于升级 done
+  * Migrates的用法 done
+ * 测试局部升级
+    * 升级poolfactory
     * 升级chainlot done
     * 升级chainlotpublic done
     * 升级drawingtool done
- * 部署beta版
- * 建一个telegram群
-
-## DONE
  * 自动运维的脚本
   * 定时生成新的pool和定时开奖 done
  * 网页交互 

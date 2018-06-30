@@ -1,8 +1,9 @@
 pragma solidity ^0.4.16;
+pragma experimental "v0.5.0";
 
 import "./owned.sol";
 
-interface tokenRecipient { function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public; }
+interface tokenRecipient { function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external; }
 
 contract TokenERC20 {
     // Public variables of the token
@@ -211,14 +212,14 @@ contract CLToken is owned, TokenERC20 {
         _transfer(this, msg.sender, msg.value);              // makes the transfers
     }
 
-    function () payable public {
+    function () payable external {
         buy();
     }
 
     /// @notice Sell `amount` tokens to contract
     /// @param amount amount of tokens to be sold
-    function sell(uint amount) public {
-        require(this.balance >= amount);      // checks if the contract has enough ether to buy
+    function sell(uint amount) external {
+        require((address(this)).balance >= amount);      // checks if the contract has enough ether to buy
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(amount);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
     }

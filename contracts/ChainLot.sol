@@ -1,4 +1,5 @@
 pragma solidity ^0.4.4;
+pragma experimental "v0.5.0";
 import "./Interface.sol";
 import "./owned.sol";
 
@@ -109,7 +110,7 @@ contract ChainLot is owned{
 	//numbers: uint8[6] 
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
-	function buyTicket(bytes numbers, address referer) payable public {
+	function buyTicket(bytes numbers, address referer) payable external {
 		checkAndSwitchPool();
 		currentPool.buyTicket.value(msg.value)(numbers, referer);
 		tokenSum += msg.value;
@@ -117,7 +118,7 @@ contract ChainLot is owned{
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(uint8 numberCount, address referer) payable public{
+	function buyRandom(uint8 numberCount, address referer) payable external{
 		checkAndSwitchPool();
 	    currentPool.buyRandom.value(msg.value)(numberCount, referer);
 	    tokenSum += msg.value;
@@ -135,7 +136,7 @@ contract ChainLot is owned{
 	    return chainLotTicket.mint(_owner, _numbers, _count);
   	}
 
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external {
 		checkAndSwitchPool();
 		clToken.transfer(currentPool, _value);
 	    currentPool.receiveApproval(_from, _value, _token, _extraData);

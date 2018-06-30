@@ -1,13 +1,14 @@
 pragma solidity ^0.4.4;
+pragma experimental "v0.5.0";
 
 interface ChainLotInterface {
 	function mint(address _owner, 
 	    bytes _numbers,
 	    uint _count) external returns (uint);
 
-	function buyTicket(bytes numbers, address referer) payable public;
-	function buyRandom(uint8 numberCount, address referer) payable public;
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
+	function buyTicket(bytes numbers, address referer) payable external;
+	function buyRandom(uint8 numberCount, address referer) payable external;
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount);
 	function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external;
 	function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[512] _poolCuts);
@@ -18,7 +19,7 @@ interface CLTokenInterface {
 	function transfer(address _to, uint _value) external;
 	function buy() payable external;
 	function balanceOf(address user) external view returns(uint value);
-	function transferFrom(address _from, address _to, uint _value) public returns (bool success);
+	function transferFrom(address _from, address _to, uint _value) external returns (bool success);
 }
 
 interface ChainLotTicketInterface {
@@ -34,11 +35,11 @@ interface ChainLotTicketInterface {
 interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
 	function tokenSum() external view returns(uint tokenSum);
-	function buyTicket(bytes numbers, address referer) payable public;
-	function buyRandom(uint8 numberCount, address referer) payable public;
+	function buyTicket(bytes numbers, address referer) payable external;
+	function buyRandom(uint8 numberCount, address referer) payable external;
 	function withdrawHistoryCut(uint[] ticketIds) external;
 	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public;
+	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function awardIndex() external view returns(uint index);
 	function toBeAward(uint index) external view returns(address winner, uint value);
 }

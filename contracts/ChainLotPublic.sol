@@ -1,4 +1,5 @@
 pragma solidity ^0.4.18;
+pragma experimental "v0.5.0";
 import "./Interface.sol";
 import "./owned.sol";
 
@@ -37,7 +38,7 @@ contract ChainLotPublic is owned {
 		}
 	}
 
-	function () payable public {
+	function () payable external {
 		buyRandom(1, 0);
 	}
 

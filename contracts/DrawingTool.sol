@@ -1,4 +1,5 @@
 pragma solidity ^0.4.4;
+pragma experimental "v0.5.0";
 import "./owned.sol";
 import "./Interface.sol";
 import "./ChainLotPool.sol";
@@ -46,7 +47,7 @@ contract DrawingTool is owned{
   	}
 
   	function getRuleKey(uint _whiteNumberCount, uint _yellowNumberCount, uint maxYellowNumberCount) 
-  		internal view returns(uint index){
+  		internal pure returns(uint index){
 		return _whiteNumberCount*(maxYellowNumberCount+1)+_yellowNumberCount;
 	}
 
@@ -250,6 +251,11 @@ contract DrawingTool is owned{
   		uint endIndex = pool.awardIndex() + toAwardCount;
 		uint toBeAwardLength = pool.getToBeAwardLength();
 		if(endIndex > toBeAwardLength) endIndex = toBeAwardLength;
+
+		pool.setAwardIndex(endIndex);
+	    if(endIndex == toBeAwardLength) {
+	    	pool.setStage(ChainLotPool.DrawingStage.SENT);
+	    }
 		
 	  	address user; uint value; 
 	  	for(uint i=pool.awardIndex(); i<endIndex; i++) {
@@ -261,15 +267,10 @@ contract DrawingTool is owned{
 		uint devCut = pool.devCut();
 
 		if(devCut > 0) {
+			pool.setDevCut(0);
 			pool.transfer(owner, devCut);
 			TransferDevCut(owner, devCut);
-			pool.setDevCut(0);
 		}
-
-	    pool.setAwardIndex(endIndex);
-	    if(endIndex == toBeAwardLength) {
-	    	pool.setStage(ChainLotPool.DrawingStage.SENT);
-	    }
 	}
 
 	function transferUnawarded(address poolAddress, address to) onlyOwner external {

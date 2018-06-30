@@ -31,7 +31,17 @@ module.exports = async function(deployer, network) {
 			drawInterval = 50000;
 		await Promise.all([
 			deployer.deploy(ChainLotPublic),
-			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]),
+			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, 
+				[0,1,1e16,
+				1,1,2e16,
+				2,1,5e16,
+				3,0,5e16,
+				3,1,1e18,
+				4,0,2.5e18,
+				4,1,5e19,
+				5,0,5e21,
+				5,1,1e64
+				]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(CLToken, 1e12),
 			deployer.deploy(ChainLotPoolFactory),

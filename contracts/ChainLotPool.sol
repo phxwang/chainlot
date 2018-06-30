@@ -1,7 +1,12 @@
 pragma solidity ^0.4.4;
+pragma experimental "v0.5.0";
 import "./owned.sol";
 import "./Interface.sol";
 
+/*
+Pool Smart Contract
+used to store all the tickets bought in this pool and all the intermedia status duiring drawing process
+*/
 contract ChainLotPool is owned{
 	uint public poolBlockNumber;
 
@@ -335,11 +340,11 @@ contract ChainLotPool is owned{
 		uint userCut; uint[] memory cutIdList; uint cutCount;
 		(userCut, cutIdList, cutCount) = calculateUserHistoryCut(ticketIds, tx.origin);
 		if(userCut > 0) {
-			clToken.transfer(tx.origin, userCut);
-			TransferHistoryCut(tx.origin, userCut);
 			for(uint i=0; i<cutCount; i++) {
 				withdrawed[cutIdList[i]] = true;
 			}
+			clToken.transfer(tx.origin, userCut);
+			TransferHistoryCut(tx.origin, userCut);
 		}	  	
 	}
 

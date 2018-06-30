@@ -1,4 +1,5 @@
 pragma solidity ^0.4.18;
+pragma experimental "v0.5.0";
 
 import "./ERC721.sol";
 import "./owned.sol";
