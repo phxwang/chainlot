@@ -29,7 +29,6 @@ module.exports = async function(deployer, network) {
 
 		//console.log("ChainLotPublic: " + chainlotpublic.address);
 
-		await chainlot.setDrawingToolAddress(drawingtool.address);
 		await drawingtool.init(chainlotticket.address, cltoken.address);
 
 	}

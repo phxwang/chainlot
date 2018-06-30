@@ -217,12 +217,12 @@ contract DrawingTool is owned{
 
 		  	doDistribute(pool, ruleId, distributedIndex, endIndex);
 
-		  	if(ruleId == pool.getAwardRulesLength() -1 && endIndex == winnerTicketCount) {
-		  		pool.setStage(ChainLotPool.DrawingStage.DISTRIBUTED);
-		  	}
-
 		  	DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());
 	  	}
+
+	  	if(ruleId == pool.getAwardRulesLength() -1 && endIndex == winnerTicketCount) {
+		  		pool.setStage(ChainLotPool.DrawingStage.DISTRIBUTED);
+		}
   	}
 
   	function doDistribute(ChainLotPool pool, uint8 ruleId, uint distributedIndex, uint endIndex) onlyOwner internal{
