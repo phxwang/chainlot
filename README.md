@@ -45,11 +45,15 @@
  ### buyTicket
  * 1 tickets, 160,000gas x 3gwei, 0.0005ETH, $0.3
  ### buyRandom
- * 1 tickets, 160,000gas x 3gwei, 0.0005ETH, $0.3
- ### award
- * match: 10 tickets, 350,000gas x 3gwei, 0.001ETH, $0.6
- * calculate: 10 tickets, 200,000gas x 3gwei, 0.0006ETH, $0.36
- * send: 10 tickets, 120,000gas x 3gwei, 0.0004ETH, $0.24
+ * 1 tickets, 400,000gas x 3gwei, 0.0012ETH, $0.5
+ ### drawing
+ * match: 25 tickets, 1,000,000gas
+ * calculate: 10 tickets, 200,000gas
+ * split: 140,000gas
+ * distribute: 1,000,000gas
+ * send: 100,000gas
+ * transfter: 60,000gas
+ * total: 125 tickets, 8,000,000gas
 
 
 
@@ -59,9 +63,9 @@
   * 所有的外部操作都要在状态改变之后 done
   * 输入越界检查，状态合法性检查
   * 安全计算库
-  * fallback函数
-  * 不能用tx.orgin做权限控制
-  * 使用pool里面的number的循环hash作为salt来计算random
+  * fallback函数 done
+  * 不能用tx.orgin做权限控制 done
+  * 使用pool里面的number的循环hash作为salt来计算random done
   * 增加maintainer角色
  * 支持一次购买多个奖池的ticket P2
  * 把drawing tool用library实现 P2
@@ -72,8 +76,8 @@
    * 奖池的10%用于token分红（实现上比较困难，如何镜像实时的token owner列表）
    * token不可购买，但可以1：1卖出 
  * 完善测试用例，正向反向都要测到 P2
-  * 网页格式美化 P2
-  * 适配移动 P2
+ * 网页格式美化 P2
+ * 适配移动 P2
  * 部署beta版到main net P2
   
 ## DONE

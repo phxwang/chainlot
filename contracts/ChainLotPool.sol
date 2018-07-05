@@ -364,14 +364,14 @@ contract ChainLotPool is owned{
 
 	function calculateUserHistoryCut(uint[] ticketIds, address user) internal view returns(uint _cut, uint[] _cutIdList, uint _cutCount) {
 		uint historyTicketCountSum = 0;
-	  	address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
+	  	bytes32 numbers; uint count; uint blockNumber;
 	  	uint[] memory cutIdList = new uint[](ticketIds.length);
 	  	uint cutCount = 0;
 
 	  	if(totalTicketCountSum != 0) {
 		  	for(uint i=0; i<ticketIds.length; i++) {
 		  		uint tid = ticketIds[i];
-		  		(mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(tid);
+		  		(numbers, count, blockNumber) = chainLotTicket.getTicket(tid);
 		  		if(withdrawed[tid] == false 
 		  			&& blockNumber < poolBlockNumber 
 		  			&& chainLotTicket.ownerOf(tid) == user) {

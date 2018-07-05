@@ -104,8 +104,7 @@ contract DrawingTool is owned{
 
 	function matchRule(uint ticketId, ChainLotPool pool, bytes32 jackpotNumbers) internal view 
 		returns(uint ruleId, bytes32 numbers, uint count, uint blockNumber) {
-			address mb; uint ma;
-	        (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+			(numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
 	      	
 			uint matchedWhiteCount = 0;
 			uint matchedYellowCount = 0;
@@ -152,13 +151,13 @@ contract DrawingTool is owned{
 
   	function doCaculate(ChainLotPool pool, uint8 ruleId, uint processedIndex, uint endIndex, uint awardEther) 
   		onlyOwner internal {
-	    address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;  
+	    bytes32 numbers; uint count; uint blockNumber;  
 	    uint totalWinnersAward = 0;
 	    uint totalTicketCount = 0;
 	            
 	    for(uint j=processedIndex;j<endIndex; j++) {
           uint ticketId = pool.getWinnerTicket(ruleId, j);
-          (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+          (numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
           totalWinnersAward += count * awardEther;
           totalTicketCount += count;
         }
@@ -231,11 +230,11 @@ contract DrawingTool is owned{
 	  	uint totalWinnerAward = pool.getTotalWinnersAward(ruleId);
 
 	  	if(totalTicketCount > 0) {
-	  		address mb; uint ma; bytes32 numbers; uint count; uint blockNumber;
+	  		bytes32 numbers; uint count; uint blockNumber;
 	          
   			for(uint j=distributedIndex; j<endIndex; j++){
 	          uint ticketId = pool.getWinnerTicket(ruleId, j);
-	          (mb, ma, numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+	          (numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
 	          uint awardValue = count * totalWinnerAward / totalTicketCount;
 	          address awardUser = pool.addToBeAward(ticketId, awardValue);
 	          ToBeAward(numbers, count, ticketId, awardUser, blockNumber, awardValue);

@@ -27,7 +27,7 @@ interface ChainLotTicketInterface {
     	bytes _numbers,
     	uint _count) external returns (uint);
 	function getTicket(uint _ticketId) external view 
-    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint count, uint blockNumber);
+    returns (bytes32 numbers, uint count, uint blockNumber);
     function ownerOf(uint _ticketId) external view returns (address owner);
     function totalTicketCountSum() external view returns (uint totalTicketCountSum);
 }

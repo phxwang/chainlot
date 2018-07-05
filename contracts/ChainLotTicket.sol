@@ -29,8 +29,6 @@ contract ChainLotTicket is ERC721, owned {
   /*** DATA TYPES ***/
 
   struct Ticket {
-    address mintedBy;
-    uint64 mintedAt;
     bytes numbers;
     uint count;
     uint blockNumber;
@@ -84,8 +82,6 @@ contract ChainLotTicket is ERC721, owned {
 
   function _mint(address _owner,bytes _numbers,uint _count) internal returns (uint ticketId) {
     Ticket memory ticket = Ticket({
-      mintedBy: _owner,
-      mintedAt: uint64(now),
       numbers: _numbers,
       count: _count,
       blockNumber: block.number
@@ -183,7 +179,7 @@ contract ChainLotTicket is ERC721, owned {
   }
 
   function getTicket(uint _ticketId) external view 
-    returns (address mintedBy, uint64 mintedAt, bytes32 numbers, uint count, uint blockNumber) {
+    returns (bytes32 numbers, uint count, uint blockNumber) {
     require(_ticketId < tickets.length);
     Ticket memory ticket = tickets[_ticketId];
 
@@ -193,9 +189,6 @@ contract ChainLotTicket is ERC721, owned {
       numbers |= bytes32(ticket.numbers[i]&0xFF)>>(i*8);
     }
 
-    mintedBy = ticket.mintedBy;
-    mintedAt = ticket.mintedAt;
-    //numbers = ticket.numbers;
     count = ticket.count;
     blockNumber = ticket.blockNumber;
   }

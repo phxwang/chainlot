@@ -42,9 +42,10 @@ contract("ChainLot", async (accounts) => {
 
 
 	r = await cltoken.sendTransaction({from:web3.eth.accounts[5], value:5e11});
-	//console.log(JSON.stringify(r.logs));
+	//console.log(JSON.stringify(r));
 
 	r = await cltoken.approveAndCall(chainlotpublic.address, 1e11, "0x020101", {from:web3.eth.accounts[5]});
+	//console.log(JSON.stringify(r.receipt.gasUsed));	
 	//console.log(JSON.stringify(r.logs));
 
 	cl = await chainlotpublic.chainlot();
@@ -60,10 +61,11 @@ contract("ChainLot", async (accounts) => {
 		let id = Math.floor(Math.random()*10);
 		console.log("from account: " + id);
 		r = await chainlotpublic.buyRandom(13, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e11});
-		//console.log(JSON.stringify(r.logs));	
+		console.log(JSON.stringify(r.receipt.gasUsed));	
 	}
 
 	for(pi=1; pi<2; pi++) {
+		totalGas = 0;
 		let pooladdress = await chainlot.chainlotPools(pi);
 		console.log(pi + ": " + pooladdress);
 		let pool = await ChainLotPool.at(pooladdress);
@@ -72,14 +74,18 @@ contract("ChainLot", async (accounts) => {
 
 		console.log("prepare awards");
 		r = await drawingtool.prepareAwards(pooladdress);
-		console.log(JSON.stringify(r.logs));
+		//console.log(JSON.stringify(r.logs));
+		console.log(JSON.stringify(r.receipt.gasUsed));	
+		totalGas += Number(r.receipt.gasUsed);
 
 		await showStage(pool);
 		
 		for(i=0; i<10; i++) {
-			console.log("match awards, progress: " + i*5);
+			console.log("match awards, progress: " + i*25);
 			r = await drawingtool.matchAwards(pooladdress, 25);
-			console.log(JSON.stringify(r.logs));
+			//console.log(JSON.stringify(r.logs));
+			console.log(JSON.stringify(r.receipt.gasUsed));	
+			totalGas += Number(r.receipt.gasUsed);
 			stage = await showStage(pool);
 			if(stage == 2) break;
 		}
@@ -89,13 +95,17 @@ contract("ChainLot", async (accounts) => {
 		for(i =0 ; i<2 ; i++) {
 			console.log("calculate awards, rule id " + i);
 			r = await drawingtool.calculateAwards(pooladdress, i, 100)
-			console.log(JSON.stringify(r.logs));
+			//console.log(JSON.stringify(r.logs));
+			console.log(JSON.stringify(r.receipt.gasUsed));	
+			totalGas += Number(r.receipt.gasUsed);
 			await showStage(pool);
 		}
 
 		console.log("split awards");
 		r = await drawingtool.splitAward(pooladdress);
 		console.log(JSON.stringify(r.logs));
+		console.log(JSON.stringify(r.receipt.gasUsed));	
+		totalGas += Number(r.receipt.gasUsed);
 
 		await showStage(pool);
 
@@ -103,7 +113,9 @@ contract("ChainLot", async (accounts) => {
 		for(i =0 ; i<2 ; i++) {
 			console.log("distribute awards, rule id " + i);
 			r = await drawingtool.distributeAwards(pooladdress, i, 100);
-			console.log(JSON.stringify(r.logs));
+			//console.log(JSON.stringify(r.logs));
+			console.log(JSON.stringify(r.receipt.gasUsed));	
+			totalGas += Number(r.receipt.gasUsed);
 
 			await showStage(pool);
 		}
@@ -113,12 +125,14 @@ contract("ChainLot", async (accounts) => {
 		for(i=0; i<2; i++) {
 			console.log("send awards: " + i*5);
 			r = await drawingtool.sendAwards(pooladdress, 100)
-			console.log(JSON.stringify(r.logs));
+			//console.log(JSON.stringify(r.logs));
+			console.log(JSON.stringify(r.receipt.gasUsed));	
+			totalGas += Number(r.receipt.gasUsed);
 			stage = await showStage(pool);
 			if(stage == 6) break;
 		}
-		
 
+		
 		
 
 		console.log("eth balance of cltoken: " + JSON.stringify(web3.eth.getBalance(cltoken.address)));
@@ -126,14 +140,16 @@ contract("ChainLot", async (accounts) => {
 		console.log("cltoken balance of cltoken: " + web3.fromWei(clbalance, 'ether'));
 
 		await showStage(pool);
-
-		
 		await showPoolToken(chainlot, cltoken);
 
 		console.log("transfer unawarded");
 		let nextPoolAddress = await chainlot.chainlotPools(pi+1);
 		r = await drawingtool.transferUnawarded(pooladdress, nextPoolAddress);
-		console.log(JSON.stringify(r.logs));
+		//console.log(JSON.stringify(r.logs));
+		console.log(JSON.stringify(r.receipt.gasUsed));	
+		totalGas += Number(r.receipt.gasUsed);
+		console.log("total Gas: " + totalGas);
+
 
 		await showStage(pool);
 
@@ -152,7 +168,7 @@ contract("ChainLot", async (accounts) => {
 			console.log("history cut of account " + account + "("+i+"):  " + JSON.stringify(cut));
 			historyCutSum += Number(cut[pi]);
 			r = await chainlotpublic.withDrawHistoryCut(0,3,tickets, {from:account});
-			console.log(JSON.stringify(r.logs));
+			//console.log(JSON.stringify(r.logs));
 			let cut1 = await chainlotpublic.listUserHistoryCut(account, 0, 3, tickets);
 			console.log("after withdraw " + account + "("+i+"):  " + JSON.stringify(cut1));
 		}
