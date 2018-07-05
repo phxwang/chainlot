@@ -57,7 +57,7 @@ contract DrawingTool is owned{
 		require(pool.stage() == ChainLotPool.DrawingStage.INITIED);
 
 		bytes memory jackpotNumbers = genRandomNumbers(pool.poolBlockNumber(), 8, 
-			pool.maxWhiteNumberCount(), pool.maxYellowNumberCount(), pool.maxWhiteNumber(), pool.maxYellowNumber());
+			pool.maxWhiteNumberCount(), pool.maxYellowNumberCount(), pool.maxWhiteNumber(), pool.maxYellowNumber(), pool.getEntropy());
 		
 		pool.setJackpotNumbers(jackpotNumbers);
 
@@ -287,13 +287,14 @@ contract DrawingTool is owned{
 	}
 
 	function genRandomNumbers(uint blockNumber, uint shift, uint8 maxWhiteNumberCount, uint8 maxYellowNumberCount,
-	 uint8 maxWhiteNumber, uint8 maxYellowNumber) public returns(bytes _numbers){
+	 uint8 maxWhiteNumber, uint8 maxYellowNumber, uint entropy) public view returns(bytes _numbers){
 		require(blockNumber < block.number);
 		uint hash = uint(block.blockhash(blockNumber));
-		uint addressInt = uint(tx.origin);
-		uint256 random = addressInt * hash;
-		random = uint256(keccak256(block.timestamp, block.difficulty, hash, addressInt));
-		GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
+		uint addressInt = uint(msg.sender);
+		uint random = uint(keccak256(entropy, block.timestamp, block.difficulty, hash, addressInt));
+
+		//GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
+
 		require(random != 0);
 		random = random >> shift;
 		bytes memory numbers = new bytes(maxWhiteNumberCount+maxYellowNumberCount);

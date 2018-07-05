@@ -17,7 +17,7 @@ module.exports = {
     },
     main: {
       host: "127.0.0.1", // Connect to geth on the specified
-      port: 9555,
+      port: 8555,
       from: "0xd3db3028e92d98ce48e5e21256696d2e5ae04d9e", // default address to use for any transaction Truffle makes during migrations
       network_id: 0,
       gasPrice: 1000000000 // Gas limit used for deploys

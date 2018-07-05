@@ -28,6 +28,7 @@ contract ChainLotPool is owned{
 	uint public devCut;
 	uint public futureCut;
 	uint public tokenSum;
+	uint private entropy;
 
 	mapping(uint => uint) public awardRulesIndex;
   	mapping(uint => winnerTicketQueue) public winnerTickets;
@@ -223,6 +224,8 @@ contract ChainLotPool is owned{
 	    uint ticketId = chainLot.mint(_from, numbers, ticketCount);
 	    allTicketsId.push(ticketId);
 	    totalTicketCountSum = chainLotTicket.totalTicketCountSum();
+	    entropy = uint(keccak256(entropy, totalTicketCountSum, ticketId, numbers));
+
 	    BuyTicket(poolBlockNumber, numbers, ticketCount, ticketId, _from, block.number, totalTicketCountSum, _value);
 	    return ticketId;
 	}
@@ -335,6 +338,11 @@ contract ChainLotPool is owned{
 	function setAwardIndex(uint index) onlyDrawingTool external {
 		awardIndex = index;
 	}
+
+	function getEntropy() onlyDrawingTool external view returns (uint _entropy) {
+		_entropy = entropy;
+	}
+
 
 	function withdrawHistoryCut(uint[] ticketIds) external {
 		uint userCut; uint[] memory cutIdList; uint cutCount;

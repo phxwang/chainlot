@@ -21,14 +21,18 @@ module.exports = async function(deployer, network) {
 
 	}
 	else if (network == "rinkeby" || network == "main") {
-		if(network == "rinkeby") 
+		if(network == "rinkeby") {
 			web3.personal.unlockAccount("0xd4f1e463501a85be4222dbef9bca8a4af76e08aa", "Z7YFSFD5927v7jW5ig", 0);
-		else
-			web3.personal.unlockAccount("0xd3db3028e92d98ce48e5e21256696d2e5ae04d9e", "DdfMb6chaGwjchGkp", 0);
-		if(network == "rinkeby")
 			drawInterval = 100;
-		else
+			poolnum = 5;
+		}
+		else {
+
+			web3.personal.unlockAccount("0xd3db3028e92d98ce48e5e21256696d2e5ae04d9e", "DdfMb6chaGwjchGkp", 0);
 			drawInterval = 50000;
+			poolnum = 1;
+		}
+	
 		await Promise.all([
 			deployer.deploy(ChainLotPublic),
 			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, 
@@ -67,8 +71,7 @@ module.exports = async function(deployer, network) {
 		await factory.transferOwnership(chainlot.address);
 		await drawingtool.init(chainlotticket.address, cltoken.address);
 
-
-		for(i=0; i<5; i++) {
+		for(i=0; i<poolnum; i++) {
 			console.log("new pool progress: " + i);
 			let r = await chainlot.newPool();
 			console.log(JSON.stringify(r.logs))
