@@ -5,7 +5,7 @@ interface ChainLotInterface {
 	function mint(address _owner, 
 	    bytes _numbers,
 	    uint _count) external returns (uint);
-
+	function reedemToken(address _owner) payable external;
 	function buyTicket(bytes numbers, address referer) payable external;
 	function buyRandom(uint8 numberCount, address referer) payable external;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
@@ -22,6 +22,10 @@ interface ChainLotCoinInterface {
 	function transferFrom(address _from, address _to, uint _value) external returns (bool success);
 }
 
+interface ChainLotTokenInterface {
+	function reedemTokenByEther(address target) payable external;
+}
+
 interface ChainLotTicketInterface {
 	function mint(address _owner, 
     	bytes _numbers,
@@ -34,7 +38,7 @@ interface ChainLotTicketInterface {
 
 interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
-	function tokenSum() external view returns(uint tokenSum);
+	function coinSum() external view returns(uint coinSum);
 	function buyTicket(bytes numbers, address referer) payable external;
 	function buyRandom(uint8 numberCount, address referer) payable external;
 	function withdrawHistoryCut(uint[] ticketIds) external;

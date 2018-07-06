@@ -21,7 +21,7 @@ contract ChainLot is owned{
 	uint public etherPerTicket; //10**18/100;
 	uint public awardIntervalNumber; //50000
 
-	uint public tokenSum;
+	uint public coinSum;
 	uint8 public maxWhiteNumberCount;
 	uint8 public maxYellowNumberCount;
 	uint8 public totalNumberCount;
@@ -36,6 +36,7 @@ contract ChainLot is owned{
 	
   	ChainLotTicketInterface public chainLotTicket;
   	ChainLotCoinInterface public chainlotCoin;
+  	ChainLotTokenInterface public chainlotToken;
   	ChainLotPoolFactoryInterface public clpFactory;
   	ChainLotPoolInterface public currentPool;
   	
@@ -113,7 +114,7 @@ contract ChainLot is owned{
 	function buyTicket(bytes numbers, address referer) payable external {
 		checkAndSwitchPool();
 		currentPool.buyTicket.value(msg.value)(numbers, referer);
-		tokenSum += msg.value;
+		coinSum += msg.value * 9/10;
 	}
 
 	//random numbers
@@ -121,12 +122,16 @@ contract ChainLot is owned{
 	function buyRandom(uint8 numberCount, address referer) payable external{
 		checkAndSwitchPool();
 	    currentPool.buyRandom.value(msg.value)(numberCount, referer);
-	    tokenSum += msg.value;
+	    coinSum += msg.value * 9/10;
 	}
 
 	modifier onlyPool {
         require(chainlotPoolsMap[msg.sender]);
         _;
+  	}
+
+  	function reedemToken(address _owner) external payable onlyPool {
+  		chainlotToken.reedemTokenByEther.value(msg.value)(_owner);
   	}
 
 	function mint(address _owner, 
@@ -140,7 +145,7 @@ contract ChainLot is owned{
 		checkAndSwitchPool();
 		chainlotCoin.transfer(currentPool, _value);
 	    currentPool.receiveApproval(_from, _value, _token, _extraData);
-	    tokenSum += _value;
+	    coinSum += _value;
 	}
 
   function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
@@ -149,6 +154,10 @@ contract ChainLot is owned{
 
   function setChainLotCoinAddress(address tokenAddress) onlyOwner external {
     chainlotCoin = ChainLotCoinInterface(tokenAddress);
+  }
+
+  function setChainLotTokenAddress(address tokenAddress) onlyOwner external {
+    chainlotToken = ChainLotTokenInterface(tokenAddress);
   }
 
   function setChainLotPoolFactoryAddress(address factoryAddress) onlyOwner external {
@@ -190,7 +199,7 @@ contract ChainLot is owned{
   function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint _currentPoolIndex)  {
   	poolTokens = chainlotCoin.balanceOf(currentPool);
   	poolBlockNumber = currentPool.poolBlockNumber();
-  	totalPoolTokens = tokenSum;
+  	totalPoolTokens = coinSum;
   	_currentPoolIndex = currentPoolIndex;
   }
 

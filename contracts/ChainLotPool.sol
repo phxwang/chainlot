@@ -27,7 +27,7 @@ contract ChainLotPool is owned{
 	uint public historyCut;
 	uint public devCut;
 	uint public futureCut;
-	uint public tokenSum;
+	uint public coinSum;
 	uint private entropy;
 
 	mapping(uint => uint) public awardRulesIndex;
@@ -147,7 +147,7 @@ contract ChainLotPool is owned{
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
 	function buyTicket(bytes numbers, address referer) payable public{
-		uint ticketCount = beforeBuy();
+		uint ticketCount = beforeBuy(tx.origin);
 
 	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
 	    if(referer != 0 && tx.origin != referer) {
@@ -162,7 +162,7 @@ contract ChainLotPool is owned{
 	function buyRandom(uint8 numberCount, address referer) payable public{
 		require(numberCount > 0);
 
-		uint ticketCount = beforeBuy();
+		uint ticketCount = beforeBuy(tx.origin);
 
 		if(numberCount > ticketCount) numberCount = uint8(ticketCount);
 		uint ticketPerNumber = ticketCount / numberCount;
@@ -181,7 +181,7 @@ contract ChainLotPool is owned{
 		}
 	}
 
-	function beforeBuy() internal returns(uint ticketCount) {
+	function beforeBuy(address _from) internal returns(uint ticketCount) {
 		require(stage == DrawingStage.INITIED);
 		require(block.number < poolBlockNumber);
 		require(address(chainlotCoin) != 0);
@@ -189,8 +189,12 @@ contract ChainLotPool is owned{
 	   	ticketCount = msg.value/etherPerTicket;
 	    require(ticketCount > 0);
 
-	    chainlotCoin.buy.value(msg.value)();
-	    tokenSum += msg.value;
+	    uint tokenToBuy = msg.value/10;
+	    uint coinToBuy = msg.value - tokenToBuy;
+
+	    chainlotCoin.buy.value(coinToBuy)();
+	    chainLot.reedemToken.value(tokenToBuy)(_from);
+	    coinSum += coinToBuy;
 	}
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
