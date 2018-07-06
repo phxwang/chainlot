@@ -20,14 +20,18 @@
  * 10%作为历史购买者分红
  * 1%作为开发者维护费用
  * 每邀请一个用户购买一个ticket，即可获得一个ticket赠送（相同号码）
- * ERC20积分
+ * ERC20积分(CLC)
  	* 主合约将用户支付的以太坊兑换成积分
  	* 奖金作为积分返还
  	* 积分可以再次购买ticket
   * 可以避免transfer失败的问题
- * ERC721 token
+ * ERC20Token(CLT)
+  * 每个奖池的10%转入CLT，用于奖池分红
+  * 预留一部分给早期投资人和开发者
+  * 后续每次购买Ticket都可以获得CLT，逐步递减
+ * ERC721 token（CLTK)
  	* 实际的ticket物品token
- 	* 作为历史提成分红的凭证
+ 	* ~~作为历史提成分红的凭证~~
  * 奖池（参考DAO）
  	* 每轮抽奖设置一个奖池
  	* 奖池的2%作为开发者费用，10%作为历史购买者分红，保留10%用于未来的奖池，其他用于奖券奖金
@@ -43,17 +47,17 @@
 
 ## 费用分析
  ### buyTicket
- * 1 tickets, 160,000gas x 3gwei, 0.0005ETH, $0.3
+ * 1 tickets, 160,000 gas x 3gwei, 0.0005ETH, $0.3
  ### buyRandom
- * 1 tickets, 400,000gas x 3gwei, 0.0012ETH, $0.5
+ * 1 tickets, 400,000 gas x 3gwei, 0.0012ETH, $0.5
  ### drawing
  * match: 25 tickets, 1,000,000gas
  * calculate: 10 tickets, 200,000gas
  * split: 140,000gas
  * distribute: 1,000,000gas
  * send: 100,000gas
- * transfter: 60,000gas
- * total: 125 tickets, 8,000,000gas
+ * transfer: 60,000gas
+ * total: 125 tickets, 8,000,000 gas
 
 
 
@@ -70,11 +74,10 @@
  * 支持一次购买多个奖池的ticket P2
  * 把drawing tool用library实现 P2
  * 把random number的计算放到pool的合约里面 P2
- * token机制调整 P2
-   * 买彩票才能获得token，10%返还
-   * 彩票的奖金都以token形式返还
-   * 奖池的10%用于token分红（实现上比较困难，如何镜像实时的token owner列表）
-   * token不可购买，但可以1：1卖出 
+ * 新增一个token，主要用于分红 P2
+   * 买彩票才能获得token，返还比例随着token数量减少逐级递减。预留一部分给早期投资人和开发者
+   * 奖池的10%返还到token的池子中 
+   * 原有的token改成coin，只用于结算，去掉ticket的分红
  * 完善测试用例，正向反向都要测到 P2
  * 网页格式美化 P2
  * 适配移动 P2
