@@ -1,7 +1,7 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
-var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 var doDrawing = require("./do_drawing.js");
@@ -15,7 +15,7 @@ module.exports = async function(callback) {
 	try {
 		let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
-		let cltoken = await CLToken.deployed();
+		let chainlotcoin = await ChainLotCoin.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
 		i = 0;
@@ -36,7 +36,7 @@ module.exports = async function(callback) {
 				
 				//draw last pool
 				console.log("do drawing");
-				await doDrawing.doDrawing(chainlot, chainlotticket, cltoken, drawingtool, ChainLotPool, web3);
+				await doDrawing.doDrawing(chainlot, chainlotticket, chainlotcoin, drawingtool, ChainLotPool, web3);
 			}
 			await sleep(10000);
 	    	i++;

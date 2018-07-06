@@ -36,7 +36,7 @@ contract ChainLotPool is owned{
 	awardRule[] public awardRules;
 
   	ChainLotTicketInterface public chainLotTicket;
-  	CLTokenInterface public clToken;
+  	ChainLotCoinInterface public chainlotCoin;
   	ChainLotInterface public  chainLot;
   	address public drawingToolAddress;
   
@@ -122,10 +122,10 @@ contract ChainLotPool is owned{
   	}
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
-						CLTokenInterface _clToken,
+						ChainLotCoinInterface _chainlotCoin,
 						ChainLotInterface _chainLot) public {
   		chainLotTicket = _chainLotTicket;
-		clToken = _clToken;
+		chainlotCoin = _chainlotCoin;
 		chainLot = _chainLot;
 		owner = tx.origin;
   	}
@@ -184,17 +184,17 @@ contract ChainLotPool is owned{
 	function beforeBuy() internal returns(uint ticketCount) {
 		require(stage == DrawingStage.INITIED);
 		require(block.number < poolBlockNumber);
-		require(address(clToken) != 0);
+		require(address(chainlotCoin) != 0);
 
 	   	ticketCount = msg.value/etherPerTicket;
 	    require(ticketCount > 0);
 
-	    clToken.buy.value(msg.value)();
+	    chainlotCoin.buy.value(msg.value)();
 	    tokenSum += msg.value;
 	}
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
-		require(_token == address(clToken));
+		require(_token == address(chainlotCoin));
 		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
 
 		uint ticketCount = _value/etherPerTicket;
@@ -320,7 +320,7 @@ contract ChainLotPool is owned{
 
 	function transfer(address to, uint value) onlyDrawingTool external {
 		if(to != 0 && value != 0)
-			clToken.transfer(to, value);
+			chainlotCoin.transfer(to, value);
 	}
 
 	function setHistoryCut(uint cut) onlyDrawingTool external {
@@ -351,7 +351,7 @@ contract ChainLotPool is owned{
 			for(uint i=0; i<cutCount; i++) {
 				withdrawed[cutIdList[i]] = true;
 			}
-			clToken.transfer(tx.origin, userCut);
+			chainlotCoin.transfer(tx.origin, userCut);
 			TransferHistoryCut(tx.origin, userCut);
 		}	  	
 	}

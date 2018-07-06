@@ -35,7 +35,7 @@ contract ChainLot is owned{
 	uint public currentPoolIndex = 0;
 	
   	ChainLotTicketInterface public chainLotTicket;
-  	CLTokenInterface public clToken;
+  	ChainLotCoinInterface public chainlotCoin;
   	ChainLotPoolFactoryInterface public clpFactory;
   	ChainLotPoolInterface public currentPool;
   	
@@ -77,7 +77,7 @@ contract ChainLot is owned{
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(latestPoolBlockNumber,maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray);
-		clpFactory.setPool(newed, chainLotTicket, clToken, ChainLotInterface(this));
+		clpFactory.setPool(newed, chainLotTicket, chainlotCoin, ChainLotInterface(this));
 		latestPoolBlockNumber = newed.poolBlockNumber();
 		if(address(newed) != 0) {
 			addPool(newed);
@@ -138,7 +138,7 @@ contract ChainLot is owned{
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external {
 		checkAndSwitchPool();
-		clToken.transfer(currentPool, _value);
+		chainlotCoin.transfer(currentPool, _value);
 	    currentPool.receiveApproval(_from, _value, _token, _extraData);
 	    tokenSum += _value;
 	}
@@ -147,8 +147,8 @@ contract ChainLot is owned{
     chainLotTicket = ChainLotTicketInterface(ticketAddress);
   }
 
-  function setCLTokenAddress(address tokenAddress) onlyOwner external {
-    clToken = CLTokenInterface(tokenAddress);
+  function setChainLotCoinAddress(address tokenAddress) onlyOwner external {
+    chainlotCoin = ChainLotCoinInterface(tokenAddress);
   }
 
   function setChainLotPoolFactoryAddress(address factoryAddress) onlyOwner external {
@@ -156,7 +156,7 @@ contract ChainLot is owned{
   }
 
   function withDrawDevCut(uint value) onlyOwner external {
-  	clToken.transfer(owner, value);
+  	chainlotCoin.transfer(owner, value);
   }
 
   function getPoolCount() external view returns(uint count) {
@@ -188,7 +188,7 @@ contract ChainLot is owned{
   }
 
   function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint _currentPoolIndex)  {
-  	poolTokens = clToken.balanceOf(currentPool);
+  	poolTokens = chainlotCoin.balanceOf(currentPool);
   	poolBlockNumber = currentPool.poolBlockNumber();
   	totalPoolTokens = tokenSum;
   	_currentPoolIndex = currentPoolIndex;

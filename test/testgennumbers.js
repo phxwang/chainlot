@@ -1,6 +1,6 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
-var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
@@ -11,12 +11,12 @@ contract("ChainLot", async (accounts) => {
 	let chainlot = await ChainLot.deployed();
 	let chainlotticket = await ChainLotTicket.deployed();
 	let factory = await ChainLotPoolFactory.deployed();
-	let cltoken = await CLToken.deployed();
+	let chainlotcoin = await ChainLotCoin.deployed();
 	let chainlotpublic = await ChainLotPublic.deployed();
 	await chainlotpublic.setChainLotAddress(chainlot.address);
-	await chainlotpublic.setCLTokenAddress(cltoken.address);
+	await chainlotpublic.setChainLotCoinAddress(chainlotcoin.address);
 	await chainlot.setChainLotTicketAddress(chainlotticket.address);
-	await chainlot.setCLTokenAddress(cltoken.address);
+	await chainlot.setChainLotCoinAddress(chainlotcoin.address);
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
 	await chainlotticket.setMinter(chainlot.address, true);
 	await factory.transferOwnership(chainlot.address);

@@ -1,8 +1,6 @@
 pragma solidity ^0.4.16;
 pragma experimental "v0.5.0";
 
-import "./owned.sol";
-
 interface tokenRecipient { function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external; }
 
 contract TokenERC20 {
@@ -153,74 +151,5 @@ contract TokenERC20 {
         Burn(_from, _value);
         return true;
     }
-}
 
-/******************************************/
-/*       ADVANCED TOKEN STARTS HERE       */
-/******************************************/
-
-contract CLToken is owned, TokenERC20 {
-
-    string public constant name = "CryptoLottoToken";
-    string public constant symbol = "CLT";
-
-    mapping (address => bool) public frozenAccount;
-
-    /* This generates a public event on the blockchain that will notify clients */
-    event FrozenFunds(address target, bool frozen);
-
-    /* Initializes contract with initial supply tokens to the creator of the contract */
-    function CLToken(
-        uint initialSupply
-    ) TokenERC20(initialSupply, name, symbol) public {}
-
-    /* Internal transfer, only can be called by this contract */
-    function _transfer(address _from, address _to, uint _value) internal {
-        require(!frozenAccount[_from]);                     // Check if sender is frozen
-        require(!frozenAccount[_to]);                       // Check if recipient is frozen
-        super._transfer(_from, _to, _value);
-    }
-
-    /*/// @notice Create `mintedAmount` tokens and send it to `target`
-    /// @param target Address to receive the tokens
-    /// @param mintedAmount the amount of tokens it will receive
-    function mintToken(address target, uint mintedAmount) onlyOwner public {
-        balanceOf[target] += mintedAmount;
-        totalSupply += mintedAmount;
-        Transfer(0, this, mintedAmount);
-        Transfer(this, target, mintedAmount);
-    }
-
-    /// @notice `freeze? Prevent | Allow` `target` from sending & receiving tokens
-    /// @param target Address to be frozen
-    /// @param freeze either to freeze it or not
-    function freezeAccount(address target, bool freeze) onlyOwner public {
-        frozenAccount[target] = freeze;
-        FrozenFunds(target, freeze);
-    }*/
-
-    /*/// @notice Allow users to buy tokens for `newBuyPrice` eth and sell tokens for `newSellPrice` eth
-    /// @param newSellPrice Price the users can sell to the contract
-    /// @param newBuyPrice Price users can buy from the contract
-    function setPrices(uint newSellPrice, uint newBuyPrice) onlyOwner public {
-        sellPrice = newSellPrice;
-        buyPrice = newBuyPrice;
-    }*/
-
-    /// @notice Buy tokens from contract by sending ether
-    function buy() payable public {
-        _transfer(this, msg.sender, msg.value);              // makes the transfers
-    }
-
-    function () payable external {
-        buy();
-    }
-
-    /// @notice Sell `amount` tokens to contract
-    /// @param amount amount of tokens to be sold
-    function sell(uint amount) external {
-        require((address(this)).balance >= amount);      // checks if the contract has enough ether to buy
-        _transfer(msg.sender, this, amount);              // makes the transfers
-        msg.sender.transfer(amount);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
-    }
 }

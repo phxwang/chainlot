@@ -3,9 +3,9 @@ pragma experimental "v0.5.0";
 
 import "./ERC721.sol";
 import "./owned.sol";
-import "./CLToken.sol";
+import "./ChainLotCoin.sol";
 
-contract ChainLotTicket is ERC721, owned {
+contract ChainLotTicket is owned, ERC721{
   /*** CONSTANTS ***/
 
   string public constant name = "CrytoLottoTicket";

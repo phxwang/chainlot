@@ -5,7 +5,7 @@ import "./owned.sol";
 
 contract ChainLotPublic is owned {
 	ChainLotInterface public chainlot;
-	CLTokenInterface public clToken;
+	ChainLotCoinInterface public chainlotCoin;
 	ChainLotTicketInterface public chainLotTicket;
   	
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
@@ -23,8 +23,8 @@ contract ChainLotPublic is owned {
 		chainlot = ChainLotInterface(chainlotAddress);
 	}
 
-	function setCLTokenAddress(address cltokenAddress) onlyOwner external {
-		clToken = CLTokenInterface(cltokenAddress);
+	function setChainLotCoinAddress(address chainlotcoinAddress) onlyOwner external {
+		chainlotCoin = ChainLotCoinInterface(chainlotcoinAddress);
 	}
 
 	function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
@@ -32,8 +32,8 @@ contract ChainLotPublic is owned {
   	}
 
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
-		if(clToken.transferFrom(_from, this, _value)) {
-			clToken.transfer(chainlot, _value);
+		if(chainlotCoin.transferFrom(_from, this, _value)) {
+			chainlotCoin.transfer(chainlot, _value);
 			chainlot.receiveApproval(_from, _value, _token, _extraData);
 		}
 	}

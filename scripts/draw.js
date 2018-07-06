@@ -1,7 +1,7 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
-var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 module.exports = async function(callback) {
@@ -12,25 +12,25 @@ module.exports = async function(callback) {
 	try {
 		let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
-		let cltoken = await CLToken.deployed();
+		let chainlotcoin = await ChainLotCoin.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
 		console.log(drawingtool.address);
 
-		doDrawing(chainlot, chainlotticket, cltoken, drawingtool);
+		doDrawing(chainlot, chainlotticket, chainlotcoin, drawingtool);
 
 	} catch(e) {
 		console.log(e);
 	}
 }
 
-var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool) {
+var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingtool) {
 	for(i=0; i<100; i++) {
 			let address = await chainlot.chainlotPools(i);
 			if(address == "0x") break;
 
 			let pool = await ChainLotPool.at(address);
-			let token = await cltoken.balanceOf(address);
+			let token = await chainlotcoin.balanceOf(address);
 			let stage = await pool.stage();
 			let currentPoolIndex = await chainlot.currentPoolIndex();
 				

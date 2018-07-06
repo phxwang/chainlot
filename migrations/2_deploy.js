@@ -1,6 +1,6 @@
 var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
-var CLToken = artifacts.require("./CLToken.sol");
+var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
@@ -22,7 +22,7 @@ module.exports = async function(deployer, network) {
 				5,1,1e64
 				]),*/
 			deployer.deploy(ChainLotTicket),
-			deployer.deploy(CLToken, 100000000000),
+			deployer.deploy(ChainLotCoin, 100000000000),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(ChainLotPublic),
 			deployer.deploy(DrawingTool)
@@ -56,7 +56,7 @@ module.exports = async function(deployer, network) {
 				5,1,1e64
 				]),
 			deployer.deploy(ChainLotTicket),
-			deployer.deploy(CLToken, 1e12),
+			deployer.deploy(ChainLotCoin, 1e12),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(DrawingTool)
 		]);
@@ -64,21 +64,21 @@ module.exports = async function(deployer, network) {
 		let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
 		let factory = await ChainLotPoolFactory.deployed();
-		let cltoken = await CLToken.deployed();
+		let chainlotcoin = await ChainLotCoin.deployed();
 		let chainlotpublic = await ChainLotPublic.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
 		console.log("ChainLotPublic: " + chainlotpublic.address);
 
 		await chainlotpublic.setChainLotAddress(chainlot.address);
-		await chainlotpublic.setCLTokenAddress(cltoken.address);
+		await chainlotpublic.setChainLotCoinAddress(chainlotcoin.address);
 		await chainlotpublic.setChainLotTicketAddress(chainlotticket.address);
 		await chainlot.setChainLotTicketAddress(chainlotticket.address);
-		await chainlot.setCLTokenAddress(cltoken.address);
+		await chainlot.setChainLotCoinAddress(chainlotcoin.address);
 		await chainlot.setChainLotPoolFactoryAddress(factory.address);
 		await chainlotticket.setMinter(chainlot.address, true);
 		await factory.transferOwnership(chainlot.address);
-		await drawingtool.init(chainlotticket.address, cltoken.address);
+		await drawingtool.init(chainlotticket.address, chainlotcoin.address);
 
 		for(i=0; i<poolnum; i++) {
 			console.log("new pool progress: " + i);

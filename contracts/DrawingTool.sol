@@ -7,7 +7,7 @@ import "./ChainLotPool.sol";
 contract DrawingTool is owned{
 
 	ChainLotTicketInterface public chainLotTicket;
-  	CLTokenInterface public clToken;
+  	ChainLotCoinInterface public chainlotCoin;
   	
   	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
 	event ToBeAward(bytes32 ticketNumber, uint ticketCount, uint ticketId, address user, uint blockNumber, uint awardValue);
@@ -41,9 +41,9 @@ contract DrawingTool is owned{
 
   	
   	function init(ChainLotTicketInterface _chainLotTicket,
-						CLTokenInterface _clToken) public {
+						ChainLotCoinInterface _chainlotCoin) public {
   		chainLotTicket = _chainLotTicket;
-		clToken = _clToken;
+		chainlotCoin = _chainlotCoin;
   	}
 
   	function getRuleKey(uint _whiteNumberCount, uint _yellowNumberCount, uint maxYellowNumberCount) 
@@ -174,7 +174,7 @@ contract DrawingTool is owned{
   		ChainLotPool pool = ChainLotPool(poolAddress);
   		require(pool.stage() == ChainLotPool.DrawingStage.CALCULATED);
 
-  		uint totalBalance = clToken.balanceOf(poolAddress);
+  		uint totalBalance = chainlotCoin.balanceOf(poolAddress);
   		uint historyCut = totalBalance/10;
   		uint futureCut = totalBalance/10;
   		uint devCut = totalBalance/50;
@@ -276,7 +276,7 @@ contract DrawingTool is owned{
 		ChainLotPool pool = ChainLotPool(poolAddress);
   		require(pool.stage() == ChainLotPool.DrawingStage.SENT);
 
-      	uint toBeTransfer = clToken.balanceOf(poolAddress) - pool.historyCut();
+      	uint toBeTransfer = chainlotCoin.balanceOf(poolAddress) - pool.historyCut();
       	if(toBeTransfer > 0) {
       		pool.transfer(to, toBeTransfer);
       		TransferUnawarded(poolAddress, to, toBeTransfer);

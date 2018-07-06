@@ -1,4 +1,4 @@
-var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool, ChainLotPool, web3) {
+var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingtool, ChainLotPool, web3) {
 	let results = await chainlot.retrievePoolInfo();
 	console.log("pool token sum: " + web3.fromWei(results[0], 'ether'));
 	console.log("pool number: " + results[1]);
@@ -12,7 +12,7 @@ var doDrawing = async function(chainlot, chainlotticket, cltoken, drawingtool, C
 			if(address == "0x") break;
 
 			let pool = await ChainLotPool.at(address);
-			let token = await cltoken.balanceOf(address);
+			let token = await chainlotcoin.balanceOf(address);
 			let stage = await pool.stage();
 			let currentPoolIndex = await chainlot.currentPoolIndex();
 				

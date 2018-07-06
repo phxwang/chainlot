@@ -15,7 +15,7 @@ interface ChainLotInterface {
 	function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count);
 }
 
-interface CLTokenInterface {
+interface ChainLotCoinInterface {
 	function transfer(address _to, uint _value) external;
 	function buy() payable external;
 	function balanceOf(address user) external view returns(uint value);
@@ -55,7 +55,7 @@ interface ChainLotPoolFactoryInterface {
 						uint[] awardRulesArray)  external returns (ChainLotPoolInterface pool);
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
-						CLTokenInterface _clToken,
+						ChainLotCoinInterface _chainlotCoin,
 						ChainLotInterface _chainLot)  external; 
 
 }
