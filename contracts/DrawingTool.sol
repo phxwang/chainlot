@@ -18,7 +18,7 @@ contract DrawingTool is owned{
   	event TransferDevCut(address dev, uint value);
   	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
-  	event CutAward(uint historyCut, uint devCut, uint futureCut);
+  	event CutAward(uint devCut, uint futureCut);
   	event TransferUnawarded(address from, address to, uint value);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
 
@@ -104,7 +104,8 @@ contract DrawingTool is owned{
 
 	function matchRule(uint ticketId, ChainLotPool pool, bytes32 jackpotNumbers) internal view 
 		returns(uint ruleId, bytes32 numbers, uint count, uint blockNumber) {
-			(numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+			address _owner;
+			(numbers, count, blockNumber, _owner) = chainLotTicket.getTicket(ticketId);
 	      	
 			uint matchedWhiteCount = 0;
 			uint matchedYellowCount = 0;
@@ -151,13 +152,13 @@ contract DrawingTool is owned{
 
   	function doCaculate(ChainLotPool pool, uint8 ruleId, uint processedIndex, uint endIndex, uint awardEther) 
   		onlyOwner internal {
-	    bytes32 numbers; uint count; uint blockNumber;  
+	    bytes32 numbers; uint count; uint blockNumber; address _owner;
 	    uint totalWinnersAward = 0;
 	    uint totalTicketCount = 0;
 	            
 	    for(uint j=processedIndex;j<endIndex; j++) {
           uint ticketId = pool.getWinnerTicket(ruleId, j);
-          (numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+          (numbers, count, blockNumber, _owner) = chainLotTicket.getTicket(ticketId);
           totalWinnersAward += count * awardEther;
           totalTicketCount += count;
         }
@@ -175,11 +176,10 @@ contract DrawingTool is owned{
   		require(pool.stage() == ChainLotPool.DrawingStage.CALCULATED);
 
   		uint totalBalance = chainlotCoin.balanceOf(poolAddress);
-  		uint historyCut = totalBalance/10;
   		uint futureCut = totalBalance/10;
   		uint devCut = totalBalance/50;
 
-  		totalBalance = totalBalance - historyCut - futureCut - devCut;
+  		totalBalance = totalBalance - futureCut - devCut;
 
   		for(uint8 i=0; i<pool.getAwardRulesLength(); i++) {
   			if(totalBalance >=  pool.getTotalWinnersAward(i)) {
@@ -192,11 +192,10 @@ contract DrawingTool is owned{
 	        SplitAward(i, pool.getTotalWinnersAward(i), totalBalance);
   		}
 
-  		pool.setHistoryCut(historyCut);
   		pool.setDevCut(devCut);
   		pool.setFutureCut(futureCut);
 
-  		CutAward(historyCut, devCut, futureCut);
+  		CutAward(devCut, futureCut);
 
   		pool.setStage(ChainLotPool.DrawingStage.SPLITED);
   	}
@@ -230,11 +229,11 @@ contract DrawingTool is owned{
 	  	uint totalWinnerAward = pool.getTotalWinnersAward(ruleId);
 
 	  	if(totalTicketCount > 0) {
-	  		bytes32 numbers; uint count; uint blockNumber;
+	  		bytes32 numbers; uint count; uint blockNumber; address _owner;
 	          
   			for(uint j=distributedIndex; j<endIndex; j++){
 	          uint ticketId = pool.getWinnerTicket(ruleId, j);
-	          (numbers, count, blockNumber) = chainLotTicket.getTicket(ticketId);
+	          (numbers, count, blockNumber, _owner) = chainLotTicket.getTicket(ticketId);
 	          uint awardValue = count * totalWinnerAward / totalTicketCount;
 	          address awardUser = pool.addToBeAward(ticketId, awardValue);
 	          ToBeAward(numbers, count, ticketId, awardUser, blockNumber, awardValue);
@@ -276,7 +275,7 @@ contract DrawingTool is owned{
 		ChainLotPool pool = ChainLotPool(poolAddress);
   		require(pool.stage() == ChainLotPool.DrawingStage.SENT);
 
-      	uint toBeTransfer = chainlotCoin.balanceOf(poolAddress) - pool.historyCut();
+      	uint toBeTransfer = chainlotCoin.balanceOf(poolAddress);
       	if(toBeTransfer > 0) {
       		pool.transfer(to, toBeTransfer);
       		TransferUnawarded(poolAddress, to, toBeTransfer);

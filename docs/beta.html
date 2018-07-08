@@ -4452,6 +4452,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                             </li>
                             <li><a href="" target="_blank" id="my_token_link">My CLT</a>
                             </li>
+                            <li><a href="" target="_blank" id="my_coin_link">My CLC</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -4460,7 +4462,10 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         <div class="middle-content">
             <div class="container">
                 <div class="message">
-                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets with ETH and share 10% of all the prize in every pool after the purchasement. One new jackpot pool will be initialized in every 50000 block. The Jackpot number of every pool will be calculated based on all the tickets number in the pool, the hash of the drawing block and the timestamp of the drawing block. All the prize will be returned as CryptoLottoToken(CLT).
+                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets with ETH and get CLT (CryptoLottoToken) through purchasement. 
+                  One new jackpot pool will be initialized in every 50000 block. 10% of the pool will go to CLT. 
+                  The Jackpot number of every pool will be calculated based on all the tickets number in the pool, the hash of the drawing block and the timestamp of the drawing block. 
+                  All the prize will be returned as CryptoLottoCoin(CLC).
                 </div>
                 <div class="cta-group" id="cta-group">
                 	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
@@ -4505,12 +4510,10 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
               <a id="ticket_link" href="" target="_blank">Click to view</a></h4></div>
         </div>
         <div class="container">
-            <div id="history_cut" class="resource-blocks">
-            <h2> History Cut</h2>
-            <h4>All your tickets will share 10% of every pool</h4>
+            <div id="token info" class="resource-blocks">
+            <h2> Crypto Lotto Token</h2>
+            <h4>All the token will share 10% of every pool</h4>
             </div>
-            <div><a href="javascript:withDrawHistoryCut()">withdraw history cut</a></div>
-            <div><span id="history_transaction_message"></span></div>
         </div>
         <div class="container">
           <div class="resource-blocks">
@@ -4607,19 +4610,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     });*/
   }
 
-  function withDrawHistoryCut() {
-    clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
-      if(!err && result.length > 0) {
-        clp.withDrawHistoryCut(0, 200, result, function(err, r) {
-          if(!err) {
-            var span = document.getElementById('history_transaction_message');
-            span.innerHTML = ["Withdraw transaction will be validated in about 1 minutes。<a target='_blank' href='",txLink,r,"'>transaction: ",r,"</a><br>"].join(""); 
-          }
-        })
-      }
-    })
-  }
-
   function updatePoolStatus() {
     clp.retrievePoolInfo(function(err, result){
           if(!err) {
@@ -4642,7 +4632,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     document.getElementById("purchase_list_link").href=addressLink+clpAddress;
 
 
-    clp.clToken(function(err, result){
+    clp.getChainLotToken(function(err, result){
       if(!err) {
         console.log(result);
         document.getElementById("token_link").href=tokenLink+result+"#balances";
@@ -4651,21 +4641,18 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       }
     });
 
-    clp.clToken(function(err, result){
+    clp.getChainLotCoin(function(err, result){
       if(!err) {
         console.log(result);
-        document.getElementById("token_link").href=tokenLink+result+"#balances";
-        document.getElementById("my_token_link").href=tokenLink+result+"?a="+web3js.eth.accounts[0];
+        document.getElementById("my_coin_link").href=tokenLink+result+"?a="+web3js.eth.accounts[0];
         
       }
     });
-
-   
              
   }
 
   function updateHistoryTickets() {
-    clp.chainLotTicket(function(err, result){
+    clp.getChainLotTicket(function(err, result){
       if(!err) {
         console.log(result);
         clticketAddress = result;
@@ -4681,22 +4668,9 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
               clticket.getTicket(id, function(err, result) {
                 //console.log(result);
                 document.getElementById("my_purchase_list").innerHTML += 
-                  ["<li>", "[", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
+                  ["<li>", "[", bytes32ToDec(result[0]).join(), "]x", result[1], " at block ", result[2], "</li>"].join("");
               });
             }
-
-            clp.listUserHistoryCut(web3js.eth.accounts[0], 0, 200, result, function(err, result) {
-              if(!err) {
-                totalEth = 0;
-                for(i=0; i<result.length; i++) {
-                  totalEth += parseInt(result[i],10)
-                }
-                //console.log(JSON.stringify(result));
-                document.getElementById("history_cut").innerHTML 
-                  += ["<li>", web3js.fromWei(totalEth, "ether"), " ETH </li>"].join("");
-              }
-              
-            })
           }
         })
 
@@ -4714,15 +4688,15 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             length = result;
             start = length - 10;
             if(start < 0) start = 0
-              for(i=start; i<length; i++) {
-                //console.log(i);
-                clticket.getTicket(i, function(err, result) {
-                  //console.log(result);
-                  //console.log(bytes32ToDec(result[2]));
-                  document.getElementById("purchase_list").innerHTML 
-                  += ["<li>", result[0], " bought [", bytes32ToDec(result[2]).join(), "]x", result[3], " at block ", result[4], "</li>"].join("");
-                });
-              }
+            for(i=start; i<length; i++) {
+              //console.log(i);
+              clticket.getTicket(i, function(err, result) {
+                //console.log(result);
+                //console.log(bytes32ToDec(result[2]));
+                document.getElementById("purchase_list").innerHTML 
+                += ["<li> ", result[3]," bought [", bytes32ToDec(result[0]).join(), "]x", result[1], " at block ", result[2], "</li>"].join("");
+              });
+            }
           }
         })
 
@@ -4742,7 +4716,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   }
 
   //config
-  var clpAddress = "0x3305a21dc896083fff2cb5e2502edf5ad8d35783";
+  var clpAddress = "0xed02961c1e97b9cd2eaeef5d19111617726787ac";
   var txLink = "https://www.etherscan.io/tx/";
   var addressLink = "https://www.etherscan.io/address/";
   var tokenLink = "https://www.etherscan.io/token/";
@@ -4796,21 +4770,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
   
 
-  var clpAbi =  [
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "clToken",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
+  var clpAbi = [
     {
       "constant": true,
       "inputs": [],
@@ -4829,20 +4789,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "constant": true,
       "inputs": [],
       "name": "owner",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "chainLotTicket",
       "outputs": [
         {
           "name": "",
@@ -4987,57 +4933,45 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
+      "constant": true,
+      "inputs": [],
+      "name": "getChainLotCoin",
+      "outputs": [
         {
-          "name": "chainlotcoinAddress",
+          "name": "",
           "type": "address"
         }
       ],
-      "name": "setChainLotCoinAddress",
-      "outputs": [],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
+      "constant": true,
+      "inputs": [],
+      "name": "getChainLotTicket",
+      "outputs": [
         {
-          "name": "ticketAddress",
+          "name": "",
           "type": "address"
         }
       ],
-      "name": "setChainLotTicketAddress",
-      "outputs": [],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
+      "constant": true,
+      "inputs": [],
+      "name": "getChainLotToken",
+      "outputs": [
         {
-          "name": "_from",
+          "name": "",
           "type": "address"
-        },
-        {
-          "name": "_value",
-          "type": "uint256"
-        },
-        {
-          "name": "_token",
-          "type": "address"
-        },
-        {
-          "name": "_extraData",
-          "type": "bytes"
         }
       ],
-      "name": "receiveApproval",
-      "outputs": [],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -5096,63 +5030,10 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "payable": false,
       "stateMutability": "view",
       "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "poolStart",
-          "type": "uint256"
-        },
-        {
-          "name": "poolEnd",
-          "type": "uint256"
-        },
-        {
-          "name": "ticketIds",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "withDrawHistoryCut",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "name": "poolStart",
-          "type": "uint256"
-        },
-        {
-          "name": "poolEnd",
-          "type": "uint256"
-        },
-        {
-          "name": "ticketIds",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "listUserHistoryCut",
-      "outputs": [
-        {
-          "name": "_poolCuts",
-          "type": "uint256[]"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
     }
   ];
 
-  var clticketAbi = [
+  var clticketAbi =  [
     {
       "constant": true,
       "inputs": [],
@@ -5564,14 +5445,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "name": "getTicket",
       "outputs": [
         {
-          "name": "mintedBy",
-          "type": "address"
-        },
-        {
-          "name": "mintedAt",
-          "type": "uint64"
-        },
-        {
           "name": "numbers",
           "type": "bytes32"
         },
@@ -5582,6 +5455,10 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         {
           "name": "blockNumber",
           "type": "uint256"
+        },
+        {
+          "name": "_owner",
+          "type": "address"
         }
       ],
       "payable": false,

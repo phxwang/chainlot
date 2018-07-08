@@ -141,12 +141,13 @@ contract ChainLot is owned{
 	    return chainLotTicket.mint(_owner, _numbers, _count);
   	}
 
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external {
+  	//TODO: security enhancement
+	/*function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external {
 		checkAndSwitchPool();
 		chainlotCoin.transfer(currentPool, _value);
 	    currentPool.receiveApproval(_from, _value, _token, _extraData);
 	    coinSum += _value;
-	}
+	}*/
 
   function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
     chainLotTicket = ChainLotTicketInterface(ticketAddress);
@@ -170,30 +171,6 @@ contract ChainLot is owned{
 
   function getPoolCount() external view returns(uint count) {
   	count = chainlotPools.length;
-  }
-
-  //withdraw history cut from pools
-  function withDrawHistoryCut(uint poolStart, uint _poolEnd, uint[] ticketIds) external {
-  	require(_poolEnd > poolStart);
-  	uint poolEnd = _poolEnd;
-  	if(poolEnd > chainlotPools.length) poolEnd = chainlotPools.length;
-
-  	for(uint i = poolStart; i < poolEnd; i++) {
-  		chainlotPools[i].withdrawHistoryCut(ticketIds);
-  	}
-  }
-
-
-  function listUserHistoryCut(address user, uint poolStart, uint _poolEnd, uint[] ticketIds) external view returns(uint[512] poolCuts) {
-  	require(_poolEnd > poolStart);
-  	uint poolEnd = _poolEnd;
-  	if(poolEnd > chainlotPools.length) poolEnd = chainlotPools.length;
-
-  	//uint[] memory poolCuts = new uint[](poolEnd - poolStart);
-	for(uint i = poolStart; i < poolEnd; i++) {
-  		poolCuts[i-poolStart] = chainlotPools[i].listUserHistoryCut(user, ticketIds);
-  	}
-  	//return poolCuts;
   }
 
   function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint _currentPoolIndex)  {

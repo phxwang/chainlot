@@ -65,7 +65,7 @@ contract ChainLotToken is owned, TokenERC20 {
     /// @param amount amount of tokens to be sold
     function sell(uint amount) external {
         require(totalSupply > balanceOf[this]);
-        uint etherValue = (address(this)).balance * amount / (totalSupply - balanceOf[this]);
+        uint etherValue = getPrice() * amount / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
         require(previousEther >= etherValue);      // checks if the contract has enough ether to buy
@@ -73,5 +73,9 @@ contract ChainLotToken is owned, TokenERC20 {
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(etherValue);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
         assert(previousEther == (etherValue + (address(this)).balance));
+    }
+
+    function getPrice() public view returns(uint){
+        return (address(this)).balance * (10 ** uint(decimals)) * 5 / (totalSupply - balanceOf[this]);
     }
 }

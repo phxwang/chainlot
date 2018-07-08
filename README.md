@@ -78,7 +78,7 @@
  * 支持一次购买多个奖池的ticket P2
  * 把drawing tool用library实现 P2
  * 把random number的计算放到pool的合约里面 P2
- * 新增一个token，主要用于分红 P2
+ * 新增一个token，主要用于分红 P2 done
  * 完善测试用例，正向反向都要测到 P2
  * 网页格式美化 P2
  * 适配移动 P2

@@ -59,6 +59,7 @@ module.exports = async function(deployer, network) {
 				]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(ChainLotCoin, 1e12),
+			deployer.deploy(ChainLotToken, 1e8),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(DrawingTool)
 		]);
@@ -67,18 +68,19 @@ module.exports = async function(deployer, network) {
 		let chainlotticket = await ChainLotTicket.deployed();
 		let factory = await ChainLotPoolFactory.deployed();
 		let chainlotcoin = await ChainLotCoin.deployed();
+		let chainlottoken = await ChainLotToken.deployed();
 		let chainlotpublic = await ChainLotPublic.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
 		console.log("ChainLotPublic: " + chainlotpublic.address);
 
 		await chainlotpublic.setChainLotAddress(chainlot.address);
-		await chainlotpublic.setChainLotCoinAddress(chainlotcoin.address);
-		await chainlotpublic.setChainLotTicketAddress(chainlotticket.address);
 		await chainlot.setChainLotTicketAddress(chainlotticket.address);
 		await chainlot.setChainLotCoinAddress(chainlotcoin.address);
+		await chainlot.setChainLotTokenAddress(chainlottoken.address);
 		await chainlot.setChainLotPoolFactoryAddress(factory.address);
 		await chainlotticket.setMinter(chainlot.address, true);
+		await chainlottoken.setMinter(chainlot.address, true);
 		await factory.transferOwnership(chainlot.address);
 		await drawingtool.init(chainlotticket.address, chainlotcoin.address);
 

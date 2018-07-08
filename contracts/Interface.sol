@@ -10,9 +10,10 @@ interface ChainLotInterface {
 	function buyRandom(uint8 numberCount, address referer) payable external;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount);
-	function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external;
-	function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[512] _poolCuts);
 	function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count);
+	function chainlotCoin() external view returns(address);
+	function chainlotToken() external view returns(address);
+	function chainLotTicket() external view returns(address);
 }
 
 interface ChainLotCoinInterface {
@@ -31,7 +32,7 @@ interface ChainLotTicketInterface {
     	bytes _numbers,
     	uint _count) external returns (uint);
 	function getTicket(uint _ticketId) external view 
-    returns (bytes32 numbers, uint count, uint blockNumber);
+    returns (bytes32 numbers, uint count, uint blockNumber, address owner);
     function ownerOf(uint _ticketId) external view returns (address owner);
     function totalTicketCountSum() external view returns (uint totalTicketCountSum);
 }
@@ -41,8 +42,6 @@ interface ChainLotPoolInterface {
 	function coinSum() external view returns(uint coinSum);
 	function buyTicket(bytes numbers, address referer) payable external;
 	function buyRandom(uint8 numberCount, address referer) payable external;
-	function withdrawHistoryCut(uint[] ticketIds) external;
-	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut);
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function awardIndex() external view returns(uint index);
 	function toBeAward(uint index) external view returns(address winner, uint value);

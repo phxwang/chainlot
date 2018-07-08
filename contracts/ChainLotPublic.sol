@@ -5,9 +5,6 @@ import "./owned.sol";
 
 contract ChainLotPublic is owned {
 	ChainLotInterface public chainlot;
-	ChainLotCoinInterface public chainlotCoin;
-	ChainLotTicketInterface public chainLotTicket;
-  	
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event TransferHistoryCut(address user, uint value);
 
@@ -23,20 +20,25 @@ contract ChainLotPublic is owned {
 		chainlot = ChainLotInterface(chainlotAddress);
 	}
 
-	function setChainLotCoinAddress(address chainlotcoinAddress) onlyOwner external {
-		chainlotCoin = ChainLotCoinInterface(chainlotcoinAddress);
+	function getChainLotCoin() external view returns(address) {
+		return chainlot.chainlotCoin();
 	}
 
-	function setChainLotTicketAddress(address ticketAddress) onlyOwner external {
-    	chainLotTicket = ChainLotTicketInterface(ticketAddress);
+	function getChainLotTicket() external view returns(address) {
+    	return chainlot.chainLotTicket();
   	}
 
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
+  	function getChainLotToken() external view returns(address) {
+    	return chainlot.chainlotToken();
+  	}
+
+
+	/*function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
 		if(chainlotCoin.transferFrom(_from, this, _value)) {
 			chainlotCoin.transfer(chainlot, _value);
 			chainlot.receiveApproval(_from, _value, _token, _extraData);
 		}
-	}
+	}*/
 
 	function () payable external {
 		buyRandom(1, 0);
@@ -61,23 +63,6 @@ contract ChainLotPublic is owned {
 			}
 			return(winners, values, blocks);
 		}
-	}
-
-	//withdraw history cut from pools
-  	function withDrawHistoryCut(uint poolStart, uint poolEnd, uint[] ticketIds) external {
-  		chainlot.withDrawHistoryCut(poolStart, poolEnd, ticketIds);
-  	}
-
-
-	function listUserHistoryCut(address user, uint poolStart, uint poolEnd, uint[] ticketIds) external view returns(uint[] _poolCuts) {
-		//return chainlot.listUserHistoryCut(user, poolStart, poolEnd, ticketIds);
-	  	
-	  	uint[512] memory pcresult = chainlot.listUserHistoryCut(user, poolStart, poolEnd, ticketIds);
-	  	uint[] memory poolCuts = new uint[](poolEnd - poolStart);
-	  	for(uint i = 0; i < poolEnd - poolStart; i++) {
-	  		poolCuts[i] = pcresult[i];
-	  	}
-	  	return poolCuts;
 	}
 
 }

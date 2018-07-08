@@ -179,7 +179,7 @@ contract ChainLotTicket is owned, ERC721{
   }
 
   function getTicket(uint _ticketId) external view 
-    returns (bytes32 numbers, uint count, uint blockNumber) {
+    returns (bytes32 numbers, uint count, uint blockNumber, address _owner) {
     require(_ticketId < tickets.length);
     Ticket memory ticket = tickets[_ticketId];
 
@@ -191,5 +191,6 @@ contract ChainLotTicket is owned, ERC721{
 
     count = ticket.count;
     blockNumber = ticket.blockNumber;
+    _owner = ticketIndexToOwner[_ticketId];
   }
 }

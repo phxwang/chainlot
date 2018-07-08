@@ -24,7 +24,6 @@ contract ChainLotPool is owned{
 	
 	uint public lastMatchedTicketIndex;
 	bytes public jackpotNumbers;
-	uint public historyCut;
 	uint public devCut;
 	uint public futureCut;
 	uint public coinSum;
@@ -189,6 +188,7 @@ contract ChainLotPool is owned{
 	   	ticketCount = msg.value/etherPerTicket;
 	    require(ticketCount > 0);
 
+	    //10% of pool goes to chainlottoken
 	    uint tokenToBuy = msg.value/10;
 	    uint coinToBuy = msg.value - tokenToBuy;
 
@@ -197,7 +197,8 @@ contract ChainLotPool is owned{
 	    coinSum += coinToBuy;
 	}
 
-	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
+	//TODO: security enhancement
+	/*function receiveApproval(address _from, uint _value, address _token, bytes _extraData) public {
 		require(_token == address(chainlotCoin));
 		require(_extraData.length ==0 || _extraData.length == totalNumberCount);
 
@@ -213,7 +214,7 @@ contract ChainLotPool is owned{
 
 		
 		_buyTicket(_from, numbers, ticketCount, _value);
-	}
+	}*/
 
   	function _buyTicket(address _from, bytes numbers, uint ticketCount, uint _value) internal returns(uint _ticketId){
 	    require(numbers.length == maxWhiteNumberCount+maxYellowNumberCount);
@@ -327,10 +328,6 @@ contract ChainLotPool is owned{
 			chainlotCoin.transfer(to, value);
 	}
 
-	function setHistoryCut(uint cut) onlyDrawingTool external {
-		historyCut = cut;
-	}
-
 	function setDevCut(uint cut) onlyDrawingTool external {
 		devCut = cut;
 	}
@@ -345,50 +342,6 @@ contract ChainLotPool is owned{
 
 	function getEntropy() onlyDrawingTool external view returns (uint _entropy) {
 		_entropy = entropy;
-	}
-
-
-	function withdrawHistoryCut(uint[] ticketIds) external {
-		uint userCut; uint[] memory cutIdList; uint cutCount;
-		(userCut, cutIdList, cutCount) = calculateUserHistoryCut(ticketIds, tx.origin);
-		if(userCut > 0) {
-			for(uint i=0; i<cutCount; i++) {
-				withdrawed[cutIdList[i]] = true;
-			}
-			chainlotCoin.transfer(tx.origin, userCut);
-			TransferHistoryCut(tx.origin, userCut);
-		}	  	
-	}
-
-	function listUserHistoryCut(address user, uint[] ticketIds) external view returns(uint _historyCut) {
-		uint userCut; uint[] memory cutIdList; uint cutCount;
-		(userCut, cutIdList, cutCount) = calculateUserHistoryCut(ticketIds, user);
-		return userCut;
-	}
-
-	function calculateUserHistoryCut(uint[] ticketIds, address user) internal view returns(uint _cut, uint[] _cutIdList, uint _cutCount) {
-		uint historyTicketCountSum = 0;
-	  	bytes32 numbers; uint count; uint blockNumber;
-	  	uint[] memory cutIdList = new uint[](ticketIds.length);
-	  	uint cutCount = 0;
-
-	  	if(totalTicketCountSum != 0) {
-		  	for(uint i=0; i<ticketIds.length; i++) {
-		  		uint tid = ticketIds[i];
-		  		(numbers, count, blockNumber) = chainLotTicket.getTicket(tid);
-		  		if(withdrawed[tid] == false 
-		  			&& blockNumber < poolBlockNumber 
-		  			&& chainLotTicket.ownerOf(tid) == user) {
-		  			historyTicketCountSum += count;	
-		  			cutIdList[cutCount] = tid;
-		  			cutCount ++;
-		  		}		
-		  	}
-		  	_cut = historyTicketCountSum * historyCut / totalTicketCountSum;
-	  	}
-	  	
-	  	_cutIdList = cutIdList;
-	  	_cutCount = cutCount;
 	}
 
 	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){
