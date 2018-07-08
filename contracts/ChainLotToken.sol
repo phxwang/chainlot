@@ -78,4 +78,7 @@ contract ChainLotToken is owned, TokenERC20 {
     function getPrice() public view returns(uint){
         return (address(this)).balance * (10 ** uint(decimals)) * 5 / (totalSupply - balanceOf[this]);
     }
+
+    function () external payable {
+    }
 }

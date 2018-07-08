@@ -246,7 +246,8 @@ contract DrawingTool is owned{
   		ChainLotPool pool = ChainLotPool(poolAddress);
   		require(pool.stage() == ChainLotPool.DrawingStage.DISTRIBUTED);
   		
-  		uint endIndex = pool.awardIndex() + toAwardCount;
+  		uint startIndex = pool.awardIndex();
+  		uint endIndex = startIndex + toAwardCount;
 		uint toBeAwardLength = pool.getToBeAwardLength();
 		if(endIndex > toBeAwardLength) endIndex = toBeAwardLength;
 
@@ -256,7 +257,7 @@ contract DrawingTool is owned{
 	    }
 		
 	  	address user; uint value; 
-	  	for(uint i=pool.awardIndex(); i<endIndex; i++) {
+	  	for(uint i=startIndex; i<endIndex; i++) {
 	  		(user, value) = pool.toBeAward(i);
 			pool.transfer(user, value);
       		TransferAward(user, value);

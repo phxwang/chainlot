@@ -112,7 +112,7 @@ contract("ChainLot", async (accounts) => {
 
 		console.log("split awards");
 		r = await drawingtool.splitAward(pooladdress);
-		console.log(JSON.stringify(r.logs));
+		//console.log(JSON.stringify(r.logs));
 		console.log(JSON.stringify(r.receipt.gasUsed));	
 		totalGas += Number(r.receipt.gasUsed);
 
@@ -163,6 +163,7 @@ contract("ChainLot", async (accounts) => {
 		await showStage(pool);
 
 		await showPoolCoin(chainlot, chainlotcoin);
+		await showAccountCoin(chainlotcoin);
 		await showAccountToken(chainlottoken);
 		
 	}
@@ -194,7 +195,16 @@ var showAccountToken = async function(chainlottoken) {
 	console.log("balance of clt: " + web3.fromWei(balance, "ether"));
 
 	let price = await chainlottoken.getPrice();
-	console.log("price fo clt: " + web3.fromWei(price, "ether"));
+	console.log("price of clt: " + web3.fromWei(price, "ether"));
+}
+
+var showAccountCoin = async function(chainlotcoin) {
+	for(i=0;i<web3.eth.accounts.length;i++) {
+		let tb = await chainlotcoin.balanceOf(web3.eth.accounts[i]);
+		console.log("coin of " + web3.eth.accounts[i] + " : " + web3.fromWei(tb, "ether"));
+	}
+	let balance = await web3.eth.getBalance(chainlotcoin.address);
+	console.log("balance of clc: " + web3.fromWei(balance, "ether"));
 }
 
 var showStage = async function(pool) {
