@@ -22,6 +22,7 @@ contract ChainLotToken is owned, TokenERC20 {
     uint public currentReedemPrice;
 
     uint public decimalsValue;
+    uint public circulationToken;
 
     /* This generates a public event on the blockchain that will notify clients */
     event FrozenFunds(address target, bool frozen);
@@ -40,7 +41,7 @@ contract ChainLotToken is owned, TokenERC20 {
         decimalsValue = 10 ** uint(decimals);
         earlyBirdAmount = initialSupply * decimalsValue / 2;
         earlyBirdReedemPrice = _earlyBirdReedemPrice;
-        unfrozenAmount = initialSupply * decimalsValue * 3 / 5;
+        unfrozenAmount = initialSupply * decimalsValue * 4 / 5;
 
         priceIncreaseInterval = _priceIncreaseInterval * decimalsValue;
         lastIncreasePriceTokenAmount = earlyBirdAmount;
@@ -55,6 +56,7 @@ contract ChainLotToken is owned, TokenERC20 {
     }
 
     /*function reedemToken(address target, uint reedemAmount) onlyOwner external {
+        circulationToken += reedemAmount;
         _transfer(this, target, reedemAmount);
         ReedemToken(target, reedemAmount);
     }*/
@@ -64,6 +66,7 @@ contract ChainLotToken is owned, TokenERC20 {
         uint tokenValue = msg.value * decimalsValue / currentReedemPrice;
 
         if(balanceOf[this] >= tokenValue) {
+            circulationToken += tokenValue;
             _transfer(this, target, tokenValue);
             ReedemTokenByEther(target, msg.value, tokenValue);
         }
@@ -71,8 +74,6 @@ contract ChainLotToken is owned, TokenERC20 {
 
     //increase price by 50%
     function checkAndIncreasePrice() internal {
-        uint circulationToken = totalSupply - balanceOf[this];
-            
         while(circulationToken >= lastIncreasePriceTokenAmount + priceIncreaseInterval) {
             IncreaseReedemPrice(circulationToken, lastIncreasePriceTokenAmount, priceIncreaseInterval, currentReedemPrice);
             lastIncreasePriceTokenAmount += priceIncreaseInterval;
@@ -107,6 +108,7 @@ contract ChainLotToken is owned, TokenERC20 {
         uint previousEther = (address(this)).balance;
         require(previousEther >= etherValue);      // checks if the contract has enough ether to buy
 
+        circulationToken -= amount;
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(etherValue);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
         assert(previousEther == (etherValue + (address(this)).balance));
@@ -121,6 +123,7 @@ contract ChainLotToken is owned, TokenERC20 {
         uint tokenValue =  msg.value * decimalsValue / earlyBirdReedemPrice;
         require(tokenValue <= earlyBirdAmount);
         earlyBirdAmount -= tokenValue;
+        circulationToken += tokenValue;
         _transfer(this, msg.sender, tokenValue);
         ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
     }

@@ -68,9 +68,10 @@
 
 ## TODO
  * 新增一个token，主要用于分红 P1
-   * 设计衰减的兑换机制
+   * 设计衰减的兑换机制 done
    * 去掉ticket
-   * 在页面上展示token的汇率
+   * 在页面上展示token的汇率 done
+   * 设计一个时间限制，超过这个时间就没有frozen token了
  * 建一个telegram群 P1
  * 安全性检查 P1
    * 所有的外部操作都要在状态改变之后 done

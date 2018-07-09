@@ -5,7 +5,7 @@ var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 var doDrawing = require("./do_drawing.js");
-console.log(doDrawing);
+//console.log(doDrawing);
 
 module.exports = async function(callback) {
 	console.log("from: " + web3.eth.accounts[0] + ", balance: " 

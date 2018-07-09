@@ -4485,6 +4485,9 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 <div class="banner-title hidden-xs">
                     <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH</h2><h2>Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
+                    <h3>Buy one ticket, get <span id="reedem_price"></span> CLT. CLT sell price: <span id="token_price"></span> ETH</h3>
+                    <h3>Circulation CLT: <span id="circulation_token"></span>, Unfrozen CLT: <span id="unfrozen_token"></span>, Total CLT: <span id="total_token"></span></h3>
+                    <h3>
                 </div>
             </div>
         </div>
@@ -4632,11 +4635,36 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     document.getElementById("purchase_list_link").href=addressLink+clpAddress;
 
 
+   /*<h3>Buy one ticket, get <span id="reedem_price"></span> token. Token sell price: <span id="token_price"></span> ETH</h3>
+                    <h3>Circulation Token: <span id="circulation_token"></span>, Unfrozen Token: <span id="unfrozen_token"></span>, Total Token: <span id="total_token"></span></h3>*/
+
     clp.getChainLotToken(function(err, result){
       if(!err) {
-        console.log(result);
+        console.log("token address: " + result);
         document.getElementById("token_link").href=tokenLink+result+"#balances";
         document.getElementById("my_token_link").href=tokenLink+result+"?a="+web3js.eth.accounts[0];
+
+        cltoken = web3js.eth.contract(cltokenAbi).at(result);
+        cltoken.currentReedemPrice(function(err, result){
+          console.log(JSON.stringify(web3js.fromWei(result, "ether")));
+          document.getElementById("reedem_price").innerHTML=0.01/Number(web3js.fromWei(result, "ether"));
+        });
+
+        cltoken.getPrice(function(err, result){
+          document.getElementById("token_price").innerHTML=web3js.fromWei(result, "ether");
+        });
+
+        cltoken.circulationToken(function(err, result){
+          document.getElementById("circulation_token").innerHTML=web3js.fromWei(result, "ether");
+        });
+
+        cltoken.unfrozenAmount(function(err, result){
+          document.getElementById("unfrozen_token").innerHTML=web3js.fromWei(result, "ether");
+        });
+
+        cltoken.totalSupply(function(err, result){
+          document.getElementById("total_token").innerHTML=web3js.fromWei(result, "ether");
+        });
         
       }
     });
@@ -5459,6 +5487,668 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         {
           "name": "_owner",
           "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+
+  var cltokenAbi = [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "circulationToken",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "priceIncreaseInterval",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "earlyBirdReedemPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentReedemPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "decimalsValue",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "earlyBirdAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnFrom",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "unfrozenAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "frozenAccount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "lastIncreasePriceTokenAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "name": "_extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "approveAndCall",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "minters",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "initialSupply",
+          "type": "uint256"
+        },
+        {
+          "name": "_earlyBirdReedemPrice",
+          "type": "uint256"
+        },
+        {
+          "name": "_priceIncreaseInterval",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "frozen",
+          "type": "bool"
+        }
+      ],
+      "name": "FrozenFunds",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "reedemAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReedemToken",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "etherValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "tokenValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReedemTokenByEther",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "etherValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "tokenValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReedemEarlyBirdToken",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "circulationToken",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "lastIncreasePriceTokenAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "priceIncreaseInterval",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "currentReedemPrice",
+          "type": "uint256"
+        }
+      ],
+      "name": "IncreaseReedemPrice",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Burn",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "target",
+          "type": "address"
+        }
+      ],
+      "name": "reedemTokenByEther",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_minter",
+          "type": "address"
+        },
+        {
+          "name": "_enable",
+          "type": "bool"
+        }
+      ],
+      "name": "setMinter",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "name": "freeze",
+          "type": "bool"
+        }
+      ],
+      "name": "freezeAccount",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "sell",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
         }
       ],
       "payable": false,

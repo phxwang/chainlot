@@ -1,8 +1,5 @@
-var ChainLot = artifacts.require("./ChainLot.sol");
 var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
-var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
-var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
 
 
@@ -17,11 +14,8 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(DrawingTool)
 		]);
 
-		let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
-		let factory = await ChainLotPoolFactory.deployed();
 		let chainlotcoin = await ChainLotCoin.deployed();
-		let chainlotpublic = await ChainLotPublic.deployed();
 		let drawingtool = await DrawingTool.deployed();
 
 		//console.log("ChainLotPublic: " + chainlotpublic.address);
