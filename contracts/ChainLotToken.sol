@@ -13,15 +13,39 @@ contract ChainLotToken is owned, TokenERC20 {
     mapping (address => bool) public frozenAccount;
     mapping (address => bool) public minters;
 
+    uint public earlyBirdAmount;
+    uint public unfrozenAmount;
+    uint public earlyBirdReedemPrice;
+    uint public priceIncreaseInterval;
+
+    uint public lastIncreasePriceTokenAmount;
+    uint public currentReedemPrice;
+
+    uint public decimalsValue;
+
     /* This generates a public event on the blockchain that will notify clients */
     event FrozenFunds(address target, bool frozen);
     event ReedemToken(address target, uint reedemAmount);
     event ReedemTokenByEther(address target, uint etherValue, uint tokenValue);
+    event ReedemEarlyBirdToken(address target, uint etherValue, uint tokenValue);
+    event IncreaseReedemPrice(uint circulationToken, uint lastIncreasePriceTokenAmount, 
+        uint priceIncreaseInterval, uint currentReedemPrice);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
     function ChainLotToken(
-        uint initialSupply
-    ) TokenERC20(initialSupply, name, symbol) public {}
+        uint initialSupply,
+        uint _earlyBirdReedemPrice,
+        uint _priceIncreaseInterval
+    ) TokenERC20(initialSupply, name, symbol) public {
+        decimalsValue = 10 ** uint(decimals);
+        earlyBirdAmount = initialSupply * decimalsValue / 2;
+        earlyBirdReedemPrice = _earlyBirdReedemPrice;
+        unfrozenAmount = initialSupply * decimalsValue * 3 / 5;
+
+        priceIncreaseInterval = _priceIncreaseInterval * decimalsValue;
+        lastIncreasePriceTokenAmount = earlyBirdAmount;
+        currentReedemPrice = earlyBirdReedemPrice;
+    }
 
     /* Internal transfer, only can be called by this contract */
     function _transfer(address _from, address _to, uint _value) internal {
@@ -30,17 +54,29 @@ contract ChainLotToken is owned, TokenERC20 {
         super._transfer(_from, _to, _value);
     }
 
-    function reedemToken(address target, uint reedemAmount) onlyOwner external {
+    /*function reedemToken(address target, uint reedemAmount) onlyOwner external {
         _transfer(this, target, reedemAmount);
         ReedemToken(target, reedemAmount);
-    }
+    }*/
 
     function reedemTokenByEther(address target) payable onlyMinter external {
-        //XXX: should use dynamic transfer rate
-        uint tokenValue = msg.value;
+        checkAndIncreasePrice();
+        uint tokenValue = msg.value * decimalsValue / currentReedemPrice;
+
         if(balanceOf[this] >= tokenValue) {
             _transfer(this, target, tokenValue);
             ReedemTokenByEther(target, msg.value, tokenValue);
+        }
+    }
+
+    //increase price by 50%
+    function checkAndIncreasePrice() internal {
+        uint circulationToken = totalSupply - balanceOf[this];
+            
+        while(circulationToken >= lastIncreasePriceTokenAmount + priceIncreaseInterval) {
+            IncreaseReedemPrice(circulationToken, lastIncreasePriceTokenAmount, priceIncreaseInterval, currentReedemPrice);
+            lastIncreasePriceTokenAmount += priceIncreaseInterval;
+            currentReedemPrice += currentReedemPrice/2;
         }
     }
 
@@ -63,8 +99,9 @@ contract ChainLotToken is owned, TokenERC20 {
 
     /// @notice Sell `amount` tokens to contract
     /// @param amount amount of tokens to be sold
+    /// token can be sold until all token in market are more than unfrozen amount
     function sell(uint amount) external {
-        require(totalSupply > balanceOf[this]);
+        require(totalSupply - balanceOf[this] > unfrozenAmount);
         uint etherValue = getPrice() * amount / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
@@ -76,9 +113,15 @@ contract ChainLotToken is owned, TokenERC20 {
     }
 
     function getPrice() public view returns(uint){
-        return (address(this)).balance * (10 ** uint(decimals)) * 5 / (totalSupply - balanceOf[this]);
+        return (address(this)).balance * decimalsValue * 5 / (totalSupply - balanceOf[this]);
     }
 
     function () external payable {
+        require(earlyBirdAmount > 0);
+        uint tokenValue =  msg.value * decimalsValue / earlyBirdReedemPrice;
+        require(tokenValue <= earlyBirdAmount);
+        earlyBirdAmount -= tokenValue;
+        _transfer(this, msg.sender, tokenValue);
+        ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
     }
 }

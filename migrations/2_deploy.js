@@ -24,7 +24,7 @@ module.exports = async function(deployer, network) {
 				]),*/
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(ChainLotCoin, 100000000000),
-			deployer.deploy(ChainLotToken, 100000000000),
+			deployer.deploy(ChainLotToken, 1e3, 1e10, 30),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(ChainLotPublic),
 			deployer.deploy(DrawingTool)
@@ -59,7 +59,7 @@ module.exports = async function(deployer, network) {
 				]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(ChainLotCoin, 1e12),
-			deployer.deploy(ChainLotToken, 1e8),
+			deployer.deploy(ChainLotToken, 1e9, 1e13, 1e6),
 			deployer.deploy(ChainLotPoolFactory),
 			deployer.deploy(DrawingTool)
 		]);

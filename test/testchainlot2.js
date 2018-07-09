@@ -63,15 +63,20 @@ contract("ChainLot", async (accounts) => {
 	await showAccountToken(chainlottoken);
 	await showPoolCoin(chainlot, chainlotcoin);
 
-	r = await chainlotticket.ticketsOfOwner(web3.eth.accounts[5]);
-	//console.log("tickets: " + r);
-
 	for(i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
 		console.log("from account: " + id);
-		r = await chainlotpublic.buyRandom(13, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e11});
+		r = await chainlotpublic.buyRandom(13, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e12});
 		console.log(JSON.stringify(r.receipt.gasUsed));	
+
+		let price = await chainlottoken.getPrice();
+		console.log("price of clt: " + web3.fromWei(price, "ether"));
+
+		let reedemPrice = await chainlottoken.currentReedemPrice();
+		console.log("reedemPrice of clt: " + web3.fromWei(reedemPrice, "ether"));
 	}
+
+	return;
 
 	for(pi=1; pi<2; pi++) {
 		totalGas = 0;
@@ -196,6 +201,9 @@ var showAccountToken = async function(chainlottoken) {
 
 	let price = await chainlottoken.getPrice();
 	console.log("price of clt: " + web3.fromWei(price, "ether"));
+
+	let reedemPrice = await chainlottoken.currentReedemPrice();
+	console.log("reedemPrice of clt: " + web3.fromWei(reedemPrice, "ether"));
 }
 
 var showAccountCoin = async function(chainlotcoin) {

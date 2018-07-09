@@ -30,9 +30,10 @@
     * 可以避免transfer失败的问题
     * 积分可以兑换成以太坊，1:1兑换
  * ERC20Token(CLT)
+    * 共发行10亿个token
+    * 早期50%的token可以直接兑换，一个ETH兑换10万个token，供募集5000个ETH，价值250万美金
+    * 普通用户每次购买Ticket的10%会被兑换为CLT，每5千万个token兑换比例提升50%
     * 每个奖池的10%转入CLT，作为准备金
-    * 早期10%的token可以直接兑换（设置白名单），按照1个ETH购买1万个CLT进行兑换
-    * 普通用户每次购买Ticket的10%会被兑换为CLT，每10万个block兑换比例提升50%
     * CLT可以兑换成以太坊，兑换比例=CLT准备金x5/CLT总流通数
  * ~~ERC721 token（CLTK)~~
     * 实际的ticket物品token
