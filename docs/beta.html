@@ -4466,6 +4466,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                   One new jackpot pool will be initialized in every 50000 block. 10% of the pool will go to CLT. 
                   The Jackpot number of every pool will be calculated based on all the tickets number in the pool, the hash of the drawing block and the timestamp of the drawing block. 
                   All the prize will be returned as CryptoLottoCoin(CLC).
+                  <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
                 </div>
                 <div class="cta-group" id="cta-group">
                 	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
@@ -4486,7 +4487,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH</h2><h2>Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
                     <h3>Buy one ticket, get <span id="reedem_price"></span> CLT. CLT sell price: <span id="token_price"></span> ETH</h3>
-                    <h3>Circulation CLT: <span id="circulation_token"></span>, Unfrozen CLT: <span id="unfrozen_token"></span>, Total CLT: <span id="total_token"></span></h3>
+                    <h3>Circulation CLT: <span id="circulation_token"></span>, Frozen CLT: <span id="frozen_token"></span>, Total CLT: <span id="total_token"></span></h3>
                     <h3>
                 </div>
             </div>
@@ -4511,12 +4512,6 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             </div>
             <div><h4>All the tickets are stored in ERC 721 based smart contract and can be exchanged. 
               <a id="ticket_link" href="" target="_blank">Click to view</a></h4></div>
-        </div>
-        <div class="container">
-            <div id="token info" class="resource-blocks">
-            <h2> Crypto Lotto Token</h2>
-            <h4>All the token will share 10% of every pool</h4>
-            </div>
         </div>
         <div class="container">
           <div class="resource-blocks">
@@ -4647,7 +4642,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         cltoken = web3js.eth.contract(cltokenAbi).at(result);
         cltoken.currentReedemPrice(function(err, result){
           console.log(JSON.stringify(web3js.fromWei(result, "ether")));
-          document.getElementById("reedem_price").innerHTML=0.01/Number(web3js.fromWei(result, "ether"));
+          document.getElementById("reedem_price").innerHTML=Math.round(0.001/Number(web3js.fromWei(result, "ether")));
         });
 
         cltoken.getPrice(function(err, result){
@@ -4658,8 +4653,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           document.getElementById("circulation_token").innerHTML=web3js.fromWei(result, "ether");
         });
 
-        cltoken.unfrozenAmount(function(err, result){
-          document.getElementById("unfrozen_token").innerHTML=web3js.fromWei(result, "ether");
+        cltoken.frozenAmount(function(err, result){
+          document.getElementById("frozen_token").innerHTML=web3js.fromWei(result, "ether");
         });
 
         cltoken.totalSupply(function(err, result){
@@ -4744,7 +4739,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   }
 
   //config
-  var clpAddress = "0xed02961c1e97b9cd2eaeef5d19111617726787ac";
+  var clpAddress = "0x3bd64dfcf42cf87decacfb476bdfbb6017b1a51e";
   var txLink = "https://www.etherscan.io/tx/";
   var addressLink = "https://www.etherscan.io/address/";
   var tokenLink = "https://www.etherscan.io/token/";
@@ -4768,6 +4763,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         else {
           if(netId == 0) {
             domain = "www.etherscan.io";
+            document.getElementById("env_message").display="hidden";
           }
           else if(netId == 4) {
             domain = "rinkeby.etherscan.io";
@@ -5750,7 +5746,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     {
       "constant": true,
       "inputs": [],
-      "name": "unfrozenAmount",
+      "name": "frozenAmount",
       "outputs": [
         {
           "name": "",

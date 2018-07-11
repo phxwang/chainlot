@@ -14,7 +14,7 @@ contract ChainLotToken is owned, TokenERC20 {
     mapping (address => bool) public minters;
 
     uint public earlyBirdAmount;
-    uint public unfrozenAmount;
+    uint public frozenAmount;
     uint public earlyBirdReedemPrice;
     uint public priceIncreaseInterval;
 
@@ -41,7 +41,7 @@ contract ChainLotToken is owned, TokenERC20 {
         decimalsValue = 10 ** uint(decimals);
         earlyBirdAmount = initialSupply * decimalsValue / 2;
         earlyBirdReedemPrice = _earlyBirdReedemPrice;
-        unfrozenAmount = initialSupply * decimalsValue * 4 / 5;
+        frozenAmount = initialSupply * decimalsValue / 2;
 
         priceIncreaseInterval = _priceIncreaseInterval * decimalsValue;
         lastIncreasePriceTokenAmount = earlyBirdAmount;
@@ -102,7 +102,7 @@ contract ChainLotToken is owned, TokenERC20 {
     /// @param amount amount of tokens to be sold
     /// token can be sold until all token in market are more than unfrozen amount
     function sell(uint amount) external {
-        require(totalSupply - balanceOf[this] > unfrozenAmount);
+        require(circulationToken > frozenAmount + amount && amount <= circulationToken);
         uint etherValue = getPrice() * amount / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
