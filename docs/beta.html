@@ -4739,7 +4739,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   }
 
   //config
-  var clpAddress = "0x3bd64dfcf42cf87decacfb476bdfbb6017b1a51e";
+  var clpAddress;
   var txLink = "https://www.etherscan.io/tx/";
   var addressLink = "https://www.etherscan.io/address/";
   var tokenLink = "https://www.etherscan.io/token/";
@@ -4757,15 +4757,17 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
       web3js.version.getNetwork((err, netId) => {
         //alert(netId);
-        if(netId < 0) {
-          document.getElementById('env_message').innerHTML="Please switch MetaMask to Rinkeby";
+        if(netId != 4) {
+          document.getElementById('env_message').innerHTML="Please switch MetaMask to Rinkeby Test Net";
         }
         else {
-          if(netId == 0) {
+          if(netId == 1) {
+            clpAddress = "";
             domain = "www.etherscan.io";
-            document.getElementById("env_message").display="hidden";
+            document.getElementById("env_message").style.display="none";
           }
           else if(netId == 4) {
+            clpAddress = "0x3bd64dfcf42cf87decacfb476bdfbb6017b1a51e";
             domain = "rinkeby.etherscan.io";
           }
 

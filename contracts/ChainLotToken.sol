@@ -106,7 +106,7 @@ contract ChainLotToken is owned, TokenERC20 {
         uint etherValue = getPrice() * amount / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
-        require(previousEther >= etherValue);      // checks if the contract has enough ether to buy
+        require(previousEther/5 >= etherValue);      // checks if the contract has enough ether to buy
 
         circulationToken -= amount;
         _transfer(msg.sender, this, amount);              // makes the transfers
