@@ -12,9 +12,12 @@ contract ChainLotToken is owned, TokenERC20 {
 
     mapping (address => bool) public frozenAccount;
     mapping (address => bool) public minters;
+    mapping (address => uint) public earlyBirdBalanceOf;
+    mapping (address => uint) public earlyBirdRawBalanceOf;
 
     uint public earlyBirdAmount;
-    uint public frozenAmount;
+    uint public mintersReserveAmount;
+    uint public mintersAmount;
     uint public earlyBirdReedemPrice;
     uint public priceIncreaseInterval;
 
@@ -40,9 +43,9 @@ contract ChainLotToken is owned, TokenERC20 {
     ) TokenERC20(initialSupply, name, symbol) public {
         decimalsValue = 10 ** uint(decimals);
         earlyBirdAmount = initialSupply * decimalsValue / 2;
+        mintersReserveAmount = totalSupply - earlyBirdAmount;
         earlyBirdReedemPrice = _earlyBirdReedemPrice;
-        frozenAmount = initialSupply * decimalsValue / 2;
-
+        
         priceIncreaseInterval = _priceIncreaseInterval * decimalsValue;
         lastIncreasePriceTokenAmount = earlyBirdAmount;
         currentReedemPrice = earlyBirdReedemPrice;
@@ -67,6 +70,7 @@ contract ChainLotToken is owned, TokenERC20 {
 
         if(balanceOf[this] >= tokenValue) {
             circulationToken += tokenValue;
+            mintersAmount += tokenValue;
             _transfer(this, target, tokenValue);
             ReedemTokenByEther(target, msg.value, tokenValue);
         }
@@ -102,20 +106,36 @@ contract ChainLotToken is owned, TokenERC20 {
     /// @param amount amount of tokens to be sold
     /// token can be sold until all token in market are more than unfrozen amount
     function sell(uint amount) external {
-        require(circulationToken > frozenAmount + amount && amount <= circulationToken);
+        //require(circulationToken > frozenAmount + amount && amount <= circulationToken);
+        //earlybird token only can be sold as the same amount as unfrozen amount
+        uint earlyBirdValue = earlyBirdBalanceOf[msg.sender];
+        if(earlyBirdValue > 0) {
+            //early bird token left
+            uint frozenValue = getFrozenAmountOfOwner();
+            require(frozenValue <= earlyBirdValue - amount);
+        }
+
         uint etherValue = getPrice() * amount / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
         require(previousEther/5 >= etherValue);      // checks if the contract has enough ether to buy
 
         circulationToken -= amount;
+        earlyBirdBalanceOf[msg.sender] -= amount;
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(etherValue);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
         assert(previousEther == (etherValue + (address(this)).balance));
     }
 
     function getPrice() public view returns(uint){
-        return (address(this)).balance * decimalsValue * 5 / (totalSupply - balanceOf[this]);
+        return (address(this)).balance * decimalsValue * 5 / circulationToken;
+    }
+
+    function getFrozenAmountOfOwner() public view returns(uint) {
+        if(mintersAmount > mintersReserveAmount) 
+            return 0;
+        else return earlyBirdRawBalanceOf[msg.sender] - 
+                earlyBirdRawBalanceOf[msg.sender] * mintersAmount / mintersReserveAmount;
     }
 
     function () external payable {
@@ -123,6 +143,8 @@ contract ChainLotToken is owned, TokenERC20 {
         uint tokenValue =  msg.value * decimalsValue / earlyBirdReedemPrice;
         require(tokenValue <= earlyBirdAmount);
         earlyBirdAmount -= tokenValue;
+        earlyBirdBalanceOf[msg.sender] += tokenValue;
+        earlyBirdRawBalanceOf[msg.sender] += tokenValue;
         circulationToken += tokenValue;
         _transfer(this, msg.sender, tokenValue);
         ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
