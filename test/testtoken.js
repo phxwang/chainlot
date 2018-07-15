@@ -1,6 +1,6 @@
 var ChainLotToken = artifacts.require("./ChainLotToken.sol");
 
-//return;
+return;
 contract("ChainLot", async (accounts) => {
 	console.log("from: " + web3.eth.accounts[0]);
 	

@@ -76,7 +76,7 @@ contract("ChainLot", async (accounts) => {
 		console.log("reedemPrice of clt: " + web3.fromWei(reedemPrice, "ether"));
 	}
 
-	return;
+	//return;
 
 	for(pi=1; pi<2; pi++) {
 		totalGas = 0;

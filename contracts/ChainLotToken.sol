@@ -69,8 +69,8 @@ contract ChainLotToken is owned, TokenERC20 {
         uint tokenValue = msg.value * decimalsValue / currentReedemPrice;
 
         if(balanceOf[this] >= tokenValue) {
-            circulationToken += tokenValue;
-            mintersAmount += tokenValue;
+            circulationToken = circulationToken.add(tokenValue);
+            mintersAmount = mintersAmount.add(tokenValue);
             _transfer(this, target, tokenValue);
             ReedemTokenByEther(target, msg.value, tokenValue);
         }
@@ -112,19 +112,19 @@ contract ChainLotToken is owned, TokenERC20 {
         if(earlyBirdValue > 0) {
             //early bird token left
             uint frozenValue = getFrozenAmountOfOwner();
-            require(frozenValue <= earlyBirdValue - amount);
+            require(frozenValue <= earlyBirdValue.sub(amount));
         }
 
-        uint etherValue = getPrice() * amount / (10 ** uint(decimals));
+        uint etherValue = getPrice().mul(amount) / (10 ** uint(decimals));
 
         uint previousEther = (address(this)).balance;
         require(previousEther/5 >= etherValue);      // checks if the contract has enough ether to buy
 
-        circulationToken -= amount;
-        earlyBirdBalanceOf[msg.sender] -= amount;
+        circulationToken = circulationToken.sub(amount);
+        earlyBirdBalanceOf[msg.sender] = earlyBirdBalanceOf[msg.sender].sub(amount);
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(etherValue);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
-        assert(previousEther == (etherValue + (address(this)).balance));
+        assert(previousEther == etherValue.add((address(this)).balance));
     }
 
     function getPrice() public view returns(uint){
@@ -140,12 +140,12 @@ contract ChainLotToken is owned, TokenERC20 {
 
     function () external payable {
         require(earlyBirdAmount > 0);
-        uint tokenValue =  msg.value * decimalsValue / earlyBirdReedemPrice;
+        uint tokenValue =  (msg.value.mul(decimalsValue)).div(earlyBirdReedemPrice);
         require(tokenValue <= earlyBirdAmount);
-        earlyBirdAmount -= tokenValue;
-        earlyBirdBalanceOf[msg.sender] += tokenValue;
-        earlyBirdRawBalanceOf[msg.sender] += tokenValue;
-        circulationToken += tokenValue;
+        earlyBirdAmount = earlyBirdAmount.sub(tokenValue);
+        earlyBirdBalanceOf[msg.sender] = earlyBirdBalanceOf[msg.sender].add(tokenValue);
+        earlyBirdRawBalanceOf[msg.sender] = earlyBirdRawBalanceOf[msg.sender].add(tokenValue);
+        circulationToken = circulationToken.add(tokenValue);
         _transfer(this, msg.sender, tokenValue);
         ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
     }
