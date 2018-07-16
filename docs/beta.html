@@ -4487,7 +4487,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH</h2><h2>Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
                     <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
                     <h3>Buy one ticket, get <span id="reedem_price"></span> CLT. CLT sell price: <span id="token_price"></span> ETH</h3>
-                    <h3>Circulation CLT: <span id="circulation_token"></span>, Frozen CLT: <span id="frozen_token"></span>, Total CLT: <span id="total_token"></span></h3>
+                    <h3>Circulation CLT: <span id="circulation_token"></span>, EarlyBird CLT Left: <span id="earlybird_amount"></span>, Total CLT: <span id="total_token"></span></h3>
                     <h3>
                 </div>
             </div>
@@ -4653,8 +4653,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           document.getElementById("circulation_token").innerHTML=web3js.fromWei(result, "ether");
         });
 
-        cltoken.frozenAmount(function(err, result){
-          document.getElementById("frozen_token").innerHTML=web3js.fromWei(result, "ether");
+        cltoken.earlyBirdAmount(function(err, result){
+          document.getElementById("earlybird_amount").innerHTML=web3js.fromWei(result, "ether");
         });
 
         cltoken.totalSupply(function(err, result){
@@ -5734,11 +5734,11 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     {
       "constant": true,
       "inputs": [],
-      "name": "owner",
+      "name": "mintersReserveAmount",
       "outputs": [
         {
           "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -5748,11 +5748,11 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     {
       "constant": true,
       "inputs": [],
-      "name": "frozenAmount",
+      "name": "owner",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -5825,6 +5825,20 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [],
+      "name": "mintersAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -5849,6 +5863,44 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       ],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "earlyBirdBalanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "earlyBirdRawBalanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -6143,6 +6195,20 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "constant": true,
       "inputs": [],
       "name": "getPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getFrozenAmountOfOwner",
       "outputs": [
         {
           "name": "",
