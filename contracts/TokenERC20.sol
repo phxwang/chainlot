@@ -1,4 +1,4 @@
-pragma solidity ^0.4.16;
+pragma solidity 0.4.18;
 pragma experimental "v0.5.0";
 import "./SafeMath.sol";
 
@@ -35,7 +35,7 @@ contract TokenERC20 {
         string tokenSymbol
     ) public {
         totalSupply = initialSupply * 10 ** uint(decimals);  // Update total supply with the decimal amount
-        balanceOf[this] = totalSupply;               // Give the creator all initial tokens
+        balanceOf[address(this)] = totalSupply;               // Give the creator all initial tokens
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;                               // Set the symbol for display purposes
     }
@@ -70,6 +70,8 @@ contract TokenERC20 {
      * @param _value the amount to send
      */
     function transfer(address _to, uint _value) public {
+        // Prevent transfer to token address. Use sell() instead
+        require(_to != address(this));
         _transfer(msg.sender, _to, _value);
     }
 
@@ -83,6 +85,7 @@ contract TokenERC20 {
      * @param _value the amount to send
      */
     function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+        require(_to != address(this));
         require(_value <= allowance[_from][msg.sender]);     // Check allowance
         allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);
         _transfer(_from, _to, _value);
@@ -99,6 +102,8 @@ contract TokenERC20 {
      */
     function approve(address _spender, uint _value) public
         returns (bool success) {
+        require(allowance[msg.sender][_spender] == 0 || _value
+             == 0);
         allowance[msg.sender][_spender] = _value;
         return true;
     }

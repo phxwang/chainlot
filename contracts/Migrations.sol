@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity 0.4.18;
 pragma experimental "v0.5.0";
 
 contract Migrations {

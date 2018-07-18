@@ -78,13 +78,13 @@
  * 降低购买ticket的gas消耗
 
 ## DOing
-
+ * 使用安全工具扫描代码
+ * 使用安全的ERC20模板
 ## DONE
  * 安全性 done
    * 输入越界检查，状态合法性检查
    * 安全计算库
    * 增加maintainer角色
-   * 找一个增强安全性的ERC20模板
  * 增加token的锁定 done
    * 每挖出一个非锁定的token，才释放等比例的锁定token
  * 考虑token挤兑的问题 done
