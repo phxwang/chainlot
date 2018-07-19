@@ -27,7 +27,7 @@ contract ChainLot is owned{
 	uint8 public totalNumberCount;
 	uint public latestPoolBlockNumber;
 
-	uint[] awardRulesArray;
+	uint[] public awardRulesArray;
 	
 
 	ChainLotPoolInterface[] public chainlotPools;

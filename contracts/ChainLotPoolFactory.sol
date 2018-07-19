@@ -5,7 +5,7 @@ import "./ChainLotPool.sol";
 
 
 contract ChainLotPoolFactory is owned {
-  	uint poolCount;
+  	uint public poolCount;
 
   	event GenerateNewPool(uint latestPoolBlockNumber, uint nextPoolBlockNumber, uint length);
 	

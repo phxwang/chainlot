@@ -65,7 +65,7 @@ contract ChainLotPool is owned{
   		uint totalWinnersAward;
   		uint totalTicketCount;
  	}
-  	mapping(uint => awardResultByRule) awardResults;
+  	mapping(uint => awardResultByRule) public awardResults;
 
   	enum DrawingStage {INITIED, PREPARED, MATCHED, CALCULATED, SPLITED, DISTRIBUTED, SENT, UNAWARED_TRANSFERED}
 	DrawingStage public stage = DrawingStage.INITIED; 
@@ -229,7 +229,7 @@ contract ChainLotPool is owned{
 	    uint ticketId = chainLot.mint(_from, numbers, ticketCount);
 	    allTicketsId.push(ticketId);
 	    totalTicketCountSum = chainLotTicket.totalTicketCountSum();
-	    entropy = uint(keccak256(entropy, totalTicketCountSum, ticketId, numbers));
+	    entropy = uint(keccak256(entropy, totalTicketCountSum, ticketId, numbers, msg.sender));
 
 	    BuyTicket(poolBlockNumber, numbers, ticketCount, ticketId, _from, block.number, totalTicketCountSum, _value);
 	    return ticketId;
@@ -349,8 +349,9 @@ contract ChainLotPool is owned{
 		uint hash = uint(block.blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
 		uint256 random = addressInt * hash;
-		random = uint256(keccak256(block.timestamp, block.difficulty, hash, addressInt));
+		random = uint256(keccak256(block.timestamp, block.difficulty, hash, addressInt, entropy));
 		GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
+		
 		require(random != 0);
 		random = random >> shift;
 		bytes memory numbers = new bytes(maxWhiteNumberCount+maxYellowNumberCount);

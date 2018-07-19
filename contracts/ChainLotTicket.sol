@@ -11,10 +11,10 @@ contract ChainLotTicket is owned, ERC721{
   string public constant name = "CrytoLottoTicket";
   string public constant symbol = "CLTK";
 
-  bytes4 constant InterfaceID_ERC165 =
+  bytes4 public constant InterfaceID_ERC165 =
     bytes4(keccak256('supportsInterface(bytes4)'));
 
-  bytes4 constant InterfaceID_ERC721 =
+  bytes4 public constant InterfaceID_ERC721 =
     bytes4(keccak256('name()')) ^
     bytes4(keccak256('symbol()')) ^
     bytes4(keccak256('totalSupply()')) ^
@@ -37,7 +37,7 @@ contract ChainLotTicket is owned, ERC721{
 
   /*** STORAGE ***/
 
-  Ticket[] tickets;
+  Ticket[] public tickets;
   mapping (address => bool) public minters;
 
   mapping (uint => address) public ticketIndexToOwner;
