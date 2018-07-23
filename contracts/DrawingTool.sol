@@ -288,11 +288,23 @@ contract DrawingTool is owned{
 		require(blockNumber < block.number);
 		uint hash = uint(blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
-		uint random = uint(keccak256(abi.encodePacked(entropy, block.timestamp, block.difficulty, hash, addressInt)));
+		uint random = 0;
+		for(uint8 i=0; i<6; i++) {
+			random = uint(keccak256(abi.encodePacked(entropy, block.number, 
+				block.timestamp, block.difficulty, hash, addressInt)));
+			uint nextBlockNumber = random - (random/blockNumber)*blockNumber;
+			hash = uint(blockhash(nextBlockNumber));
+		}
 
 		//GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
 
-		require(random != 0);
+		return uintToNumbers(random, shift, maxWhiteNumberCount, maxYellowNumberCount, maxWhiteNumber, maxYellowNumber);
+	}
+
+	function uintToNumbers(uint _random, uint shift, uint8 maxWhiteNumberCount, uint8 maxYellowNumberCount,
+		uint8 maxWhiteNumber, uint8 maxYellowNumber) private pure returns(bytes) {
+		require(_random != 0);
+		uint random = _random;
 		random = random >> shift;
 		bytes memory numbers = new bytes(maxWhiteNumberCount+maxYellowNumberCount);
 		for(uint8 i=0;i<maxWhiteNumberCount;i++) {
