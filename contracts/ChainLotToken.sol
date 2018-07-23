@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 import "./owned.sol";
@@ -36,7 +36,7 @@ contract ChainLotToken is owned, TokenERC20 {
         uint priceIncreaseInterval, uint currentReedemPrice);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function ChainLotToken(
+    constructor(
         uint initialSupply,
         uint _earlyBirdReedemPrice,
         uint _priceIncreaseInterval
@@ -72,14 +72,14 @@ contract ChainLotToken is owned, TokenERC20 {
             circulationToken = circulationToken.add(tokenValue);
             mintersAmount = mintersAmount.add(tokenValue);
             _transfer(this, target, tokenValue);
-            ReedemTokenByEther(target, msg.value, tokenValue);
+            emit ReedemTokenByEther(target, msg.value, tokenValue);
         }
     }
 
     //increase price by 50%
     function checkAndIncreasePrice() internal {
         while(circulationToken >= lastIncreasePriceTokenAmount + priceIncreaseInterval) {
-            IncreaseReedemPrice(circulationToken, lastIncreasePriceTokenAmount, priceIncreaseInterval, currentReedemPrice);
+            emit IncreaseReedemPrice(circulationToken, lastIncreasePriceTokenAmount, priceIncreaseInterval, currentReedemPrice);
             lastIncreasePriceTokenAmount += priceIncreaseInterval;
             currentReedemPrice += currentReedemPrice/2;
         }
@@ -99,7 +99,7 @@ contract ChainLotToken is owned, TokenERC20 {
     /// @param freeze either to freeze it or not
     function freezeAccount(address target, bool freeze) onlyOwner external {
         frozenAccount[target] = freeze;
-        FrozenFunds(target, freeze);
+        emit FrozenFunds(target, freeze);
     }
 
     /// @notice Sell `amount` tokens to contract
@@ -147,6 +147,6 @@ contract ChainLotToken is owned, TokenERC20 {
         earlyBirdRawBalanceOf[msg.sender] = earlyBirdRawBalanceOf[msg.sender].add(tokenValue);
         circulationToken = circulationToken.add(tokenValue);
         _transfer(this, msg.sender, tokenValue);
-        ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
+        emit ReedemEarlyBirdToken(msg.sender, msg.value, tokenValue);
     }
 }

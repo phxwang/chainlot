@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./SafeMath.sol";
 
@@ -29,7 +29,7 @@ contract TokenERC20 {
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
-    function TokenERC20(
+    constructor(
         uint initialSupply,
         string tokenName,
         string tokenSymbol
@@ -56,7 +56,7 @@ contract TokenERC20 {
         balanceOf[_from] = balanceOf[_from].sub(_value);
         // Add the same to the recipient
         balanceOf[_to] = balanceOf[_to].add(_value);
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balanceOf[_from].add(balanceOf[_to]) == previousBalances);
     }
@@ -138,7 +138,7 @@ contract TokenERC20 {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);            // Subtract from the sender
         totalSupply = totalSupply.sub(_value);                      // Updates totalSupply
-        Burn(msg.sender, _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 
@@ -156,7 +156,7 @@ contract TokenERC20 {
         balanceOf[_from] = balanceOf[_from].sub(_value);                         // Subtract from the targeted balance
         allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);             // Subtract from the sender's allowance
         totalSupply = totalSupply.sub(_value);                              // Update totalSupply
-        Burn(_from, _value);
+        emit Burn(_from, _value);
         return true;
     }
 

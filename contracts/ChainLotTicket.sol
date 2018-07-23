@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 import "./ERC721.sol";
@@ -65,7 +65,7 @@ contract ChainLotTicket is owned, ERC721{
   function _approve(address _to, uint _ticketId) internal {
     ticketIndexToApproved[_ticketId] = _to;
 
-    Approval(ticketIndexToOwner[_ticketId], ticketIndexToApproved[_ticketId], _ticketId);
+    emit Approval(ticketIndexToOwner[_ticketId], ticketIndexToApproved[_ticketId], _ticketId);
   }
 
   function _transfer(address _from, address _to, uint _ticketId) internal {
@@ -77,7 +77,7 @@ contract ChainLotTicket is owned, ERC721{
       delete ticketIndexToApproved[_ticketId];
     }
 
-    Transfer(_from, _to, _ticketId);
+    emit Transfer(_from, _to, _ticketId);
   }
 
   function _mint(address _owner,bytes _numbers,uint _count) internal returns (uint ticketId) {
@@ -89,7 +89,7 @@ contract ChainLotTicket is owned, ERC721{
     ticketId = tickets.push(ticket) - 1;
     totalTicketCountSum += _count;
 
-    Mint(_owner, ticketId);
+   emit Mint(_owner, ticketId);
 
     _transfer(0, _owner, ticketId);
   }
@@ -140,11 +140,11 @@ contract ChainLotTicket is owned, ERC721{
 
   function ticketsOfOwner(address _owner) public view returns (uint[]) {
     uint balance = balanceOf(_owner);
-
+    uint[] memory result = new uint[](balance);
+      
     if (balance == 0) {
       return new uint[](0);
     } else {
-      uint[] memory result = new uint[](balance);
       uint maxTicketId = totalSupply();
       uint idx = 0;
 

@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./owned.sol";
 import "./Interface.sol";
@@ -61,7 +61,7 @@ contract DrawingTool is owned{
 		
 		pool.setJackpotNumbers(jackpotNumbers);
 
-		PrepareAward(jackpotNumbers, pool.poolBlockNumber(), pool.getAllTicketsCount());
+		emit PrepareAward(jackpotNumbers, pool.poolBlockNumber(), pool.getAllTicketsCount());
 
 		pool.setStage(ChainLotPool.DrawingStage.PREPARED);
 	}
@@ -87,11 +87,11 @@ contract DrawingTool is owned{
 			if(ruleId >= 0 && ruleId < pool.getAwardRulesLength()) {
 		        //match one rule!
 		        pool.pushWinnerTicket(ruleId, ticketId);
-		        MatchRule(jackpotNumbers, numbers, count, ticketId, blockNumber, ruleId);
+		        emit MatchRule(jackpotNumbers, numbers, count, ticketId, blockNumber, ruleId);
 			}
 		}
 
-		MatchAwards(jackpotNumbers, endIndex, allTicketsCount);
+		emit MatchAwards(jackpotNumbers, endIndex, allTicketsCount);
 
 		pool.setLastMatchedTicketIndex(endIndex);
 
@@ -114,7 +114,7 @@ contract DrawingTool is owned{
 					matchedWhiteCount ++;
 				}
 			}
-			for(j = pool.maxWhiteNumberCount(); j <  pool.maxWhiteNumberCount() + pool.maxYellowNumberCount(); j++) {
+			for(uint j = pool.maxWhiteNumberCount(); j <  pool.maxWhiteNumberCount() + pool.maxYellowNumberCount(); j++) {
 				if(numbers[j] == jackpotNumbers[j]) {
 					matchedYellowCount ++;
 				}
@@ -135,10 +135,9 @@ contract DrawingTool is owned{
 	  	uint winnerTicketCount = pool.getWinnerTicketCount(ruleId);
 	  	uint processedIndex = pool.getProcessedIndex(ruleId);
 	  	uint awardEther = pool.getAwardEther(ruleId);
-	    
+	    uint endIndex = processedIndex + toCalcCount;
+	        
 	    if(winnerTicketCount > processedIndex) {
-	        uint endIndex = processedIndex + toCalcCount;
-
 	        if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
 
 	        doCaculate(pool, ruleId, processedIndex, endIndex, awardEther);    
@@ -168,7 +167,7 @@ contract DrawingTool is owned{
 		//move pointer
      	pool.setProcessedIndex(ruleId, endIndex);
 
-     	CalculateAwards(ruleId, endIndex, awardEther, totalWinnersAward, totalTicketCount); 
+     	emit CalculateAwards(ruleId, endIndex, awardEther, totalWinnersAward, totalTicketCount); 
   	}
   	
   	function splitAward(address poolAddress) onlyOwner external {
@@ -189,13 +188,13 @@ contract DrawingTool is owned{
 	          pool.setTotalWinnersAward(i, totalBalance);
 	          totalBalance = 0;
 	        }
-	        SplitAward(i, pool.getTotalWinnersAward(i), totalBalance);
+	        emit SplitAward(i, pool.getTotalWinnersAward(i), totalBalance);
   		}
 
   		pool.setDevCut(devCut);
   		pool.setFutureCut(futureCut);
 
-  		CutAward(devCut, futureCut);
+  		emit CutAward(devCut, futureCut);
 
   		pool.setStage(ChainLotPool.DrawingStage.SPLITED);
   	}
@@ -208,15 +207,14 @@ contract DrawingTool is owned{
 		
 		uint winnerTicketCount = pool.getWinnerTicketCount(ruleId);
 	  	uint distributedIndex = pool.getDistributedIndex(ruleId);
-	  	
+	  	uint endIndex = distributedIndex + toDistCount;			  	
 
 	  	if(winnerTicketCount > distributedIndex) {
-	  		uint endIndex = distributedIndex + toDistCount;
-		  	if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
+	  		if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
 
 		  	doDistribute(pool, ruleId, distributedIndex, endIndex);
 
-		  	DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());
+		  	emit DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());
 	  	}
 
 	  	if(ruleId == pool.getAwardRulesLength() -1 && endIndex == winnerTicketCount) {
@@ -236,7 +234,7 @@ contract DrawingTool is owned{
 	          (numbers, count, blockNumber, _owner) = chainLotTicket.getTicket(ticketId);
 	          uint awardValue = count * totalWinnerAward / totalTicketCount;
 	          address awardUser = pool.addToBeAward(ticketId, awardValue);
-	          ToBeAward(numbers, count, ticketId, awardUser, blockNumber, awardValue);
+	          emit ToBeAward(numbers, count, ticketId, awardUser, blockNumber, awardValue);
 	    	}
   		}
 	  	pool.setDistributedIndex(ruleId, endIndex);
@@ -260,7 +258,7 @@ contract DrawingTool is owned{
 	  	for(uint i=startIndex; i<endIndex; i++) {
 	  		(user, value) = pool.toBeAward(i);
 			pool.transfer(user, value);
-      		TransferAward(user, value);
+      		emit TransferAward(user, value);
 		}
 
 		uint devCut = pool.devCut();
@@ -268,7 +266,7 @@ contract DrawingTool is owned{
 		if(devCut > 0) {
 			pool.setDevCut(0);
 			pool.transfer(owner, devCut);
-			TransferDevCut(owner, devCut);
+			emit TransferDevCut(owner, devCut);
 		}
 	}
 
@@ -279,7 +277,7 @@ contract DrawingTool is owned{
       	uint toBeTransfer = chainlotCoin.balanceOf(poolAddress);
       	if(toBeTransfer > 0) {
       		pool.transfer(to, toBeTransfer);
-      		TransferUnawarded(poolAddress, to, toBeTransfer);
+      		emit TransferUnawarded(poolAddress, to, toBeTransfer);
       	}
 
       	pool.setStage(ChainLotPool.DrawingStage.UNAWARED_TRANSFERED);
@@ -288,9 +286,9 @@ contract DrawingTool is owned{
 	function genRandomNumbers(uint blockNumber, uint shift, uint8 maxWhiteNumberCount, uint8 maxYellowNumberCount,
 	 uint8 maxWhiteNumber, uint8 maxYellowNumber, uint entropy) public view returns(bytes _numbers){
 		require(blockNumber < block.number);
-		uint hash = uint(block.blockhash(blockNumber));
+		uint hash = uint(blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
-		uint random = uint(keccak256(entropy, block.timestamp, block.difficulty, hash, addressInt));
+		uint random = uint(keccak256(abi.encodePacked(entropy, block.timestamp, block.difficulty, hash, addressInt)));
 
 		//GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
 
@@ -302,7 +300,7 @@ contract DrawingTool is owned{
 			random = random >> 8;
 
 		}
-		for(i=maxWhiteNumberCount;i<numbers.length;i++) {
+		for(uint8 i=maxWhiteNumberCount;i<numbers.length;i++) {
 			numbers[i] = byte(random%maxYellowNumber + 1);
 			random = random >> 8;
 

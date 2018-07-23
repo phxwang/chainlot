@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 import "./owned.sol";
@@ -11,7 +11,7 @@ contract ChainLotCoin is TokenERC20 {
 
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function ChainLotCoin(
+    constructor(
         uint initialSupply
     ) TokenERC20(initialSupply, name, symbol) public {}
 

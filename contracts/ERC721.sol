@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 /// @title Interface for contracts conforming to ERC-721: Non-Fungible Tokens

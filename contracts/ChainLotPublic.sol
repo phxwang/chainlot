@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./Interface.sol";
 import "./owned.sol";
@@ -41,7 +41,8 @@ contract ChainLotPublic is owned {
 	}*/
 
 	function () payable external {
-		buyRandom(1, 0);
+		if(msg.value > 0)
+			buyRandom(1, 0);
 	}
 
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint currentPoolIndex) {

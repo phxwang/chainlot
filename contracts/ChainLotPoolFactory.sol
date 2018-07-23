@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 import "./ChainLotPool.sol";
@@ -28,7 +28,7 @@ contract ChainLotPoolFactory is owned {
 		maxWhiteNumber, maxYellowNumber, whiteNumberCount, yellowNumberCount, 
 		etherPerTicket, awardRulesArray);
 	poolCount ++;
-	GenerateNewPool(latestPoolBlockNumber, nextPoolBlockNumber, poolCount);
+	emit GenerateNewPool(latestPoolBlockNumber, nextPoolBlockNumber, poolCount);
 	
   	return ChainLotPoolInterface(clp);
   }

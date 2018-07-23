@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./Interface.sol";
 import "./owned.sol";
@@ -58,7 +58,7 @@ contract ChainLot is owned{
   	event MigrateFrom(address chainlotAddress, address poolAddress);
   	event LOG(uint msg);
 
-	function ChainLot(uint8 _maxWhiteNumber, 
+	constructor(uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
 						uint8 _whiteNumberCount, 
 						uint8 _yellowNumberCount, 
@@ -92,7 +92,7 @@ contract ChainLot is owned{
 		if(address(currentPool)==0) {
 			currentPool = newed;
 			currentPoolIndex = chainlotPools.length - 1;
-			SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
+			emit SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
 		}
 	}
 
@@ -104,7 +104,7 @@ contract ChainLot is owned{
 			require(currentPoolIndex + 1 < chainlotPools.length); // need more pool
 			currentPoolIndex ++;
 			currentPool = chainlotPools[currentPoolIndex];
-			SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
+			emit SwitchPool(currentPool.poolBlockNumber(), address(currentPool), currentPoolIndex);
 		}
 	}
 
@@ -212,7 +212,7 @@ contract ChainLot is owned{
   		address poolAddress = old.chainlotPools(i);
   		if(!chainlotPoolsMap[poolAddress]) {
   			addPool(ChainLotPoolInterface(poolAddress));
-  			MigrateFrom(chainlotAddress, poolAddress);
+  			emit MigrateFrom(chainlotAddress, poolAddress);
   		}
   	}
   	currentPool = old.currentPool();

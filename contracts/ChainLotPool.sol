@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./owned.sol";
 import "./Interface.sol";
@@ -87,7 +87,7 @@ contract ChainLotPool is owned{
   	event TransferUnawarded(address from, address to, uint value);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
 
-  	function ChainLotPool(uint _poolBlockNumber,
+  	constructor(uint _poolBlockNumber,
   						uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
 						uint8 _whiteNumberCount, 
@@ -111,7 +111,7 @@ contract ChainLotPool is owned{
 			awardRulesIndex[getRuleKey(awardRulesArray[i],awardRulesArray[i+1])] = awardRules.length;
 		}
 
-    	for(i=0; i<awardRules.length; i++) {
+    	for(uint i=0; i<awardRules.length; i++) {
       		winnerTickets[i].processedIndex = 0;
       		winnerTickets[i].distributedIndex = 0;
     	}
@@ -221,7 +221,7 @@ contract ChainLotPool is owned{
 	    for(uint8 i=0; i<maxWhiteNumberCount; i++) {
 	      require(uint8(numbers[i])>=1 && uint8(numbers[i])<=maxWhiteNumber); 
 	    }     
-	    for(i=maxWhiteNumberCount; i<numbers.length; i++){
+	    for(uint8 i=maxWhiteNumberCount; i<numbers.length; i++){
 	      require(uint8(numbers[i])>=1&&uint8(numbers[i])<=maxYellowNumber);
 	    }
 	    
@@ -229,9 +229,9 @@ contract ChainLotPool is owned{
 	    uint ticketId = chainLot.mint(_from, numbers, ticketCount);
 	    allTicketsId.push(ticketId);
 	    totalTicketCountSum = chainLotTicket.totalTicketCountSum();
-	    entropy = uint(keccak256(entropy, totalTicketCountSum, ticketId, numbers, msg.sender));
+	    entropy = uint(keccak256(abi.encodePacked(entropy, totalTicketCountSum, ticketId, numbers, msg.sender)));
 
-	    BuyTicket(poolBlockNumber, numbers, ticketCount, ticketId, _from, block.number, totalTicketCountSum, _value);
+	    emit BuyTicket(poolBlockNumber, numbers, ticketCount, ticketId, _from, block.number, totalTicketCountSum, _value);
 	    return ticketId;
 	}
 
@@ -346,11 +346,11 @@ contract ChainLotPool is owned{
 
 	function genRandomNumbers(uint blockNumber, uint shift) public returns(bytes _numbers){
 		require(blockNumber < block.number);
-		uint hash = uint(block.blockhash(blockNumber));
+		uint hash = uint(blockhash(blockNumber));
 		uint addressInt = uint(msg.sender);
 		uint256 random = addressInt * hash;
-		random = uint256(keccak256(block.timestamp, block.difficulty, hash, addressInt, entropy));
-		GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
+		random = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, hash, addressInt, entropy)));
+		emit GenRandomNumbers(random, blockNumber, hash, addressInt, shift, block.timestamp, block.difficulty);
 		
 		require(random != 0);
 		random = random >> shift;
@@ -360,7 +360,7 @@ contract ChainLotPool is owned{
 			random = random >> 8;
 
 		}
-		for(i=maxWhiteNumberCount;i<numbers.length;i++) {
+		for(uint8 i=maxWhiteNumberCount;i<numbers.length;i++) {
 			numbers[i] = byte(random%maxYellowNumber + 1);
 			random = random >> 8;
 
