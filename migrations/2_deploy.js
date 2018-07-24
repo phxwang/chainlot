@@ -11,7 +11,7 @@ module.exports = async function(deployer, network) {
 	if(network == "develop") {
 		console.log("develop");
 		await Promise.all([
-			deployer.deploy(ChainLot, 2, 2, 2, 1, 1e10, 10, [0,1,1e10, 2,1,2e16]),
+			deployer.deploy(ChainLot, 2, 2, 3, 0, 1e10, 10, [1,0,1e10, 40, 3,0,2e16, 48]),
 			/*deployer.deploy(ChainLot, 70, 25, 5, 1, 1e6, 10000, [0,1,1e16,
 				1,1,2e6,
 				2,1,5e6,
@@ -38,7 +38,6 @@ module.exports = async function(deployer, network) {
 			poolnum = 5;
 		}
 		else {
-
 			web3.personal.unlockAccount("0xd3db3028e92d98ce48e5e21256696d2e5ae04d9e", "DdfMb6chaGwjchGkp", 0);
 			drawInterval = 50000;
 			poolnum = 1;
@@ -46,7 +45,7 @@ module.exports = async function(deployer, network) {
 	
 		await Promise.all([
 			deployer.deploy(ChainLotPublic),
-			deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, 
+			/*deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, 
 				[0,1,1e16,
 				1,1,2e16,
 				2,1,5e16,
@@ -56,6 +55,13 @@ module.exports = async function(deployer, network) {
 				4,1,5e19,
 				5,0,5e21,
 				5,1,1e64
+				]),*/
+			deployer.deploy(ChainLot, 100, 0, 5, 0, 1e16, drawInterval, 
+				[1,0,5e16,20,
+				 2,0,5e17,10,
+				 3,0,1e19,10,
+				 4,0,1e23,10,
+				 5,0,1e64,48,
 				]),
 			deployer.deploy(ChainLotTicket),
 			deployer.deploy(ChainLotCoin, 1e12),

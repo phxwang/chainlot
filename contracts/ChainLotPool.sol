@@ -48,6 +48,7 @@ contract ChainLotPool is Ownable{
 		uint whiteNumberCount;
 		uint yellowNumberCount;
 		uint awardEther;
+		uint maxSplit;
 	}
 
 	struct awardData {
@@ -103,11 +104,11 @@ contract ChainLotPool is Ownable{
 		totalNumberCount = maxWhiteNumberCount + maxYellowNumberCount;
 		
 
-		for(uint i=0; i<awardRulesArray.length; i+=3) {
+		for(uint i=0; i<awardRulesArray.length; i+=4) {
 			require(i+3 <= awardRulesArray.length);
 			require(awardRulesArray[i]>=0 && awardRulesArray[i]<=maxWhiteNumberCount);
 			require(awardRulesArray[i+1]>=0 && awardRulesArray[i+1]<=maxYellowNumberCount);
-			awardRules.push(awardRule(awardRulesArray[i],awardRulesArray[i+1],awardRulesArray[i+2]));
+			awardRules.push(awardRule(awardRulesArray[i],awardRulesArray[i+1],awardRulesArray[i+2], awardRulesArray[i+3]));
 			awardRulesIndex[getRuleKey(awardRulesArray[i],awardRulesArray[i+1])] = awardRules.length;
 		}
 
@@ -242,6 +243,10 @@ contract ChainLotPool is Ownable{
 
 	function getAwardRulesLength() onlyDrawingTool external view returns(uint length) {
 		return awardRules.length;
+	}
+
+	function getMaxRuleSplit(uint ruleId) onlyDrawingTool external view returns(uint split) {
+		return awardRules[ruleId].maxSplit;
 	}
 
 	function pushWinnerTicket(uint ruleId, uint ticketId) onlyDrawingTool external {

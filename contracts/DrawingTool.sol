@@ -17,7 +17,7 @@ contract DrawingTool is Ownable{
   	event TransferAward(address winner, uint value);
   	event TransferDevCut(address dev, uint value);
   	event CalculateAwards(uint8 ruleId, uint winnersTicketCount, uint awardEther, uint totalWinnersAward, uint totalTicketCount);
-  	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
+  	event SplitAward(uint8 ruleId, uint totalRuleAward, uint maxRuleAward, uint leftBalance);
   	event CutAward(uint devCut, uint futureCut);
   	event TransferUnawarded(address from, address to, uint value);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
@@ -127,6 +127,10 @@ contract DrawingTool is Ownable{
 	}
 
 
+	/**
+	* calculateAwards
+	* calculate the total award of each rule pool
+	**/
   	function calculateAwards(address poolAddress, uint8 ruleId, uint8 toCalcCount) onlyOwner external {
   		ChainLotPool pool = ChainLotPool(poolAddress);
 	  	require(pool.stage() == ChainLotPool.DrawingStage.MATCHED);
@@ -170,6 +174,10 @@ contract DrawingTool is Ownable{
      	emit CalculateAwards(ruleId, endIndex, awardEther, totalWinnersAward, totalTicketCount); 
   	}
   	
+  	/**
+  	* splitAward
+  	* split award among different rule pool
+  	**/
   	function splitAward(address poolAddress) onlyOwner external {
   		ChainLotPool pool = ChainLotPool(poolAddress);
   		require(pool.stage() == ChainLotPool.DrawingStage.CALCULATED);
@@ -177,18 +185,22 @@ contract DrawingTool is Ownable{
   		uint totalBalance = chainlotCoin.balanceOf(poolAddress);
   		uint futureCut = totalBalance/10;
   		uint devCut = totalBalance/50;
+  		uint rawTotalBalance = totalBalance;
 
   		totalBalance = totalBalance - futureCut - devCut;
 
   		for(uint8 i=0; i<pool.getAwardRulesLength(); i++) {
-  			if(totalBalance >=  pool.getTotalWinnersAward(i)) {
-	          totalBalance -= pool.getTotalWinnersAward(i);
-	        }
-	        else {
-	          pool.setTotalWinnersAward(i, totalBalance);
-	          totalBalance = 0;
-	        }
-	        emit SplitAward(i, pool.getTotalWinnersAward(i), totalBalance);
+  			uint ruleAward = pool.getTotalWinnersAward(i);
+  			if(ruleAward > totalBalance)
+  				ruleAward = totalBalance;
+  			uint maxRuleAward = rawTotalBalance * pool.getMaxRuleSplit(i)/100;
+  			if(ruleAward > maxRuleAward)
+  				ruleAward = maxRuleAward;
+
+  			
+	        totalBalance -= ruleAward;
+	        pool.setTotalWinnersAward(i, ruleAward);
+	        emit SplitAward(i, pool.getTotalWinnersAward(i), maxRuleAward, totalBalance);
   		}
 
   		pool.setDevCut(devCut);
