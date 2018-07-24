@@ -1,10 +1,10 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
-import "./owned.sol";
+import "./Ownable.sol";
 import "./Interface.sol";
 import "./ChainLotPool.sol";
 
-contract DrawingTool is owned{
+contract DrawingTool is Ownable{
 
 	ChainLotTicketInterface public chainLotTicket;
   	ChainLotCoinInterface public chainlotCoin;
@@ -290,8 +290,7 @@ contract DrawingTool is owned{
 		uint addressInt = uint(msg.sender);
 		uint random = 0;
 		for(uint8 i=0; i<6; i++) {
-			random = uint(keccak256(abi.encodePacked(entropy, block.number, 
-				block.timestamp, block.difficulty, hash, addressInt)));
+			random = uint(keccak256(abi.encodePacked(entropy, hash, addressInt)));
 			uint nextBlockNumber = random - (random/blockNumber)*blockNumber;
 			hash = uint(blockhash(nextBlockNumber));
 		}

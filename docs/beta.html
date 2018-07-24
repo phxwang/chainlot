@@ -3,7 +3,7 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="author" content="">
-    <title> CryptoLotto6 | Decentralized Lottery on Ethereum</title>
+    <title> Puzzle3D | Decentralized Puzzle on Ethereum</title>
     <meta http-equiv="refresh" content="30">
     <style type="text/css">
 html,
@@ -4438,8 +4438,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             <div class="align-center header-inner">
                 <div class="container clearfix">
                     <div class="logo">
-                        <a href="https://www.cryptoLotto6.org/beta.html">
-                            <h1>Crypto Lotto 6 (Beta)</h1>
+                        <a href="https://www.puzzle3d.me/beta.html">
+                            <h1>Puzzle3D</h1>
                         </a>
                     </div>
                     <div id="nav-icon">
@@ -4448,11 +4448,11 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     </div>
                     <div class="navigation">
                         <ul>
-                            <li><a href="" target="_blank" id="token_link">CLT Holders </a>
+                            <li><a href="" target="_blank" id="token_link">PZT Holders </a>
                             </li>
-                            <li><a href="" target="_blank" id="my_token_link">My CLT</a>
+                            <li><a href="" target="_blank" id="my_token_link">My PZT</a>
                             </li>
-                            <li><a href="" target="_blank" id="my_coin_link">My CLC</a>
+                            <li><a href="" target="_blank" id="my_coin_link">My PZT</a>
                             </li>
                         </ul>
                     </div>
@@ -4462,10 +4462,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         <div class="middle-content">
             <div class="container">
                 <div class="message">
-                  CryptoLotto6.org is an Ethereum based lottery. Everyone can purchase tickets with ETH and get CLT (CryptoLottoToken) through purchasement. 
-                  One new jackpot pool will be initialized in every 50000 block. 10% of the pool will go to CLT. 
-                  The Jackpot number of every pool will be calculated based on all the tickets number in the pool, the hash of the drawing block and the timestamp of the drawing block. 
-                  All the prize will be returned as CryptoLottoCoin(CLC).
+                  Puzzle3D is an Ethereum based Distributed Puzzle Game. The final result of one round is based on all the number input by users in the round. Everyone can try to input one number along with 0.01ETH to predict the final result. The winner of one game round can take as much as 48% of the whole pot of the round.
                   <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
                 </div>
                 <div class="cta-group" id="cta-group">
@@ -4476,18 +4473,18 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <input type="text" id="number3" name="number3" class="cta" length=2/></input>
                     <input type="text" id="number4" name="number4" class="cta" length=2/></input>
                     <input type="text" id="number5" name="number5" class="cta" length=2/></input>
-                    <h4 id="">Enter ticket count to purchase (0.01ETH/ticket).</h4>
+                    <h4 id="">Enter predict times (0.01ETH/time).</h4>
                     <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
-                    <button onclick="javascript:buyTicket(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Purchase Tickets </button>
-                    <button onclick="javascript:buyTicket(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Purchase Random Tickets </button>
-                    <h4>Send this link to friends to get free tickets: <span id="invite_link"></span></h4>
+                    <button onclick="javascript:predict(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Predict </button>
+                    <button onclick="javascript:predict(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Random Predict </button>
+                    <h4>Send this link to friends to earn invatation reward: <span id="invite_link"></span></h4>
                     <h4 id="transaction_message"></h4>
                 </div>
                 <div class="banner-title hidden-xs">
-                    <h2 id="message1">Current Jackpot Pool: <span id="pooltokens"></span> ETH</h2><h2>Total Jackpot Pool: <span id="allpooltokens"></span> ETH</h2>
-                    <h2 id="message1">Next Drawing Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
-                    <h3>Buy one ticket, get <span id="reedem_price"></span> CLT. CLT sell price: <span id="token_price"></span> ETH</h3>
-                    <h3>Circulation CLT: <span id="circulation_token"></span>, EarlyBird CLT Left: <span id="earlybird_amount"></span>, Total CLT: <span id="total_token"></span></h3>
+                    <h2 id="message1">Current Pot: <span id="pooltokens"></span> ETH</h2><h2>Total Pot: <span id="allpooltokens"></span> ETH</h2>
+                    <h2 id="message1">Next Ending Block: <span id="poolblocknumber"></span>, Current Block: <span id="currentblocknumber"></span></h2>
+                    <h3>Predict one time, get <span id="reedem_price"></span> PZT. PZT sell price: <span id="token_price"></span> ETH</h3>
+                    <h3>Circulation PZT: <span id="circulation_token"></span>, EarlyBird PZT Left: <span id="earlybird_amount"></span>, Total PZT: <span id="total_token"></span></h3>
                     <h3>
                 </div>
             </div>
@@ -4502,18 +4499,16 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         </div>
         <div class="container">
             <div id="purchase_list" class="resource-blocks">
-            <h2> Purchase List</h2>
+            <h2> Predict List</h2>
             </div>
             <a href="" target="_blank" id="purchase_list_link"><h4>Click to see all purchase list</h4></a>
         </div>
         <div class="container">
             <div id="my_purchase_list" class="resource-blocks">
-            <h2> My Tickets</h2>
+            <h2> My Predicts</h2>
             </div>
-            <div><h4>All the tickets are stored in ERC 721 based smart contract and can be exchanged. 
-              <a id="ticket_link" href="" target="_blank">Click to view</a></h4></div>
         </div>
-        <div class="container">
+        <!--<div class="container">
           <div class="resource-blocks">
           <h2>Prize List</h2>
           <li>5+1 Jackpot </li>
@@ -4526,7 +4521,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 <li>1+1 0.02 ETH</li>
                 <li>0+1 0.01 ETH</li>
           </div>
-        </div>
+        </div>-->
     </div>
     </div>
 </div>
@@ -4534,7 +4529,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
 <script>
 
-  function buyTicket(isRandom) {
+  function predict(isRandom) {
 
     hash = window.location.hash.substring(1);
     console.log("hash: " + hash + ", length" + hash.length); 

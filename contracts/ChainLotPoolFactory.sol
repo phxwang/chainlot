@@ -4,7 +4,7 @@ pragma experimental "v0.5.0";
 import "./ChainLotPool.sol";
 
 
-contract ChainLotPoolFactory is owned {
+contract ChainLotPoolFactory is Ownable {
   	uint public poolCount;
 
   	event GenerateNewPool(uint latestPoolBlockNumber, uint nextPoolBlockNumber, uint length);

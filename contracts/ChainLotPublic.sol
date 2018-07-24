@@ -1,9 +1,9 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./Interface.sol";
-import "./owned.sol";
+import "./Ownable.sol";
 
-contract ChainLotPublic is owned {
+contract ChainLotPublic is Ownable {
 	ChainLotInterface public chainlot;
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event TransferHistoryCut(address user, uint value);

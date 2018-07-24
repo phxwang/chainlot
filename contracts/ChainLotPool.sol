@@ -1,13 +1,13 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
-import "./owned.sol";
+import "./Ownable.sol";
 import "./Interface.sol";
 
 /*
 Pool Smart Contract
 used to store all the tickets bought in this pool and all the intermedia status duiring drawing process
 */
-contract ChainLotPool is owned{
+contract ChainLotPool is Ownable{
 	uint public poolBlockNumber;
 
 	uint8 public maxWhiteNumber; //70;

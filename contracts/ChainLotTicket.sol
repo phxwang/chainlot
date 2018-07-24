@@ -2,14 +2,14 @@ pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
 import "./ERC721.sol";
-import "./owned.sol";
+import "./Ownable.sol";
 import "./ChainLotCoin.sol";
 
-contract ChainLotTicket is owned, ERC721{
+contract ChainLotTicket is Ownable, ERC721{
   /*** CONSTANTS ***/
 
-  string public constant name = "CrytoLottoTicket";
-  string public constant symbol = "CLTK";
+  string public constant name = "Puzzle3DTicket";
+  string public constant symbol = "PZTK";
 
   bytes4 public constant InterfaceID_ERC165 =
     bytes4(keccak256('supportsInterface(bytes4)'));

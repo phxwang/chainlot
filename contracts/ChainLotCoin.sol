@@ -1,13 +1,13 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
-import "./owned.sol";
+import "./Ownable.sol";
 import "./TokenERC20.sol";
 
 contract ChainLotCoin is TokenERC20 {
 
-    string public constant name = "CryptoLottoCoin";
-    string public constant symbol = "CLC";
+    string public constant name = "Puzzle3DCoin";
+    string public constant symbol = "PZC";
 
 
     /* Initializes contract with initial supply tokens to the creator of the contract */

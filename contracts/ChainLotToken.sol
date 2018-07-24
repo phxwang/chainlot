@@ -1,14 +1,14 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 
-import "./owned.sol";
+import "./Ownable.sol";
 import "./TokenERC20.sol";
 
 
-contract ChainLotToken is owned, TokenERC20 {
+contract ChainLotToken is Ownable, TokenERC20 {
 
-    string public constant name = "CryptoLottoToken";
-    string public constant symbol = "CLT";
+    string public constant name = "Puzzle3DToken";
+    string public constant symbol = "PZT";
 
     mapping (address => bool) public frozenAccount;
     mapping (address => bool) public minters;

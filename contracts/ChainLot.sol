@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 pragma experimental "v0.5.0";
 import "./Interface.sol";
-import "./owned.sol";
+import "./Ownable.sol";
 
 /*
 award rules:
@@ -15,7 +15,7 @@ award rules:
   * 1+1 0.02 ETH
   * 0+1 0.01 ETH
 */
-contract ChainLot is owned{
+contract ChainLot is Ownable{
 	uint8 public maxWhiteNumber; //70;
 	uint8 public maxYellowNumber; //25;
 	uint public etherPerTicket; //10**18/100;
