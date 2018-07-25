@@ -39,6 +39,7 @@ contract ChainLot is Ownable{
   	ChainLotTokenInterface public chainlotToken;
   	ChainLotPoolFactoryInterface public clpFactory;
   	ChainLotPoolInterface public currentPool;
+  	AffiliateStorageInterface public affiliate;
   	
 	event BuyTicket(uint poolBlockNumber, bytes numbers, uint ticketCount, uint ticketId, address user, uint blockNumber, uint totalTicketCountSum, uint value);
 	event PrepareAward(bytes jackpotNumbers, uint poolBlockNumber, uint allTicketsCount);
@@ -56,6 +57,8 @@ contract ChainLot is Ownable{
   	event SwitchPool(uint currentPoolblockNumber, address currentPool, uint currentPoolIndex);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
   	event MigrateFrom(address chainlotAddress, address poolAddress);
+  	event NewCode(address user, uint code, bytes32 result);
+  	event AffiliateTransfer(address affiliate, uint affFee);
   	event LOG(uint msg);
 
 	constructor(uint8 _maxWhiteNumber, 
@@ -78,7 +81,7 @@ contract ChainLot is Ownable{
 	function newPool() public onlyOwner {
 		ChainLotPoolInterface newed = clpFactory.newPool(latestPoolBlockNumber,maxWhiteNumber, maxYellowNumber, maxWhiteNumberCount, maxYellowNumberCount, 
 			awardIntervalNumber, etherPerTicket, awardRulesArray);
-		clpFactory.setPool(newed, chainLotTicket, chainlotCoin, ChainLotInterface(this));
+		clpFactory.setPool(newed, chainLotTicket, chainlotCoin, ChainLotInterface(this), affiliate);
 		latestPoolBlockNumber = newed.poolBlockNumber();
 		if(address(newed) != 0) {
 			addPool(newed);
@@ -111,17 +114,17 @@ contract ChainLot is Ownable{
 	//numbers: uint8[6] 
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
-	function buyTicket(bytes numbers, address referer) payable external {
+	function buyTicket(bytes numbers, bytes affCode) payable external {
 		checkAndSwitchPool();
-		currentPool.buyTicket.value(msg.value)(numbers, referer);
+		currentPool.buyTicket.value(msg.value)(numbers, affCode);
 		coinSum += msg.value * 9/10;
 	}
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(uint8 numberCount, address referer) payable external{
+	function buyRandom(uint8 numberCount, bytes affCode) payable external{
 		checkAndSwitchPool();
-	    currentPool.buyRandom.value(msg.value)(numberCount, referer);
+	    currentPool.buyRandom.value(msg.value)(numberCount, affCode);
 	    coinSum += msg.value * 9/10;
 	}
 
@@ -139,6 +142,14 @@ contract ChainLot is Ownable{
 	    uint _count) 
 	    external onlyPool returns (uint) {
 	    return chainLotTicket.mint(_owner, _numbers, _count);
+  	}
+
+  	function newAffCode() external{
+  		affiliate.newCode(tx.origin);
+  	}
+
+  	function getAffCode() external view returns(bytes32) {
+  		return affiliate.getCode(tx.origin);
   	}
 
   	//TODO: security enhancement
@@ -163,6 +174,10 @@ contract ChainLot is Ownable{
 
   function setChainLotPoolFactoryAddress(address factoryAddress) onlyOwner external {
   	clpFactory = ChainLotPoolFactoryInterface(factoryAddress);
+  }
+
+  function setAffiliateStorageAddress(address affiliateAddress) onlyOwner external {
+  	affiliate = AffiliateStorageInterface(affiliateAddress);
   }
 
   function withDrawDevCut(uint value) onlyOwner external {

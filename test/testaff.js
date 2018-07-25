@@ -1,5 +1,7 @@
 var AffiliateStorage = artifacts.require("./AffiliateStorage.sol");
 
+return;
+
 contract("ChainLot", async (accounts) => {
 	let affstore = await AffiliateStorage.deployed();
 
@@ -36,7 +38,7 @@ contract("ChainLot", async (accounts) => {
 	//console.log(JSON.stringify(r));
 });
 
-bytes32ToStr = async function(str) {
+var bytes32ToStr = async function(str) {
     result = "";
     for(i=2; i<str.length; i+=2) {
       r = parseInt(str.substring(i, i+2), 16);
@@ -47,7 +49,7 @@ bytes32ToStr = async function(str) {
     return result;
 }
 
-strToBytes32 = async function(str) {
+var strToBytes32 = async function(str) {
 	result = "0x";
 	for(i=0; i<str.length; i++) {
 		//console.log(str.charAt(i) + ", " +str.charCodeAt(i).toString(16));

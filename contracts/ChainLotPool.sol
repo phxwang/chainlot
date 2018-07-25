@@ -38,6 +38,7 @@ contract ChainLotPool is Ownable{
   	ChainLotCoinInterface public chainlotCoin;
   	ChainLotInterface public  chainLot;
   	address public drawingToolAddress;
+  	AffiliateStorageInterface public affliate;
   
   	awardData[] public toBeAward;
   	uint public awardIndex;
@@ -87,7 +88,9 @@ contract ChainLotPool is Ownable{
   	event SplitAward(uint8 ruleId, uint totalWinnersAward, uint leftBalance);
   	event TransferUnawarded(address from, address to, uint value);
   	event GenRandomNumbers(uint random, uint blockNumber, uint hash, uint addressInt, uint shift, uint timestamp, uint difficulty);
-
+	event NewCode(address user, uint code, bytes32 result);
+	event AffiliateTransfer(address affiliate, uint affFee);
+  	
   	constructor(uint _poolBlockNumber,
   						uint8 _maxWhiteNumber, 
 						uint8 _maxYellowNumber, 
@@ -123,10 +126,11 @@ contract ChainLotPool is Ownable{
 
   	function setPool(ChainLotTicketInterface _chainLotTicket,
 						ChainLotCoinInterface _chainlotCoin,
-						ChainLotInterface _chainLot) public {
+						ChainLotInterface _chainLot, AffiliateStorageInterface _affliate) public {
   		chainLotTicket = _chainLotTicket;
 		chainlotCoin = _chainlotCoin;
 		chainLot = _chainLot;
+		affliate = _affliate;
 		owner = tx.origin;
   	}
 
@@ -146,23 +150,20 @@ contract ChainLotPool is Ownable{
 	//numbers: uint8[6] 
 	//			1-5: <=maxWhiteNumber
 	//			6: <=maxYellowNumber
-	function buyTicket(bytes numbers, address referer) payable public{
-		uint ticketCount = beforeBuy(tx.origin);
+	function buyTicket(bytes numbers, bytes affCode) payable public{
+		uint ticketCount = beforeBuy(tx.origin, affCode);
 
 	    _buyTicket(tx.origin, numbers, ticketCount, msg.value);
-	    if(referer != 0 && tx.origin != referer) {
-	    	_buyTicket(referer, numbers, ticketCount, msg.value);	
-	    }
 	}
 
 	event LOG(uint msg);
 
 	//random numbers
 	//random seed: number-1 block hash x user address
-	function buyRandom(uint8 numberCount, address referer) payable public{
+	function buyRandom(uint8 numberCount, bytes affCode) payable public{
 		require(numberCount > 0);
 
-		uint ticketCount = beforeBuy(tx.origin);
+		uint ticketCount = beforeBuy(tx.origin, affCode);
 
 		if(numberCount > ticketCount) numberCount = uint8(ticketCount);
 		uint ticketPerNumber = ticketCount / numberCount;
@@ -175,13 +176,10 @@ contract ChainLotPool is Ownable{
 				buyCount = ticketCount - ticketPerNumber * (numberCount - 1);
 
 			_buyTicket(tx.origin, numbers, buyCount, msg.value);
-			if(referer != 0 && tx.origin != referer) {
-	    		_buyTicket(referer, numbers, buyCount, msg.value);	
-	    }
 		}
 	}
 
-	function beforeBuy(address _from) internal returns(uint ticketCount) {
+	function beforeBuy(address _from, bytes affCode) internal returns(uint ticketCount) {
 		require(stage == DrawingStage.INITIED);
 		require(block.number < poolBlockNumber);
 		require(address(chainlotCoin) != 0);
@@ -195,6 +193,16 @@ contract ChainLotPool is Ownable{
 
 	    chainlotCoin.buy.value(coinToBuy)();
 	    chainLot.reedemToken.value(tokenToBuy)(_from);
+
+	    //10% of pool goes to affliate
+	    address aff = affliate.getUser(affCode);
+	    if(aff != address(0) && aff != _from) {
+	    	uint affFee = msg.value/10;
+	    	coinToBuy -= affFee;
+	    	chainlotCoin.transfer(aff, affFee);
+	    	emit AffiliateTransfer(aff, affFee);
+	    }
+
 	    coinSum += coinToBuy;
 	}
 

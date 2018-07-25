@@ -35,8 +35,9 @@ contract ChainLotPoolFactory is Ownable {
 
   function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						ChainLotCoinInterface _chainlotCoin,
-						ChainLotInterface _chainLot) onlyOwner external {
-  	ChainLotPool(pool).setPool(_chainLotTicket, _chainlotCoin, _chainLot);
+						ChainLotInterface _chainLot, 
+						AffiliateStorageInterface _affliate) onlyOwner external {
+  	ChainLotPool(pool).setPool(_chainLotTicket, _chainlotCoin, _chainLot, _affliate);
 
   }
 }

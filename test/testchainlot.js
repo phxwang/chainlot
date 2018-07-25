@@ -6,6 +6,7 @@ var ChainLotPoolFactory = artifacts.require("./ChainLotPoolFactory.sol");
 var ChainLotPool = artifacts.require("./ChainLotPool.sol");
 var ChainLotPublic = artifacts.require("./ChainLotPublic.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
+var AffiliateStorage = artifacts.require("./AffiliateStorage.sol");
 
 //a = [70, 25, 5, 1, 1e16, 10000, [5,1,1e64,5,0,5e21,4,1,5e19,4,0,2.5e18,3,1,1e18,3,0,5e16,2,1,5e16,1,1,2e16,0,1,1e16]];
 //console.log(a);
@@ -21,6 +22,7 @@ contract("ChainLot", async (accounts) => {
 	let chainlottoken = await ChainLotToken.deployed();
 	let chainlotpublic = await ChainLotPublic.deployed();
 	let drawingtool = await DrawingTool.deployed();
+	let affiliate = await AffiliateStorage.deployed();
 
 	let ad = await chainlotpublic.owner();
 	console.log(ad);
@@ -29,15 +31,22 @@ contract("ChainLot", async (accounts) => {
 	await chainlot.setChainLotCoinAddress(chainlotcoin.address);
 	await chainlot.setChainLotTokenAddress(chainlottoken.address);
 	await chainlot.setChainLotPoolFactoryAddress(factory.address);
+	await chainlot.setAffiliateStorageAddress(affiliate.address);
 	await chainlotticket.setMinter(chainlot.address, true);
 	await chainlottoken.setMinter(chainlot.address, true);
 	await factory.transferOwnership(chainlot.address);
 	await drawingtool.init(chainlotticket.address, chainlotcoin.address);
 
+
 	for(i=0; i<5; i++) {
 		console.log("new pool progress: " + i);
 		let r = await chainlot.newPool();
 		//console.log(JSON.stringify(r.logs))
+	}
+
+	for(i=0; i<10; i++) {
+		let r = await chainlotpublic.newAffCode({from:web3.eth.accounts[i]});
+		//console.log(JSON.stringify(r.logs));
 	}
 
 	//r = await chainlotpublic.getWinnerList(0, 10);
@@ -58,16 +67,20 @@ contract("ChainLot", async (accounts) => {
 
 	r = await chainlotpublic.sendTransaction({from:web3.eth.accounts[5], value:2e11});
 	//r = await chainlotpublic.buyRandom(13, web3.eth.accounts[2],{from:web3.eth.accounts[1], value:5e11});
-	console.log(JSON.stringify(r.logs));
+	//console.log(JSON.stringify(r.logs));
 
 	await showAccountToken(chainlottoken);
 	await showPoolCoin(chainlot, chainlotcoin);
 
-	for(i=0; i<20; i++) {
+	for(var i=0; i<20; i++) {
 		let id = Math.floor(Math.random()*10);
-		console.log("from account: " + id);
-		r = await chainlotpublic.buyRandom(13, web3.eth.accounts[(id+1)%10],{from:web3.eth.accounts[id], value:5e12});
+		code = await chainlotpublic.getAffCode({from:web3.eth.accounts[(id+1)%10]});
+		str = await bytes32ToStr(code);
+		code = await strToBytes32(str);
+		console.log("from account: " + id + ", aff code: " + str);
+		r = await chainlotpublic.buyRandom(13, code, {from:web3.eth.accounts[id], value:5e12});
 		console.log(JSON.stringify(r.receipt.gasUsed));	
+		//console.log(JSON.stringify(r.logs));
 
 		let price = await chainlottoken.getPrice();
 		console.log("price of clt: " + web3.fromWei(price, "ether"));
@@ -76,9 +89,11 @@ contract("ChainLot", async (accounts) => {
 		console.log("reedemPrice of clt: " + web3.fromWei(reedemPrice, "ether"));
 	}
 
+	await showAccountCoin(chainlotcoin);
+
 	//return;
 
-	for(pi=1; pi<2; pi++) {
+	for(var pi=1; pi<2; pi++) {
 		totalGas = 0;
 		let pooladdress = await chainlot.chainlotPools(pi);
 		console.log(pi + ": " + pooladdress);
@@ -94,7 +109,7 @@ contract("ChainLot", async (accounts) => {
 
 		await showStage(pool);
 		
-		for(i=0; i<50; i++) {
+		for(var i=0; i<50; i++) {
 			console.log("match awards, progress: " + i*25);
 			r = await drawingtool.matchAwards(pooladdress, 25);
 			//console.log(JSON.stringify(r.logs));
@@ -106,7 +121,7 @@ contract("ChainLot", async (accounts) => {
 
 		
 		
-		for(i =0 ; i<2 ; i++) {
+		for(var i =0 ; i<2 ; i++) {
 			console.log("calculate awards, rule id " + i);
 			r = await drawingtool.calculateAwards(pooladdress, i, 100)
 			//console.log(JSON.stringify(r.logs));
@@ -124,7 +139,7 @@ contract("ChainLot", async (accounts) => {
 		await showStage(pool);
 
 
-		for(i =0 ; i<2 ; i++) {
+		for(var i =0 ; i<2 ; i++) {
 			console.log("distribute awards, rule id " + i);
 			r = await drawingtool.distributeAwards(pooladdress, i, 100);
 			//console.log(JSON.stringify(r.logs));
@@ -136,7 +151,7 @@ contract("ChainLot", async (accounts) => {
 
 		await showPoolCoin(chainlot, chainlotcoin);
 
-		for(i=0; i<2; i++) {
+		for(var i=0; i<2; i++) {
 			console.log("send awards: " + i*5);
 			r = await drawingtool.sendAwards(pooladdress, 100)
 			//console.log(JSON.stringify(r.logs));
@@ -219,6 +234,28 @@ var showStage = async function(pool) {
 	let stage = await pool.stage();
 	console.log("stage: " + stage);
 	return stage;
+}
+
+var bytes32ToStr = async function(str) {
+    result = "";
+    for(i=2; i<str.length; i+=2) {
+      r = parseInt(str.substring(i, i+2), 16);
+      //console.log(r);
+      if(r == 0) break;
+      result += String.fromCharCode(r);
+    }
+    return result;
+}
+
+var strToBytes32 = async function(str) {
+	result = "0x";
+	for(i=0; i<str.length; i++) {
+		//console.log(str.charAt(i) + ", " +str.charCodeAt(i).toString(16));
+		var b = str.charCodeAt(i).toString(16);
+		if(b.length == 0) b = "0" + b;
+		result += b;
+	}
+	return result;
 }
 
 

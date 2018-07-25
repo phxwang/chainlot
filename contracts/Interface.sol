@@ -6,14 +6,16 @@ interface ChainLotInterface {
 	    bytes _numbers,
 	    uint _count) external returns (uint);
 	function reedemToken(address _owner) payable external;
-	function buyTicket(bytes numbers, address referer) payable external;
-	function buyRandom(uint8 numberCount, address referer) payable external;
+	function buyTicket(bytes numbers, bytes affCode) payable external;
+	function buyRandom(uint8 numberCount, bytes affCode) payable external;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function retrievePoolInfo() external view returns (uint poolTokens, uint poolBlockNumber, uint totalPoolTokens, uint poolCount);
 	function getWinnerList(uint poolStart, uint _poolEnd) external view returns (address[512] winners, uint[512] values, uint[512] blocks, uint count);
 	function chainlotCoin() external view returns(address);
 	function chainlotToken() external view returns(address);
 	function chainLotTicket() external view returns(address);
+	function newAffCode() external;
+	function getAffCode() external view returns(bytes32);
 }
 
 interface ChainLotCoinInterface {
@@ -40,8 +42,8 @@ interface ChainLotTicketInterface {
 interface ChainLotPoolInterface {
 	function poolBlockNumber() external view returns(uint blockNumber);
 	function coinSum() external view returns(uint coinSum);
-	function buyTicket(bytes numbers, address referer) payable external;
-	function buyRandom(uint8 numberCount, address referer) payable external;
+	function buyTicket(bytes numbers, bytes affCode) payable external;
+	function buyRandom(uint8 numberCount, bytes affCode) payable external;
 	function receiveApproval(address _from, uint _value, address _token, bytes _extraData) external;
 	function awardIndex() external view returns(uint index);
 	function toBeAward(uint index) external view returns(address winner, uint value);
@@ -59,8 +61,14 @@ interface ChainLotPoolFactoryInterface {
 
 	function setPool(address pool, ChainLotTicketInterface _chainLotTicket,
 						ChainLotCoinInterface _chainlotCoin,
-						ChainLotInterface _chainLot)  external; 
+						ChainLotInterface _chainLot, AffiliateStorageInterface _affliate)  external; 
 
+}
+
+interface AffiliateStorageInterface{
+	function newCode(address user) external returns(bytes32);
+	function getUser(bytes code) external view returns(address);
+	function getCode(address user) external view returns(bytes32);
 }
 
 

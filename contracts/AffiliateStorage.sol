@@ -4,18 +4,6 @@ import "./Interface.sol";
 import "./Ownable.sol";
 import "./SafeMath.sol";
 
-/*
-award rules:
-  * 5+1 jackpot
-  * 5+0 5000 ETH
-  * 4+1 50 ETH
-  * 4+0 2.5 ETH
-  * 3+1 1 ETH
-  * 3+0 0.05 ETH
-  * 2+1 0.05 ETH
-  * 1+1 0.02 ETH
-  * 0+1 0.01 ETH
-*/
 contract AffiliateStorage is Ownable{
 	using SafeMath for uint;
 
@@ -26,7 +14,7 @@ contract AffiliateStorage is Ownable{
 
 	event NewCode(address user, uint code, bytes32 result);
 
-	function charAt(uint i) public view returns(uint) {
+	function charAt(uint i) public pure returns(uint) {
 		return uint(baseString[i]);
 	}
 
