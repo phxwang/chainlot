@@ -4472,12 +4472,13 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <input type="text" id="number2" name="number2" class="cta" length=2/></input>
                     <input type="text" id="number3" name="number3" class="cta" length=2/></input>
                     <input type="text" id="number4" name="number4" class="cta" length=2/></input>
-                    <input type="text" id="number5" name="number5" class="cta" length=2/></input>
                     <h4 id="">Enter predict times (0.01ETH/time).</h4>
                     <input type="text" id="count" name="count" class="cta" style="width:200px;margin-bottom: 10px" /></input><br>
+                    <h4>Enter Affiliate Code</h4>
+                    <input type="text" id="affCode" name="affCode" class="cta" style="width:200px;margin-bottom: 10px"/></input><br>
                     <button onclick="javascript:predict(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Predict </button>
                     <button onclick="javascript:predict(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Random Predict </button>
-                    <h4>Send this link to friends to earn invatation reward: <span id="invite_link"></span></h4>
+                    <h4 id="affiliate_message">Send this link to friends to earn invitation reward: <span id="invite_link"></span></h4>
                     <h4 id="transaction_message"></h4>
                 </div>
                 <div class="banner-title hidden-xs">
@@ -4508,20 +4509,17 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             <h2> My Predicts</h2>
             </div>
         </div>
-        <!--<div class="container">
+        <div class="container">
           <div class="resource-blocks">
-          <h2>Prize List</h2>
-          <li>5+1 Jackpot </li>
-                <li>5+0 5000 ETH</li>
-                <li>4+1 50 ETH</li>
-                <li>4+0 2.5 ETH</li>
-                <li>3+1 1 ETH</li>
-                <li>3+0 0.05 ETH</li>
-                <li>2+1 0.05 ETH</li>
-                <li>1+1 0.02 ETH</li>
-                <li>0+1 0.01 ETH</li>
+          <h2>Pot Split Rule</h2>
+          <h3>(all the user with the same hit number share one split)</h3>
+          <li>Hit 5 48% </li>
+          <li>Hit 4 5%</li>
+          <li>Hit 3 5%</li>
+          <li>Hit 2 10%</li>
+          <li>Hit 1 10%</li>
           </div>
-        </div>-->
+        </div>
     </div>
     </div>
 </div>
@@ -4531,12 +4529,12 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
   function predict(isRandom) {
 
-    hash = window.location.hash.substring(1);
+    var hash = document.getElementById("affCode").value;
     console.log("hash: " + hash + ", length" + hash.length); 
-    referer = "0x0";
-    if(hash.length == 42) referer = hash;
+    affCode = "0x0";
+    if(hash.length>=5 && hash.length <=6) affCode = strToBytes32(hash);
 
-    console.log("referer: " + referer);
+    console.log("affCode: " + affCode);
 
     count = document.getElementById("count").value;
     if(count <= 0) {
@@ -4549,7 +4547,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         numberCount = count;
       else
         numberCount = 10;
-      clp.buyRandom(numberCount, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
+      clp.buyRandom(numberCount, affCode, {value:count*1e16, gasPrice: 1e9}, function(err,r){
         if(!err) {
           console.log(r);
           var span = document.getElementById('transaction_message');
@@ -4564,9 +4562,9 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
     }
     else {
       toBuyNumber = "0x";
-      for(i=0;i<6;i++) {
+      for(i=0;i<5;i++) {
         n = parseInt(document.getElementById("number"+i).value,10);
-        if((i<5 && (n<=0 || n>70)) || (i==5 && (n<=0 || n>25))) {
+        if(i<5 && (n<=0 || n>100)) {
           alert("wrong number: " + n);
           return;
         }
@@ -4575,7 +4573,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         toBuyNumber += hexNum;
       }
 
-      clp.buyTicket(toBuyNumber, referer, {value:count*1e16, gasPrice: 1e9}, function(err,r){
+      clp.buyTicket(toBuyNumber, affCode, {value:count*1e16, gasPrice: 1e9}, function(err,r){
         if(!err) {
           //console.log(r);
           var span = document.getElementById('transaction_message');
@@ -4604,6 +4602,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   }
 
   function updatePoolStatus() {
+    document.getElementById("affCode").value = window.location.hash.substring(1);
     clp.retrievePoolInfo(function(err, result){
           if(!err) {
             console.log(JSON.stringify(result));
@@ -4618,9 +4617,17 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         document.getElementById("currentblocknumber").innerHTML = result;
     });
 
-    link = window.location.href;
-    if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
-    document.getElementById("invite_link").innerHTML =  link + "#" + web3js.eth.accounts[0];
+    clp.getAffCode(function(err, result) {
+
+      console.log(result);
+      //don't have code
+
+      //code exist
+      link = window.location.href;
+      if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
+      document.getElementById("invite_link").innerHTML =  link + "#" + bytes32ToStr(result);
+    })
+    
 
     document.getElementById("purchase_list_link").href=addressLink+clpAddress;
 
@@ -4725,13 +4732,35 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
   function bytes32ToDec(str) {
     result = [];
-    for(i=2; i<str.length; i+=2) {
+    for(var i=2; i<str.length; i+=2) {
       r = parseInt(str.substring(i, i+2), 16);
       if(r == 0) break;
       result.push(r);
     }
     return result;
   }
+
+  function strToBytes32(str) {
+  result = "0x";
+  for(var i=0; i<str.length; i++) {
+    //console.log(str.charAt(i) + ", " +str.charCodeAt(i).toString(16));
+    var b = str.charCodeAt(i).toString(16);
+    if(b.length == 0) b = "0" + b;
+    result += b;
+  }
+  return result;
+  }
+
+  var bytes32ToStr = async function(str) {
+    result = "";
+    for(i=2; i<str.length; i+=2) {
+      r = parseInt(str.substring(i, i+2), 16);
+      //console.log(r);
+      if(r == 0) break;
+      result += String.fromCharCode(r);
+    }
+    return result;
+}
 
   //config
   var clpAddress;

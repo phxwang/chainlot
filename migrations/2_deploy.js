@@ -69,7 +69,8 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(ChainLotCoin, 1e12),
 			deployer.deploy(ChainLotToken, 1e9, 1e13, 5e7),
 			deployer.deploy(ChainLotPoolFactory),
-			deployer.deploy(DrawingTool)
+			deployer.deploy(DrawingTool),
+			deployer.deploy(AffiliateStorage)
 		]);
 
 		let chainlot = await ChainLot.deployed();
@@ -79,6 +80,7 @@ module.exports = async function(deployer, network) {
 		let chainlottoken = await ChainLotToken.deployed();
 		let chainlotpublic = await ChainLotPublic.deployed();
 		let drawingtool = await DrawingTool.deployed();
+		let affiliate = await AffiliateStorage.deployed();
 
 		console.log("ChainLotPublic: " + chainlotpublic.address);
 
@@ -87,6 +89,7 @@ module.exports = async function(deployer, network) {
 		await chainlot.setChainLotCoinAddress(chainlotcoin.address);
 		await chainlot.setChainLotTokenAddress(chainlottoken.address);
 		await chainlot.setChainLotPoolFactoryAddress(factory.address);
+		await chainlot.setAffiliateStorageAddress(affiliate.address);
 		await chainlotticket.setMinter(chainlot.address, true);
 		await chainlottoken.setMinter(chainlot.address, true);
 		await factory.transferOwnership(chainlot.address);
