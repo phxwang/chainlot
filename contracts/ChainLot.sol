@@ -28,6 +28,7 @@ contract ChainLot is Ownable{
 	uint public latestPoolBlockNumber;
 
 	uint[] public awardRulesArray;
+	
 
 	ChainLotPoolInterface[] public chainlotPools;
 	mapping(address=>bool) public chainlotPoolsMap;

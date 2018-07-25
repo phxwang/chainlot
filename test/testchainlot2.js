@@ -117,7 +117,7 @@ contract("ChainLot", async (accounts) => {
 
 		console.log("split awards");
 		r = await drawingtool.splitAward(pooladdress);
-		//console.log(JSON.stringify(r.logs));
+		console.log(JSON.stringify(r.logs));
 		console.log(JSON.stringify(r.receipt.gasUsed));	
 		totalGas += Number(r.receipt.gasUsed);
 
@@ -179,7 +179,7 @@ contract("ChainLot", async (accounts) => {
 	console.log("total token sum: " + web3.fromWei(results[2], 'ether'));
 
 	results = await chainlotpublic.getWinnerList(0, 10);
-	console.log(JSON.stringify(results));
+	//console.log(JSON.stringify(results));
 })
 
 var showPoolCoin = async function(chainlot, chainlotcoin) {
