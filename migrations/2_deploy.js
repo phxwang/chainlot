@@ -73,7 +73,7 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(AffiliateStorage)
 		]);
 
-		let chainlot = await ChainLot.deployed();
+		/*let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();
 		let factory = await ChainLotPoolFactory.deployed();
 		let chainlotcoin = await ChainLotCoin.deployed();
@@ -99,7 +99,7 @@ module.exports = async function(deployer, network) {
 			console.log("new pool progress: " + i);
 			let r = await chainlot.newPool();
 			console.log(JSON.stringify(r.logs))
-		}
+		}*/
 
 	}
 

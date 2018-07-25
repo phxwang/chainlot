@@ -40,7 +40,9 @@ contract AffiliateStorage is Ownable{
 	}
 
 	function getCode(address user) public view returns(bytes32) {
-		return codeToBytes32(addressToCodeMap[user]);
+		uint code = addressToCodeMap[user];
+		if(code != 0)
+			return codeToBytes32(code);
 	}
 
 	function getUser(bytes code) public view returns(address) {

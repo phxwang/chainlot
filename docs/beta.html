@@ -4466,7 +4466,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                   <h5 id="env_message">（The SmartContract is now deployed on <a target="_blank"  href="https://www.rinkeby.io/">Rinkeby TestNet</a>， <a target="_blank"  href="https://www.rinkeby.io/#faucet">click here</a> to get test coins）</h5>
                 </div>
                 <div class="cta-group" id="cta-group">
-                	<h4 id="">Enter 6 numbers（1-70 for the first 5 numbers, 1-25 for the sixth number）</h4>
+                	<h4 id="">Enter 5 numbers（1-100）to get million prize</h4>
                     <input type="text" id="number0" name="number0" class="cta" length=2/></input>
                     <input type="text" id="number1" name="number1" class="cta" length=2/></input>
                     <input type="text" id="number2" name="number2" class="cta" length=2/></input>
@@ -4479,6 +4479,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                     <button onclick="javascript:predict(false)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;margin-right:5px">Predict </button>
                     <button onclick="javascript:predict(true)" style="font-size: 20px;background-color: #F88A2F;color: white;padding: 10px 30px;">Random Predict </button>
                     <h4 id="affiliate_message">Send this link to friends to earn invitation reward: <span id="invite_link"></span></h4>
+                    <h4 id="new_affiliate" style="display: none"><a href="javascript:newAffCode()">Click to generate your affiliate code</a></h4>
                     <h4 id="transaction_message"></h4>
                 </div>
                 <div class="banner-title hidden-xs">
@@ -4619,13 +4620,20 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
 
     clp.getAffCode(function(err, result) {
 
-      console.log(result);
-      //don't have code
+      var s = bytes32ToStr(result);
+      console.log(s);
 
-      //code exist
-      link = window.location.href;
-      if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
-      document.getElementById("invite_link").innerHTML =  link + "#" + bytes32ToStr(result);
+      if(s.length != 0 && s != "0") {
+        //code exist
+        link = window.location.href;
+        if(link.indexOf("#")>0) link = link.substring(0,link.indexOf("#"));
+        document.getElementById("invite_link").innerHTML =  link + "#" + bytes32ToStr(result);
+      }
+      else {
+        //don't have code
+        document.getElementById("new_affiliate").style.display = "";
+        document.getElementById("affiliate_message").style.display = "none";
+      }
     })
     
 
@@ -4676,6 +4684,13 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
              
   }
 
+  function newAffCode() {
+    clp.newAffCode(function(err, r) {
+      var span = document.getElementById('transaction_message');
+          span.innerHTML = ["Transaction will be validated in about 1 minutes。<a target='_blank' href='",txLink,r,"'>transaction: ",r,"</a><br>"].join("");
+    });
+  }
+
   function updateHistoryTickets() {
     clp.getChainLotTicket(function(err, result){
       if(!err) {
@@ -4683,7 +4698,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
         clticketAddress = result;
         clticket = web3js.eth.contract(clticketAbi).at(clticketAddress);
 
-        document.getElementById("ticket_link").href=addressLink+clticketAddress;
+        //document.getElementById("ticket_link").href=addressLink+clticketAddress;
 
 
         clticket.ticketsOfOwner(web3js.eth.accounts[0], function(err, result) {
@@ -4719,7 +4734,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
                 //console.log(result);
                 //console.log(bytes32ToDec(result[2]));
                 document.getElementById("purchase_list").innerHTML 
-                += ["<li> ", result[3]," bought [", bytes32ToDec(result[0]).join(), "]x", result[1], " at block ", result[2], "</li>"].join("");
+                += ["<li> ", result[3]," predict [", bytes32ToDec(result[0]).join(), "]x", result[1], " at block ", result[2], "</li>"].join("");
               });
             }
           }
@@ -4751,7 +4766,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
   return result;
   }
 
-  var bytes32ToStr = async function(str) {
+  function bytes32ToStr(str) {
     result = "";
     for(i=2; i<str.length; i+=2) {
       r = parseInt(str.substring(i, i+2), 16);
@@ -4791,7 +4806,7 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
             document.getElementById("env_message").style.display="none";
           }
           else if(netId == 4) {
-            clpAddress = "0x3bd64dfcf42cf87decacfb476bdfbb6017b1a51e";
+            clpAddress = "0xae177dd0aba6e43dd0e753564d81b9704b27432c";
             domain = "rinkeby.etherscan.io";
           }
 
@@ -4933,6 +4948,45 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "code",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "result",
+          "type": "bytes32"
+        }
+      ],
+      "name": "NewCode",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "affiliate",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "affFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "AffiliateTransfer",
+      "type": "event"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -4940,8 +4994,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           "type": "bytes"
         },
         {
-          "name": "referer",
-          "type": "address"
+          "name": "affCode",
+          "type": "bytes"
         }
       ],
       "name": "buyTicket",
@@ -4958,8 +5012,8 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
           "type": "uint8"
         },
         {
-          "name": "referer",
-          "type": "address"
+          "name": "affCode",
+          "type": "bytes"
         }
       ],
       "name": "buyRandom",
@@ -5025,6 +5079,29 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [],
+      "name": "newAffCode",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAffCode",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [],
       "name": "retrievePoolInfo",
@@ -5065,15 +5142,15 @@ _:-ms-fullscreen, :root .modal .modal-body .token-check-condition input[type='ch
       "name": "getWinnerList",
       "outputs": [
         {
-          "name": "_winners",
+          "name": "",
           "type": "address[]"
         },
         {
-          "name": "_values",
+          "name": "",
           "type": "uint256[]"
         },
         {
-          "name": "_blocks",
+          "name": "",
           "type": "uint256[]"
         }
       ],
