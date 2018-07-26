@@ -249,11 +249,11 @@ contract ChainLotPool is Ownable{
 		jackpotNumbers = _jackpotNumbers;
 	}
 
-	function getAwardRulesLength() onlyDrawingTool external view returns(uint length) {
+	function getAwardRulesLength() external view returns(uint length) {
 		return awardRules.length;
 	}
 
-	function getMaxRuleSplit(uint ruleId) onlyDrawingTool external view returns(uint split) {
+	function getMaxRuleSplit(uint ruleId)  external view returns(uint split) {
 		return awardRules[ruleId].maxSplit;
 	}
 
@@ -261,7 +261,7 @@ contract ChainLotPool is Ownable{
 		winnerTickets[ruleId].ticketIds.push(ticketId);
 	}
 
-	function getJackpotNumbers() onlyDrawingTool external view returns (bytes32 numbers) {
+	function getJackpotNumbers()  external view returns (bytes32 numbers) {
 		bytes memory mJackpotNumbers = jackpotNumbers;
 		uint bytesLength = 32;
     	if(bytesLength > mJackpotNumbers.length) bytesLength = mJackpotNumbers.length;
@@ -270,15 +270,15 @@ contract ChainLotPool is Ownable{
     	}
 	}
 
-	function getWinnerTicketCount(uint8 ruleId) onlyDrawingTool external view returns(uint count) {
+	function getWinnerTicketCount(uint8 ruleId)  external view returns(uint count) {
 		count = winnerTickets[ruleId].ticketIds.length;
 	}
 
-	function getProcessedIndex(uint8 ruleId) onlyDrawingTool external view returns(uint index) {
+	function getProcessedIndex(uint8 ruleId)  external view returns(uint index) {
 		index = winnerTickets[ruleId].processedIndex;
 	}
 
-	function getAwardEther(uint8 ruleId) onlyDrawingTool external view returns(uint _ether) {
+	function getAwardEther(uint8 ruleId)  external view returns(uint _ether) {
 		_ether = awardRules[ruleId].awardEther;
 	}
 
@@ -302,11 +302,11 @@ contract ChainLotPool is Ownable{
 		lastMatchedTicketIndex = index;
 	}
 
-	function getWinnerTicket(uint8 ruleId, uint j) onlyDrawingTool external view returns(uint id) {
+	function getWinnerTicket(uint8 ruleId, uint j)  external view returns(uint id) {
 		id = winnerTickets[ruleId].ticketIds[j];
 	}
 
-	function getTotalWinnersAward(uint8 ruleId) onlyDrawingTool external view returns(uint award) {
+	function getTotalWinnersAward(uint8 ruleId)  external view returns(uint award) {
 		award = awardResults[ruleId].totalWinnersAward;
 	}
 
@@ -314,7 +314,7 @@ contract ChainLotPool is Ownable{
 		awardResults[ruleId].totalWinnersAward = award;
 	}
 
-	function getDistributedIndex(uint8 ruleId) external onlyDrawingTool view returns(uint index) {
+	function getDistributedIndex(uint8 ruleId) external  view returns(uint index) {
 		index = winnerTickets[ruleId].distributedIndex;
 	}
 
@@ -322,7 +322,7 @@ contract ChainLotPool is Ownable{
 		winnerTickets[ruleId].distributedIndex = index;
 	}
 
-	function getTotalTicketCount(uint8 ruleId) onlyDrawingTool external view returns(uint count) {
+	function getTotalTicketCount(uint8 ruleId)  external view returns(uint count) {
 		count = awardResults[ruleId].totalTicketCount;
 	}
 
@@ -332,7 +332,7 @@ contract ChainLotPool is Ownable{
 	    toBeAward.push(ad);
 	}
 
-	function getToBeAwardLength() onlyDrawingTool external view returns(uint length) {
+	function getToBeAwardLength()  external view returns(uint length) {
 		length = toBeAward.length;
 	}
 
@@ -353,7 +353,7 @@ contract ChainLotPool is Ownable{
 		awardIndex = index;
 	}
 
-	function getEntropy() onlyDrawingTool external view returns (uint _entropy) {
+	function getEntropy()  external view returns (uint _entropy) {
 		_entropy = entropy;
 	}
 

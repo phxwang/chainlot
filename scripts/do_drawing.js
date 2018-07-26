@@ -44,7 +44,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 2:
-							for(i =0 ; i<9 ; i++) {
+							for(i =0 ; i<5 ; i++) {
 								console.log("calculate awards, rule id " + i);
 								r = await drawingtool.calculateAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
@@ -56,7 +56,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 4:
-							for(i =0 ; i<9 ; i++) {
+							for(i =0 ; i<5 ; i++) {
 								console.log("distribute awards, rule id " + i);
 								r = await drawingtool.distributeAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
