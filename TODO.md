@@ -1,7 +1,6 @@
 ## TODO
  * 建一个telegram群 P2
  * 支持一次购买多个奖池的ticket P2
- * 把random number的计算放到pool的合约里面 P2
  * 完善测试用例，正向反向都要测到 P2
  * 网页格式美化 P2
  * 适配移动 P2

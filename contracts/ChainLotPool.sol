@@ -198,9 +198,12 @@ contract ChainLotPool is Ownable{
 	    address aff = affliate.getUser(affCode);
 	    if(aff != address(0) && aff != _from) {
 	    	uint affFee = msg.value/10;
-	    	coinToBuy -= affFee;
+	    	coinToBuy -= affFee*2;
 	    	chainlotCoin.transfer(aff, affFee);
 	    	emit AffiliateTransfer(aff, affFee);
+
+	    	//send back 10% to user
+	    	chainlotCoin.transfer(_from, affFee);
 	    }
 
 	    coinSum += coinToBuy;
