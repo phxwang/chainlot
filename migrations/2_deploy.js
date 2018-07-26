@@ -45,8 +45,8 @@ module.exports = async function(deployer, network) {
 			poolnum = 1;
 		}
 	
-		await Promise.all([
-			deployer.deploy(ChainLotPublic),
+		//await Promise.all([
+			deployer.deploy(ChainLotPublic);
 			/*deployer.deploy(ChainLot, 70, 25, 5, 1, 1e16, drawInterval, 
 				[0,1,1e16,
 				1,1,2e16,
@@ -61,17 +61,17 @@ module.exports = async function(deployer, network) {
 			deployer.deploy(ChainLot, 100, 0, 5, 0, 1e16, drawInterval, 
 				[1,0,2e16,10,
 				 2,0,1e18,10,
-				 3,0,5e19,5,
-				 4,0,5e21,5,
+				 3,0,1e20,10,
+				 4,0,1e22,10,
 				 5,0,1e60,48,
-				]),
-			deployer.deploy(ChainLotTicket),
-			deployer.deploy(ChainLotCoin, 1e12),
-			deployer.deploy(ChainLotToken, 1e9, 1e13, 5e7),
-			deployer.deploy(ChainLotPoolFactory),
-			deployer.deploy(DrawingTool),
-			deployer.deploy(AffiliateStorage)
-		]);
+				]);
+			deployer.deploy(ChainLotTicket);
+			deployer.deploy(ChainLotCoin, 1e12);
+			deployer.deploy(ChainLotToken, 1e9, 1e13, 5e7);
+			deployer.deploy(ChainLotPoolFactory);
+			deployer.deploy(DrawingTool);
+			deployer.deploy(AffiliateStorage);
+		//]);
 
 		/*let chainlot = await ChainLot.deployed();
 		let chainlotticket = await ChainLotTicket.deployed();

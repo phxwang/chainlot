@@ -130,6 +130,7 @@ contract("ChainLot", async (accounts) => {
 			await showStage(pool);
 		}
 
+
 		console.log("split awards");
 		r = await drawingtool.splitAward(pooladdress);
 		console.log(JSON.stringify(r.logs));

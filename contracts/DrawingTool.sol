@@ -139,11 +139,11 @@ contract DrawingTool is Ownable{
 	  	uint winnerTicketCount = pool.getWinnerTicketCount(ruleId);
 	  	uint processedIndex = pool.getProcessedIndex(ruleId);
 	  	uint awardEther = pool.getAwardEther(ruleId);
+
 	    uint endIndex = processedIndex + toCalcCount;
+	    if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
 	        
 	    if(winnerTicketCount > processedIndex) {
-	        if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
-
 	        doCaculate(pool, ruleId, processedIndex, endIndex, awardEther);    
 	    }
 
@@ -219,11 +219,11 @@ contract DrawingTool is Ownable{
 		
 		uint winnerTicketCount = pool.getWinnerTicketCount(ruleId);
 	  	uint distributedIndex = pool.getDistributedIndex(ruleId);
-	  	uint endIndex = distributedIndex + toDistCount;			  	
+	  	
+	  	uint endIndex = distributedIndex + toDistCount;		
+	  	if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;	  	
 
 	  	if(winnerTicketCount > distributedIndex) {
-	  		if(endIndex > winnerTicketCount) endIndex = winnerTicketCount;
-
 		  	doDistribute(pool, ruleId, distributedIndex, endIndex);
 
 		  	emit DistributeAwards(ruleId, toDistCount, endIndex, winnerTicketCount, pool.getAwardRulesLength());

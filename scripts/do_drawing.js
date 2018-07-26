@@ -13,8 +13,10 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 
 			let pool = await ChainLotPool.at(address);
 			let token = await chainlotcoin.balanceOf(address);
-			let stage = await pool.stage();
+			let stage = await  pool.stage();
 			let currentPoolIndex = await chainlot.currentPoolIndex();
+			let ruleCount = await pool.getAwardRulesLength();
+			console.log("rule count: " + ruleCount);
 				
 
 			currentBlockNumber = web3.eth.blockNumber;
@@ -44,7 +46,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 2:
-							for(i =0 ; i<5 ; i++) {
+							for(i =0 ; i<ruleCount; i++) {
 								console.log("calculate awards, rule id " + i);
 								r = await drawingtool.calculateAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
@@ -56,7 +58,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 4:
-							for(i =0 ; i<5 ; i++) {
+							for(i =0 ; i<ruleCount; i++) {
 								console.log("distribute awards, rule id " + i);
 								r = await drawingtool.distributeAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));

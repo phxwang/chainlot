@@ -4,6 +4,8 @@ var ChainLotTicket = artifacts.require("./ChainLotTicket.sol");
 var ChainLotCoin = artifacts.require("./ChainLotCoin.sol");
 var DrawingTool = artifacts.require("./DrawingTool.sol");
 
+var doDrawing = require("./do_drawing.js");
+
 module.exports = async function(callback) {
 	console.log("from: " + web3.eth.accounts[0] + ", balance: " 
 		+ web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]), "ether"));
@@ -17,14 +19,15 @@ module.exports = async function(callback) {
 
 		console.log(drawingtool.address);
 
-		doDrawing(chainlot, chainlotticket, chainlotcoin, drawingtool);
+		//doDrawing(chainlot, chainlotticket, chainlotcoin, drawingtool);
+		await doDrawing.doDrawing(chainlot, chainlotticket, chainlotcoin, drawingtool, ChainLotPool, web3);
 
 	} catch(e) {
 		console.log(e);
 	}
 }
 
-var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingtool) {
+/*var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingtool) {
 	for(i=0; i<100; i++) {
 			let address = await chainlot.chainlotPools(i);
 			if(address == "0x") break;
@@ -56,7 +59,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 2:
-							for(i =0 ; i<9 ; i++) {
+							for(i =0 ; i<5 ; i++) {
 								console.log("calculate awards, rule id " + i);
 								r = await drawingtool.calculateAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
@@ -68,7 +71,7 @@ var doDrawing = async function(chainlot, chainlotticket, chainlotcoin, drawingto
 							console.log(JSON.stringify(r.logs));
 							break;
 						case 4:
-							for(i =0 ; i<9 ; i++) {
+							for(i =0 ; i<5 ; i++) {
 								console.log("distribute awards, rule id " + i);
 								r = await drawingtool.distributeAwards(address, i, 100);
 								console.log(JSON.stringify(r.logs));
@@ -103,4 +106,4 @@ var showStage = async function(pool) {
 	let stage = await pool.stage();
 	console.log("stage: " + stage);
 	return stage;
-}
+}*/
